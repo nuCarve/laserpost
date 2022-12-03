@@ -1080,7 +1080,7 @@
    let group = undefined;
    if (groupName)
      for (let l = 0; l < groups.length; ++l) {
-       if (groups[l].groupName.toLowerCase() == groupName.toLowerCase()) {
+       if (groups[l].groupName && groups[l].groupName.toLowerCase() == groupName.toLowerCase()) {
          group = groups[l];
          break;
        }
