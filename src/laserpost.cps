@@ -37,7 +37,7 @@
 description = localize('LaserPost');
 vendor = 'nuCarve';
 vendorUrl = 'https://nucarve.com/laserpost';
-let semVer = '1.0.0-beta.2';
+let semVer = '1.0.0-beta.0';
 
 let codeDescription = localize(
   'This post outputs the toolpath in LightBurn (LBRN) file format.'
@@ -134,6 +134,17 @@ const STOCK_FEED_RATE = 1000;
 // name of the state storage file
 const STATE_FILENAME = 'laserpost.xml';
 
+// time to wait on retry of version update checks when the API fails to respond
+const RETRY_VERSION_CHECK_ON_FAILURE_TIME_MS = 60 * 60 * 1000;
+
+// freqncy of update checking from the post properties UI
+const UPDATE_FREQUENCY_NEVER = "never";
+const UPDATE_FREQUENCY_ALWAYS = "always";
+const UPDATE_FREQUENCY_HOURLY = "hourly";
+const UPDATE_FREQUENCY_DAILY = "daily";
+const UPDATE_FREQUENCY_WEEKLY = "weekly";
+const UPDATE_FREQUENCY_MONTHLY = "monthly";
+
 /**************************************************************************************
  *
  * Global variables used internally by the post-processor
@@ -146,7 +157,7 @@ let notes = ''; // notes to add to the file when the trailer is written
 let currentGroup = undefined; // tracks the current group in use, set in `onSection`.
 let currentPower = undefined; // track if the laser is powered on, used to understand CAM movements vs. cuts
 let workspaceOffsets = { x: 0, y: 0 }; // offsets the geometry in the workspace based on preferences
-let activeState = undefined;  // current state that will be persisted to the STATE_FILENAME when done
+let activeState = undefined; // current state that will be persisted to the STATE_FILENAME when done
 let origState = undefined; // original state loaded from STATE_FILENAME and should not be changed
 
 // groups is an array of CAM positions, organized by groupings (default is one per operation, but the user
@@ -200,9 +211,7 @@ groupDefinitions = {
   groupWorkspace: {
     title: localize('Workspace'),
     description: localize(
-      'Optional X and Y offset (positive or negative) to shift the positions within the LightBurn workspace.  ' +
-        'May be required to avoid manually shifting the geometry in LightBurn when lead-in and lead-out cuts are in use, as they ' +
-        'may be generated outside of the workspace.'
+      'Adjust the workspace (or stock) settings, including X/Y offset and rendering of the stock boundries.'
     ),
     collapsed: true,
     order: 40,
@@ -215,78 +224,21 @@ groupDefinitions = {
     collapsed: true,
     order: 40,
   },
+  groupLaserPost: {
+    title: localize('LaserPost'),
+    description: localize('Settings to control the behavior of the post itself, such as automatic updates.'),
+    collapsed: true,
+    order: 50
+  }
 };
 
 /**
  * Define the properties (often organized by the groups above) that users can control during CAM configuration.
  */
 properties = {
-  laserPower0100EtchMin: {
-    title: localize('Etch power (min, %)'),
-    description: localize(
-      'Sets the mininum laser power used for etching (ignored if etch max power is 0).'
-    ),
-    group: 'groupLaserPower',
-    type: 'number',
-    value: 0,
-    range: [0, 100],
-    scope: 'post',
-  },
-  laserPower0200EtchMax: {
-    title: localize('Etch power (max, %)'),
-    description: localize(
-      "Sets the maximum laser power used for etching ('0' to use power specified on the tool)."
-    ),
-    group: 'groupLaserPower',
-    type: 'number',
-    value: 0,
-    range: [0, 100],
-    scope: 'post',
-  },
-  laserPower0300VaporizeMin: {
-    title: localize('Vaporize power (min, %)'),
-    description: localize(
-      'Sets the minimum laser power used for vaporize (ignored if vaporize max power is 0).'
-    ),
-    group: 'groupLaserPower',
-    type: 'number',
-    value: 0,
-    range: [0, 100],
-    scope: 'post',
-  },
-  laserPower0400VaporizeMax: {
-    title: localize('Vaporize power (max, %)'),
-    description: localize(
-      "Sets the maximum laser power used for vaporize ('0' to use power specified on the tool)."
-    ),
-    group: 'groupLaserPower',
-    type: 'number',
-    value: 0,
-    range: [0, 100],
-    scope: 'post',
-  },
-  laserPower0500ThroughMin: {
-    title: localize('Through power (min, %)'),
-    description: localize(
-      'Sets the minimum laser power used for through cutting (ignored if through max power is 0)).'
-    ),
-    group: 'groupLaserPower',
-    type: 'number',
-    value: 0,
-    range: [0, 100],
-    scope: 'post',
-  },
-  laserPower0600ThroughMax: {
-    title: localize('Through power (max, %)'),
-    description: localize(
-      "Sets the maximum laser power used for through cutting ('0' to use power specified on the tool)."
-    ),
-    group: 'groupLaserPower',
-    type: 'number',
-    value: 0,
-    range: [0, 100],
-    scope: 'post',
-  },
+  //
+  // Group: groupLightBurn
+  //
   lightburn0200IncludeComments: {
     title: localize('Comments'),
     description: localize(
@@ -353,6 +305,9 @@ properties = {
     value: true,
     scope: 'post',
   },
+  //
+  // Group: groupWorkspace
+  //
   work0100TraceStock: {
     title: localize('Trace stock'),
     description: localize(
@@ -383,6 +338,110 @@ properties = {
     value: 0,
     scope: 'post',
   },
+  //
+  // Group: groupLaserPower
+  //
+  laserPower0100EtchMin: {
+    title: localize('Etch power (min, %)'),
+    description: localize(
+      'Sets the mininum laser power used for etching (ignored if etch max power is 0).'
+    ),
+    group: 'groupLaserPower',
+    type: 'number',
+    value: 0,
+    range: [0, 100],
+    scope: 'post',
+  },
+  laserPower0200EtchMax: {
+    title: localize('Etch power (max, %)'),
+    description: localize(
+      "Sets the maximum laser power used for etching ('0' to use power specified on the tool)."
+    ),
+    group: 'groupLaserPower',
+    type: 'number',
+    value: 0,
+    range: [0, 100],
+    scope: 'post',
+  },
+  laserPower0300VaporizeMin: {
+    title: localize('Vaporize power (min, %)'),
+    description: localize(
+      'Sets the minimum laser power used for vaporize (ignored if vaporize max power is 0).'
+    ),
+    group: 'groupLaserPower',
+    type: 'number',
+    value: 0,
+    range: [0, 100],
+    scope: 'post',
+  },
+  laserPower0400VaporizeMax: {
+    title: localize('Vaporize power (max, %)'),
+    description: localize(
+      "Sets the maximum laser power used for vaporize ('0' to use power specified on the tool)."
+    ),
+    group: 'groupLaserPower',
+    type: 'number',
+    value: 0,
+    range: [0, 100],
+    scope: 'post',
+  },
+  laserPower0500ThroughMin: {
+    title: localize('Through power (min, %)'),
+    description: localize(
+      'Sets the minimum laser power used for through cutting (ignored if through max power is 0)).'
+    ),
+    group: 'groupLaserPower',
+    type: 'number',
+    value: 0,
+    range: [0, 100],
+    scope: 'post',
+  },
+  laserPower0600ThroughMax: {
+    title: localize('Through power (max, %)'),
+    description: localize(
+      "Sets the maximum laser power used for through cutting ('0' to use power specified on the tool)."
+    ),
+    group: 'groupLaserPower',
+    type: 'number',
+    value: 0,
+    range: [0, 100],
+    scope: 'post',
+  },
+  //
+  // group: groupLaserPost
+  //
+  laserpost0100AutomaticUpdate: {
+    title: localize('Automatic update'),
+    description: localize(
+      'Set how often LaserPost should check and notify that updates are available.'
+    ),
+    group: 'groupLaserPost',
+    type: 'enum',
+    values: [
+      { title: localize('Never'), id: UPDATE_FREQUENCY_NEVER },
+      { title: localize('Always'), id: UPDATE_FREQUENCY_ALWAYS },
+      { title: localize('Hourly'), id: UPDATE_FREQUENCY_HOURLY },
+      { title: localize('Daily'), id: UPDATE_FREQUENCY_DAILY },
+      { title: localize('Weekly'), id: UPDATE_FREQUENCY_WEEKLY },
+      { title: localize('Monthly'), id: UPDATE_FREQUENCY_MONTHLY },
+    ],
+    value: UPDATE_FREQUENCY_HOURLY, // todo: change to DAILY when at RC/STABLE
+    scope: 'post',
+  },
+  laserpost0200UpdateAllowBeta: {
+    title: localize('Beta releases'),
+    description: localize(
+      'Enable to allow beta releases, disable for stable releases only.'
+    ),
+    group: 'groupLaserPost',
+    type: 'boolean',
+    value: true,  // todo: change to false when at RC/STABLE
+    scope: 'post',
+  },
+
+  //
+  // operation: cutting
+  //
   op0100GroupName: {
     title: localize('Group name'),
     description: localize(
@@ -504,6 +563,9 @@ properties = {
 function onOpen() {
   // load our state from the persistent state file
   stateLoad();
+
+  // check if an update is available
+  checkUpdateAvailability();
 
   // capture and save the preferences that affect file generation
   includeComments = getProperty('lightburn0200IncludeComments');
@@ -2114,7 +2176,6 @@ function formatComment(text) {
  */
 function writeComment(template, parameters, level) {
   const text = format(template, parameters);
-  // CAM does not have trimEnd()...
   text = text.replace(/[ \n]+$/, '');
 
   if (level === undefined) level = COMMENT_NORMAL;
@@ -2170,16 +2231,19 @@ function writeCommentAndNote(template, parameters) {
  * Simple XML parser
  *
  * This limited parser handles nested xml tags with attributes.  It has support
- * only for non-duplicate tag names with attributes (and no inner-body text
- * elements) and no handling of special character codes for xml.  Very limited
+ * only for non-duplicate tag names with attributes and content within a tag.
+ * There is no handling of special character codes for xml.  Very limited
  * detection of malformed XML.  Results in a nested object where the name of the
  * tag is the name of the member of the object, and the value of the member is
  * either the value of an attribute, or another object (for nested xml).
  *
  * For example:
- * - <one><two v1="1" v2="2"><three v3="3" /></two></one> translates to the
- *   nested object:
- * - { one: { two: { v1:"1", v2:"2", v":"3" } } }
+ *
+ * `<one><two v1="1" v2="2"><three v3="3" /><four>example</four></two></one>`
+ *
+ * translates to:
+ *
+ * `{ one: { two: { v1: '1', v2: '2', three: { v3: '3' }, four: { content: 'example' } } } }`
  *
  * @param xml XML string to parse
  * @returns Nested object with members, of undefined if XML could not be parsed.
@@ -2220,16 +2284,24 @@ function parseXML(xml) {
 
     // parse the attributes
     let match = xmlElement.match(/\w+\=\".*?\"/g);
-    if (match === null) continue;
-    for (let i = 0; i < match.length; i++) {
-      let index = match[i].indexOf('"');
-      let attrName = match[i].substring(0, index - 1);
-      let attrValue = match[i].substring(index + 1, match[i].length - 1);
-      currentTagObject[attrName] = attrValue;
+    if (match !== null) {
+      for (let i = 0; i < match.length; i++) {
+        let index = match[i].indexOf('"');
+        let attrName = match[i].substring(0, index - 1);
+        let attrValue = match[i].substring(index + 1, match[i].length - 1);
+        currentTagObject[attrName] = attrValue;
+      }
     }
 
     // if this is a self-contained tag, close it by poping the object off the stack
     if (selfContainedTag) objStack.pop();
+    else {
+      let nextTagPos = xml.indexOf('<', endTagPos + 1);
+      if (nextTagPos > endTagPos + 1) {
+        var content = xml.substring(endTagPos + 1, nextTagPos).trim();
+        if (content.length) currentTagObject['content'] = content;
+      }
+    }
   }
 
   // make sure we have decended back to the top element
@@ -2308,6 +2380,118 @@ function format(template, parameters) {
  *
  *************************************************************************************/
 
+/**************************************************************************************
+ *
+ * Automatic update checking APIs
+ *
+ *************************************************************************************/
+
+/**
+ * Determines if an update to this post-processor is available, according to post properties
+ * `laserpost0100AutomaticUpdate` (how often to check) and `laserpost0200UpdateAllowBeta` 
+ * (if beta releases are allowed).  
+ *
+ * Displays a message if an update is available.
+ *
+ * @returns `true` if an update is available, `false` if no update or did not check
+ */
+function checkUpdateAvailability() {
+  // determine parameters for doing update checking from the post properties
+  const allowBeta = getProperty('laserpost0200UpdateAllowBeta');
+  let timeBetweenChecksMs = 0;
+  switch (getProperty('laserpost0100AutomaticUpdate')) {
+    case UPDATE_FREQUENCY_NEVER:
+      timeBetweenChecksMs = undefined;
+      break;
+    case UPDATE_FREQUENCY_ALWAYS:
+      timeBetweenChecksMs = 0;
+      break;
+    case UPDATE_FREQUENCY_HOURLY:
+      timeBetweenChecksMs = 60 * 1000 * 1000;
+      break;
+    case UPDATE_FREQUENCY_DAILY:
+      timeBetweenChecksMs = 24 * 60 * 1000 * 1000;
+      break;
+    case UPDATE_FREQUENCY_WEEKLY:
+      timeBetweenChecksMs = 7 * 24 * 60 * 1000 * 1000;
+      break;
+    case UPDATE_FREQUENCY_MONTHLY:
+      timeBetweenChecksMs = 30 * 7 * 24 * 60 * 1000 * 1000;
+      break;
+  }
+
+  // are we even allowed to check?
+  if (timeBetweenChecksMs === undefined)
+    return false;
+
+  // have we every checked?
+  if (activeState.updateEpoch) {
+    if (Date.now() - activeState.updateEpoch < timeBetweenChecksMs)
+      return false;
+  }
+  // check the version
+  const version = getVersionFromWeb(!allowBeta);
+  if (version) {
+    // track this update check
+    activeState.updateEpoch = Date.now();
+    if (version && version.compare && version.compare.content && version.compare.content === 'upgrade') {
+      showWarning(localize('LaserPost update "{version}" available:\n\n{summary}\n\nRelease notes and download: {url}'), {
+        version: version.semver.content,
+        url: version.homepage.content.replace(/\/$/, ''),
+        summary: version.notes.summary.content
+      });
+      return true;
+    }
+    return false;
+  }
+  // we failed to get version info, so reset the timer to try again soon
+  activeState.updateEpoch += RETRY_VERSION_CHECK_ON_FAILURE_TIME_MS;
+}
+
+/**
+ * Gets the version object from the web (using the nuCarve.com web server `version-check` API)
+ *
+ * @param stableOnly `true` to get only stable releases, `false` to allow beta releases
+ * @returns Version object if available, else undefined
+ */
+function getVersionFromWeb(stableOnly) {
+  if (stableOnly === undefined) stableOnly = true;
+
+  // make sure we are allowed to access the net
+  ensureSecurityRights();
+
+  // issue the API call
+  const request = new XMLHttpRequest();
+  try {
+    request.open(
+      'GET',
+      'https://nucarve.com/version-check/laserpost?type=' +
+        (stableOnly ? 'stable' : 'any') +
+        '&version=' +
+        semVer,
+      false,
+      '',
+      ''
+    );
+    request.send(null);
+  } catch (ex) {
+    return undefined;
+  }
+
+  // make sure we got back an XML message
+  if (request.response.substring(0, 5) != '<?xml') return undefined;
+
+  // decode the XML
+  const versionObject = parseXML(request.response);
+
+  // make sure it's our version object and we didn't get an error
+  if (!versionObject.version) return undefined;
+  if (versionObject.version.error) return undefined;
+
+  // return the verison object
+  return versionObject.version;
+}
+
 /**
  * Determine if we have permission from Autodesk to run security level 0 calls.
  *
@@ -2331,14 +2515,16 @@ function haveSecurityRights() {
  */
 function ensureSecurityRights() {
   if (!haveSecurityRights()) {
-    alert(
-      description,
+    showWarning(
       localize(
-        'Automatic update checking requires permission to access the Internet.  ' +
-          'In the next dialog, please allow access.  If you do not wish to grant permission, change the Automatic Updates option ' +
-          'in the post dialog to "Never".'
+        'LaserPost requires your permission to check for updates.\n\n' +
+        'ALLOW: Select "Yes" on the following dialog (and optionally check the "Remember" box).\n\n' +
+        'DECLINE: You must disable update checking.  Select "No" on the following dialog ' +
+        'then change the "LaserPost: Automatic update" option on the post properties page to "Never".\n\n' +
+        'Visit https://nucarve.com/laserpost-permissions for more information.'
       )
     );
+    // use a benign security 0 call to trigger the clearance message
     FileSystem.getTemporaryFile('temp');
   }
 }
@@ -2349,18 +2535,17 @@ function ensureSecurityRights() {
  *
  *************************************************************************************/
 
-
 /**
  * Loads the state from the XML file (STATE_FILENAME) used for tracking processing activities
  * of the post processor.  Results in two global variables being set:
- * 
+ *
  * - activeState: The state loaded from the XML file that can be modified as needed
  * - origState: The original state that is used to compare for state changes and should not be changed.
- * 
+ *
  * The XML file is expected to contain `<laserpost>` and then one key for each object entry
- * with <memberName value="value"/>
+ * with <memberName>value</memberName>
  */
- function stateLoad() {
+function stateLoad() {
   // set up path to the state file, and see if it exists
   const statePath = FileSystem.getCombinedPath(
     getConfigurationFolder(),
@@ -2389,25 +2574,21 @@ function ensureSecurityRights() {
   else {
     origState = xmlObject.laserpost;
     for (key in origState)
-      if (origState[key].value)
-        origState[key] = origState[key].value;
-      else 
-        delete origState[key];
+      if (origState[key].content) origState[key] = origState[key].content;
+      else delete origState[key];
   }
   activeState = JSON.parse(JSON.stringify(origState));
 }
 
 /**
  * Determine if the state (activeState) has changed (shallow compare with origState)
- * 
+ *
  * @returns `true` if the state is dirty and should be written.
  */
 function stateIsDirty() {
   if (Object.keys(origState).length != Object.keys(activeState).length)
     return true;
-  for (key in origState)
-    if (origState[key] != activeState[key])
-      return true;
+  for (key in origState) if (origState[key] != activeState[key]) return true;
   return false;
 }
 
@@ -2434,7 +2615,7 @@ function stateSave() {
       xmlFile.writeln('<laserpost>');
       for (key in activeState) {
         xmlFile.writeln(
-          format('  <{key} value="{value}"/>', {
+          format('  <{key}>{value}</{key}>', {
             key: key,
             value: activeState[key],
           })
@@ -2443,17 +2624,14 @@ function stateSave() {
       xmlFile.writeln('</laserpost>');
       xmlFile.close();
     } catch (ex) {
-      alert(
-        description,
-        format(
+      showWarning(
           localize(
             'Warning: Unable to save state file, but post should continue to work correctly (error "{error}")'
           ),
           {
             error: ex.toString(),
           }
-        )
-      );
+        );
       if (xmlFile) {
         try {
           xmlFile.close();
@@ -2465,9 +2643,22 @@ function stateSave() {
 
 /**************************************************************************************
  *
- * Debugging support
+ * Debugging and simple UI support
  *
  *************************************************************************************/
+
+/**
+ * Display a simple warning message with a single OK button to continue.
+ * 
+ * @param message Message that has been localized, with optional {arguments}
+ * @param arguments Object to resolve any {arguments} in message
+ */
+function showWarning(message, arguments) {
+  alert(format(localize("{description} ({version})"), { description: description, version: semVer }),
+    format(message, arguments)
+  );
+}
+
 
 /**
  * Dumps the contents of the groups (CAM based pathing) to comments in the file.
