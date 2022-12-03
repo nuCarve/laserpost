@@ -1079,8 +1079,9 @@ function onTerminate() {}
 function getGroup(groupName, defaults) {
   let group = undefined;
   if (groupName)
+    showWarning(JSON.stringify(groups));
     for (let l = 0; l < groups.length; ++l) {
-      if (groups[l].groupName.toLowerCase() == groupName.toLowerCase()) {
+      if (groups[l].groupName && groups[l].groupName.toLowerCase() == groupName.toLowerCase()) {
         group = groups[l];
         break;
       }
