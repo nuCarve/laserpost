@@ -2424,16 +2424,11 @@ function checkUpdateAvailability() {
   if (timeBetweenChecksMs === undefined)
     return false;
 
-  // sanity test on activeState in case the time reference changes
-  if (Date.now() < activeState.updateEpoch)
-    activeState.updateEpoch = undefined;
-
-  // have we ever checked?
+  // have we every checked?
   if (activeState.updateEpoch) {
     if (Date.now() - activeState.updateEpoch < timeBetweenChecksMs)
       return false;
   }
-
   // check the version
   const version = getVersionFromWeb(!allowBeta);
   if (version) {
@@ -2556,8 +2551,10 @@ function stateLoad() {
     getConfigurationFolder(),
     STATE_FILENAME
   );
+
+  let xmlFile;
   try {
-    const xmlFile = new TextFile(statePath, false, 'ansi');
+    xmlFile = new TextFile(statePath, false, 'ansi');
   } catch (ex) {
     // no file, so set an empty state
     origState = {};
@@ -2572,7 +2569,10 @@ function stateLoad() {
       xmlString += xmlFile.readln();
     }
   } catch (ex) {}
-  xmlFile.close();
+
+  try {
+    xmlFile.close();
+  } catch (ex) {}
 
   const xmlObject = parseXML(xmlString);
   if (!xmlObject || !xmlObject.laserpost) origState = {};
