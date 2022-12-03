@@ -37,7 +37,7 @@
 description = localize('LaserPost');
 vendor = 'nuCarve';
 vendorUrl = 'https://nucarve.com/laserpost';
-let semVer = '1.0.0-beta.0';
+let semVer = '1.0.0-beta.2';
 
 let codeDescription = localize(
   'This post outputs the toolpath in LightBurn (LBRN) file format.'
