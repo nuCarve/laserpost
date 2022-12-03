@@ -2424,11 +2424,16 @@ function checkUpdateAvailability() {
   if (timeBetweenChecksMs === undefined)
     return false;
 
-  // have we every checked?
+  // sanity test on activeState in case the time reference changes
+  if (Date.now() < activeState.updateEpoch)
+    activeState.updateEpoch = undefined;
+
+  // have we ever checked?
   if (activeState.updateEpoch) {
     if (Date.now() - activeState.updateEpoch < timeBetweenChecksMs)
       return false;
   }
+
   // check the version
   const version = getVersionFromWeb(!allowBeta);
   if (version) {
