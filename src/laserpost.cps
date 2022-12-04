@@ -432,30 +432,60 @@
    //
    // operation: cutting
    //
-   op0100GroupName: {
-     title: localize('Group name'),
-     description: localize(
-       'By default, operations have their shapes group together (if there is more than one shape) but operations themselves are not grouped.  ' +
-       'Operations that share the same "group name" will have their shapes grouped into a parent LightBurn group.  The name is used only to identify ' +
-       'operations to group and is not part of the LightBurn grouping or layering.'
-     ),
-     type: 'string',
-     value: '',
-     scope: 'operation',
-     enabled: 'cutting',
-   },
-   op0200PowerScale: {
-     title: localize('Power scale'),
-     description: localize(
-       'LightBurn power scale (0-100%) for the shapes in the operation.'
-     ),
-     type: 'number',
-     value: 100,
-     range: [0, 100],
-     scope: 'operation',
-     enabled: 'cutting',
-   },
-   op0300LayerMode: {
+   op0100UseAir: {
+    title: localize('Air assist'),
+    description: localize(
+      'Sets if the layer uses air.  "Off" / "On" always set the air to the specified state, "Tool Assist Gas" will set the air off when ' +
+        'the tools "Cutting Data" (section "Process inputs") property "Assist gas" is "None" (or blank) and turn the air on for any other value.'
+    ),
+    type: 'enum',
+    values: [
+      { title: localize('Off'), id: USE_AIR_OFF },
+      { title: localize('On'), id: USE_AIR_ON },
+      { title: localize('Tool Assist Gas'), id: USE_AIR_ASSIST_GAS },
+    ],
+    value: USE_AIR_ASSIST_GAS,
+    scope: 'operation',
+    enabled: 'cutting',
+  },
+  op0200PowerScale: {
+    title: localize('Power scale (%)'),
+    description: localize(
+      'LightBurn power scale (0-100%) for the shapes in the operation.'
+    ),
+    type: 'number',
+    value: 100,
+    range: [0, 100],
+    scope: 'operation',
+    enabled: 'cutting',
+  },
+ op0300ZOffset: {
+    title: localize('Z-offset (mm)'),
+    description: localize(
+      'Amount to offset Z into the material (or out of it) at the start of cutting.  Useful for deep cutting or defocusing.'
+    ),
+    type: 'number',
+    value: 0,
+    scope: 'operation',
+    enabled: 'cutting',
+  },
+  op0400Passes: {
+    title: localize('Pass count'),
+    description: localize('Number of times to repeat the cut.'),
+    type: 'number',
+    value: 1,
+    scope: 'operation',
+    enabled: 'cutting',
+  },
+  op0500ZStep: {
+    title: localize('Z-step per pass (mm)'),
+    description: localize('Amount of raise or lower Z for each cut pass.'),
+    type: 'number',
+    value: 0,
+    scope: 'operation',
+    enabled: 'cutting',
+  },
+   op0600LayerMode: {
      title: localize('Layer mode'),
      description: localize(
        'Selects the layer mode for the layer (Line, Fill or Offset Fill).  If a complex layer setup is needed, including for sub-layers (Multi), see the ' +
@@ -471,7 +501,7 @@
      scope: 'operation',
      enabled: 'cutting',
    },
-   op0400LaserEnable: {
+   op0700LaserEnable: {
      title: localize('Laser enable'),
      description: localize(
        'Controls if the layer should be enabled and using which laser(s) (for dual laser machines).'
@@ -487,49 +517,19 @@
      scope: 'operation',
      enabled: 'cutting',
    },
-   op0500UseAir: {
-     title: localize('Use air'),
-     description: localize(
-       'Sets if the layer uses air.  "Off" / "On" always set the air to the specified state, "Tool Assist Gas" will set the air off when ' +
-         'the tools "Cutting Data" (section "Process inputs") property "Assist gas" is "None" (or blank) and turn the air on for any other value.'
-     ),
-     type: 'enum',
-     values: [
-       { title: localize('Off'), id: USE_AIR_OFF },
-       { title: localize('On'), id: USE_AIR_ON },
-       { title: localize('Tool Assist Gas'), id: USE_AIR_ASSIST_GAS },
-     ],
-     value: USE_AIR_ASSIST_GAS,
-     scope: 'operation',
-     enabled: 'cutting',
-   },
-   op0600ZOffset: {
-     title: localize('Z offset (mm)'),
-     description: localize(
-       'Amount to offset the Z into the material (or out of it) at the start of cutting.  Useful for deep cutting or defocusing.'
-     ),
-     type: 'number',
-     value: 0,
-     scope: 'operation',
-     enabled: 'cutting',
-   },
-   op0700Passes: {
-     title: localize('Passes'),
-     description: localize('Number of times to repeat the cut.'),
-     type: 'number',
-     value: 1,
-     scope: 'operation',
-     enabled: 'cutting',
-   },
-   op0800ZStep: {
-     title: localize('Z step per pass (mm)'),
-     description: localize('Amount of raise or lower Z for each cut pass.'),
-     type: 'number',
-     value: 0,
-     scope: 'operation',
-     enabled: 'cutting',
-   },
-   op0900CustomCutSettingXML: {
+   op0800GroupName: {
+    title: localize('Grouping name'),
+    description: localize(
+      'By default, operations have their shapes group together (if there is more than one shape) but operations themselves are not grouped.  ' +
+      'Operations that share the same "group name" will have their shapes grouped into a parent LightBurn group.  The name is used only to identify ' +
+      'operations to group and is not part of the LightBurn grouping or layering.'
+    ),
+    type: 'string',
+    value: '',
+    scope: 'operation',
+    enabled: 'cutting',
+  },
+  op0900CustomCutSettingXML: {
      title: localize('Custom CutSetting (XML)'),
      description: localize(
        'For complex LightBurn cut settings (such as using sub-layers or advanced options) you can paste the <CutSettings> section of the XML from a template ' +
@@ -742,7 +742,7 @@
  
    // determine the air setting.
    let useAir = true;
-   switch (getProperty('op0500UseAir')) {
+   switch (getProperty('op0100UseAir')) {
      case USE_AIR_OFF:
        useAir = false;
        break;
@@ -755,7 +755,7 @@
    }
  
    // set up the group - using the shared group name if specified, else a new empty group
-   const groupName = currentSection.getProperty('op0100GroupName');
+   const groupName = currentSection.getProperty('op0800GroupName');
    if (groupName == '') groupName = undefined;
  
    currentGroup = getGroup(groupName, {
@@ -765,14 +765,14 @@
  
    // collect settings from the user via operation properties
    const powerScale = currentSection.getProperty('op0200PowerScale');
-   const opLayerMode = currentSection.getProperty('op0300LayerMode');
+   const opLayerMode = currentSection.getProperty('op0600LayerMode');
    const customCutSettingXML = currentSection.getProperty(
      'op0900CustomCutSettingXML'
    );
-   const laserEnable = currentSection.getProperty('op0400LaserEnable');
-   const zOffset = currentSection.getProperty('op0600ZOffset');
-   const passes = currentSection.getProperty('op0700Passes');
-   const zStep = currentSection.getProperty('op0800ZStep');
+   const laserEnable = currentSection.getProperty('op0700LaserEnable');
+   const zOffset = currentSection.getProperty('op0300ZOffset');
+   const passes = currentSection.getProperty('op0400Passes');
+   const zStep = currentSection.getProperty('op0500ZStep');
  
    // if custom XML is used, decode it
    let parsedXML = undefined;
