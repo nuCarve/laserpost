@@ -435,8 +435,9 @@
    op0100GroupName: {
      title: localize('Group name'),
      description: localize(
-       'Shapes are automatically grouped when an operation has more than one shape, but each operation (group or single shape) will be ungrouped.  To ' +
-         'group multple operations together, specify a name on each operation and matching group names (case insensitive) will be grouped together.'
+       'By default, operations have their shapes group together (if there is more than one shape) but operations themselves are not grouped.  ' +
+       'Operations that share the same "group name" will have their shapes grouped into a parent LightBurn group.  The name is used only to identify ' +
+       'operations to group and is not part of the LightBurn grouping or layering.'
      ),
      type: 'string',
      value: '',
@@ -498,7 +499,7 @@
        { title: localize('On'), id: USE_AIR_ON },
        { title: localize('Tool Assist Gas'), id: USE_AIR_ASSIST_GAS },
      ],
-     value: USE_AIR_ON,
+     value: USE_AIR_ASSIST_GAS,
      scope: 'operation',
      enabled: 'cutting',
    },
