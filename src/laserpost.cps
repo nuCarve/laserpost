@@ -224,12 +224,6 @@
      collapsed: true,
      order: 40,
    },
-   groupLaserPost: {
-     title: localize('LaserPost'),
-     description: localize('Settings to control the behavior of the post itself, such as automatic updates.'),
-     collapsed: true,
-     order: 50
-   }
  };
  
  /**
@@ -254,35 +248,6 @@
        { title: localize('Insane'), id: INCLUDE_COMMENTS_INSANE },
      ],
      value: INCLUDE_COMMENTS_NORMAL,
-     scope: 'post',
-   },
-   lightburn0300IncludeNotes: {
-     title: localize('Notes'),
-     description: localize(
-       'Detail level of Notes in the generated ".lbrn" file.'
-     ),
-     group: 'groupLightBurn',
-     type: 'enum',
-     values: [
-       { title: localize('Disable'), id: INCLUDE_NOTES_NONE },
-       { title: localize('Hidden'), id: INCLUDE_NOTES_HIDDEN },
-       { title: localize('Show'), id: INCLUDE_NOTES_SHOW },
-     ],
-     value: INCLUDE_NOTES_SHOW,
-     scope: 'post',
-   },
-   lightburn0400IncludeNotes: {
-     title: localize('Speed units'),
-     description: localize(
-       'Speed units to use in comments and file notes (does not affect the actual file as LightBurn always uses mm/sec).'
-     ),
-     group: 'groupLightBurn',
-     type: 'enum',
-     values: [
-       { title: localize('mm/sec'), id: SPEED_UNITS_MMPS },
-       { title: localize('mm/min'), id: SPEED_UNITS_MMPM },
-     ],
-     value: SPEED_UNITS_MMPS,
      scope: 'post',
    },
    lightburn0500GroupOperations: {
@@ -408,14 +373,40 @@
      scope: 'post',
    },
    //
-   // group: groupLaserPost
+   // machine: common machine settings
    //
-   laserpost0100AutomaticUpdate: {
+   machine0100SpeedUnits: {
+    title: localize('Speed units'),
+    description: localize(
+      'Speed units to use in comments and file notes (does not affect the actual file as LightBurn always uses mm/sec).'
+    ),
+    type: 'enum',
+    values: [
+      { title: localize('mm/sec'), id: SPEED_UNITS_MMPS },
+      { title: localize('mm/min'), id: SPEED_UNITS_MMPM },
+    ],
+    value: SPEED_UNITS_MMPS,
+    scope: 'machine',
+  },
+  machine0200IncludeNotes: {
+    title: localize('Notes'),
+    description: localize(
+      'Detail level of Notes in the generated ".lbrn" file.'
+    ),
+    type: 'enum',
+    values: [
+      { title: localize('Disable'), id: INCLUDE_NOTES_NONE },
+      { title: localize('Hidden'), id: INCLUDE_NOTES_HIDDEN },
+      { title: localize('Show'), id: INCLUDE_NOTES_SHOW },
+    ],
+    value: INCLUDE_NOTES_SHOW,
+    scope: 'machine',
+  },
+ machine0300AutomaticUpdate: {
      title: localize('Automatic update'),
      description: localize(
        'Set how often LaserPost should check and notify that updates are available.'
      ),
-     group: 'groupLaserPost',
      type: 'enum',
      values: [
        { title: localize('Never'), id: UPDATE_FREQUENCY_NEVER },
@@ -426,19 +417,18 @@
        { title: localize('Monthly'), id: UPDATE_FREQUENCY_MONTHLY },
      ],
      value: UPDATE_FREQUENCY_HOURLY, // todo: change to DAILY when at RC/STABLE
-     scope: 'post',
+     scope: 'machine',
    },
-   laserpost0200UpdateAllowBeta: {
+   machine0400UpdateAllowBeta: {
      title: localize('Beta releases'),
      description: localize(
        'Enable to allow beta releases, disable for stable releases only.'
      ),
-     group: 'groupLaserPost',
      type: 'boolean',
      value: true,  // todo: change to false when at RC/STABLE
-     scope: 'post',
+     scope: 'machine',
    },
- 
+
    //
    // operation: cutting
    //
@@ -569,7 +559,7 @@
  
    // capture and save the preferences that affect file generation
    includeComments = getProperty('lightburn0200IncludeComments');
-   includeNotes = getProperty('lightburn0300IncludeNotes');
+   includeNotes = getProperty('machine0200IncludeNotes');
    workspaceOffsets = {
      x: getProperty('work0200OffsetX'),
      y: getProperty('work0300OffsetX'),
@@ -2343,7 +2333,7 @@
   * @returns String with "### mm/min" or "### mm/sec"
   */
  function speedToUnits(speedInMMPM) {
-   const speedUnits = getProperty('lightburn0400IncludeNotes');
+   const speedUnits = getProperty('machine0100SpeedUnits');
    if (speedUnits == SPEED_UNITS_MMPM)
      return formatSpeed.format(speedInMMPM) + ' ' + localize('mm/min');
  
@@ -2388,7 +2378,7 @@
  
  /**
   * Determines if an update to this post-processor is available, according to post properties
-  * `laserpost0100AutomaticUpdate` (how often to check) and `laserpost0200UpdateAllowBeta` 
+  * `machine0300AutomaticUpdate` (how often to check) and `machine0400UpdateAllowBeta` 
   * (if beta releases are allowed).  
   *
   * Displays a message if an update is available.
@@ -2397,9 +2387,9 @@
   */
  function checkUpdateAvailability() {
    // determine parameters for doing update checking from the post properties
-   const allowBeta = getProperty('laserpost0200UpdateAllowBeta');
+   const allowBeta = getProperty('machine0400UpdateAllowBeta');
    let timeBetweenChecksMs = 0;
-   switch (getProperty('laserpost0100AutomaticUpdate')) {
+   switch (getProperty('machine0300AutomaticUpdate')) {
      case UPDATE_FREQUENCY_NEVER:
        timeBetweenChecksMs = undefined;
        break;
