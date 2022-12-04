@@ -37,7 +37,7 @@
  description = localize('LaserPost');
  vendor = 'nuCarve';
  vendorUrl = 'https://nucarve.com/laserpost';
- let semVer = '1.0.0-beta.2';
+ let semVer = '1.0.0-beta.3';
  
  let codeDescription = localize(
    'This post outputs the toolpath in LightBurn (LBRN) file format.'
@@ -1698,34 +1698,34 @@
    // add a path outlining the stock
    paths.push({
      type: PATH_TYPE_LINEAR,
-     startX: stock.minX,
-     startY: stock.minY,
-     endX: stock.maxX,
-     endY: stock.minY,
+     startX: stock.minX + workspaceOffsets.x,
+     startY: stock.minY + workspaceOffsets.y,
+     endX: stock.maxX + workspaceOffsets.x,
+     endY: stock.minY + workspaceOffsets.y,
      feed: STOCK_FEED_RATE,
    });
    paths.push({
      type: PATH_TYPE_LINEAR,
-     startX: stock.maxX,
-     startY: stock.minY,
-     endX: stock.maxX,
-     endY: stock.maxY,
+     startX: stock.maxX + workspaceOffsets.x,
+     startY: stock.minY + workspaceOffsets.y,
+     endX: stock.maxX + workspaceOffsets.x,
+     endY: stock.maxY + workspaceOffsets.y,
      feed: STOCK_FEED_RATE,
    });
    paths.push({
      type: PATH_TYPE_LINEAR,
-     startX: stock.maxX,
-     startY: stock.maxY,
-     endX: stock.minX,
-     endY: stock.maxY,
+     startX: stock.maxX + workspaceOffsets.x,
+     startY: stock.maxY + workspaceOffsets.y,
+     endX: stock.minX + workspaceOffsets.x,
+     endY: stock.maxY + workspaceOffsets.y,
      feed: STOCK_FEED_RATE,
    });
    paths.push({
      type: PATH_TYPE_LINEAR,
-     startX: stock.minX,
-     startY: stock.maxY,
-     endX: stock.minX,
-     endY: stock.minY,
+     startX: stock.minX + workspaceOffsets.x,
+     startY: stock.maxY + workspaceOffsets.y,
+     endX: stock.minX + workspaceOffsets.x,
+     endY: stock.minY + workspaceOffsets.y,
      feed: STOCK_FEED_RATE,
    });
  }
@@ -2797,7 +2797,7 @@
  
          // dump the shape into insane comments
          writeComment(
-           '        Shape (type={type}, cutIndex={cutIndex}, powerScale={powerScale}',
+           '        Shape (type={type}, cutIndex={cutIndex}, powerScale={powerScale})',
            {
              type: shape.type,
              cutIndex: shape.cutIndex,
@@ -2807,7 +2807,7 @@
          );
          if (shape.type == SHAPE_TYPE_ELIPSE) {
            writeComment(
-             '          Circle center=[{centerX}, {centerY}, radius={radius}',
+             '          Circle center=[{centerX}, {centerY}], radius={radius}',
              {
                centerX: formatPosition.format(shape.centerX),
                centerY: formatPosition.format(shape.centerY),
