@@ -90,9 +90,6 @@ const COMMENT_DETAIL = 1;
 const COMMENT_DEBUG = 2;
 const COMMENT_INSANE = 3;
 
-// notes string used to indiciate a newline operation
-const NOTES_NEWLINE = '&#10;';
-
 // path types from CAM
 const PATH_TYPE_LINEAR = 'linear';
 const PATH_TYPE_SEMICIRCLE = 'semicircle';
@@ -145,6 +142,18 @@ const UPDATE_FREQUENCY_HOURLY = 'hourly';
 const UPDATE_FREQUENCY_DAILY = 'daily';
 const UPDATE_FREQUENCY_WEEKLY = 'weekly';
 const UPDATE_FREQUENCY_MONTHLY = 'monthly';
+
+// Map of characters and symbols for XML encoding/decoding
+const xmlEncodeMap = {
+  '&': '&amp;',
+  '"': '&quot;',
+  "'": '&apos;',
+  '<': '&lt;',
+  '>': '&gt;',
+  '\t': '&#x9;',
+  '\n': '&#xA;',
+  '\r': '&#xD;',
+};
 
 /**************************************************************************************
  *
@@ -2082,8 +2091,8 @@ function writeTrailer() {
     else if (includeNotes == INCLUDE_NOTES_SHOW) showOnLoad = true;
 
     writeXML('Notes', {
-      ShowOnLoad: includeNotes == INCLUDE_NOTES_SHOW ? 1 : 0,
-      Notes: notes.replace(/\n/g, NOTES_NEWLINE),
+      ShowOnLoad: showOnLoad ? 1 : 0,
+      Notes: notes,
     });
   }
 
@@ -2118,7 +2127,7 @@ function writeXML(tag, parameters, leaveOpen) {
     ) {
       if (typeof parameters[key] === 'boolean')
         xml += ' ' + key + '="' + (parameters[key] ? 'True' : 'False') + '"';
-      else xml += ' ' + key + '="' + parameters[key] + '"';
+      else xml += ' ' + key + '="' + encodeXML(parameters[key]) + '"';
     }
   }
 
@@ -2126,9 +2135,10 @@ function writeXML(tag, parameters, leaveOpen) {
   // content needs to keep the tag open briefly
   if (leaveOpen) {
     xml += '>';
-    if (parameters.content) xml += parameters.content;
+    if (parameters.content) xml += encodeXML(parameters.content);
   } else {
-    if (parameters.content) xml += '>' + parameters.content + '</' + tag + '>';
+    if (parameters.content)
+      xml += '>' + encodeXML(parameters.content) + '</' + tag + '>';
     else xml += ' />';
   }
 
@@ -2219,10 +2229,9 @@ function writeComment(template, parameters, level) {
  * @param important If the note is "important" (show notes in LightBurn when INCLUDE_NOTES_SHOW_IMPORTANT); optional, default `false`
  */
 function writeNote(template, parameters, important) {
-  if (important === true) 
-    notesImportant = true;
+  if (important === true) notesImportant = true;
   const text = format(template, parameters);
-  notes += text + NOTES_NEWLINE;
+  notes += text + '\n';
 }
 
 /**
@@ -2235,6 +2244,41 @@ function writeCommentAndNote(template, parameters) {
   const text = format(template, parameters);
   writeComment(text);
   writeNote(text);
+}
+
+/**
+ * Helper method to encode a string for XML
+ *
+ * @param string String to encode
+ * @returns Encoded version of `str`
+ */
+function encodeXML(string) {
+  string = string.toString();
+  for (key in xmlEncodeMap) {
+    while (true) {
+      const encoded = string.replace(key, xmlEncodeMap[key]);
+      if (encoded === string) break;
+      string = encoded;
+    }
+  }
+  return string;
+}
+
+/**
+ * Helper method to decode a string encoded for XML
+ *
+ * @param string String to decode
+ * @returns Decoded version of `str`
+ */
+function decodeXML(string) {
+  for (key in xmlEncodeMap) {
+    while (true) {
+      const decoded = string.replace(xmlEncodeMap[key], key);
+      if (decoded === string) break;
+      string = decoded;
+    }
+  }
+  return string;
 }
 
 /**
@@ -2299,7 +2343,7 @@ function parseXML(xml) {
         let index = match[i].indexOf('"');
         let attrName = match[i].substring(0, index - 1);
         let attrValue = match[i].substring(index + 1, match[i].length - 1);
-        currentTagObject[attrName] = attrValue;
+        currentTagObject[attrName] = decodeXML(attrValue);
       }
     }
 
@@ -2309,7 +2353,7 @@ function parseXML(xml) {
       let nextTagPos = xml.indexOf('<', endTagPos + 1);
       if (nextTagPos > endTagPos + 1) {
         var content = xml.substring(endTagPos + 1, nextTagPos).trim();
-        if (content.length) currentTagObject['content'] = content;
+        if (content.length) currentTagObject['content'] = decodeXML(content);
       }
     }
   }
@@ -2406,6 +2450,15 @@ function format(template, parameters) {
  * @returns `true` if an update is available, `false` if no update or did not check
  */
 function checkUpdateAvailability() {
+  // check if we have updated since our last check
+  if (activeState.installedSemver && activeState.installedSemver !== semVer) {
+    delete activeState.updateSemver;
+    delete activeState.updateURL;
+    delete activeState.updateSummary;
+    // clear epoch so we check again right away
+    activeState.updateEpoch = undefined;
+  }
+
   // determine parameters for doing update checking from the post properties
   const allowBeta = getProperty('machine0400UpdateAllowBeta');
   let timeBetweenChecksMs = 0;
@@ -2433,39 +2486,88 @@ function checkUpdateAvailability() {
   // are we even allowed to check?
   if (timeBetweenChecksMs === undefined) return false;
 
-  // have we ever checked?
+  // determine if we should check the internet for updates
+  let checkInternet = true;
   if (activeState.updateEpoch) {
-    if (Date.now() - activeState.updateEpoch < timeBetweenChecksMs)
-      return false;
+    // is the next check not in the future (to fix for timebase changes) and not yet expired?
+    if (
+      activeState.updateEpoch < Date.now() &&
+      Date.now() - activeState.updateEpoch < timeBetweenChecksMs
+    )
+      checkInternet = false;
   }
 
-  // check the version
-  const version = getVersionFromWeb(!allowBeta);
-  if (version) {
-    // track this update check
-    activeState.updateEpoch = Date.now();
-    if (
-      version &&
-      version.compare &&
-      version.compare.content &&
-      version.compare.content === 'upgrade'
-    ) {
-      showWarning(
-        localize(
-          'LaserPost update "{version}" available:\n\n{summary}\n\nRelease notes and download: {url}'
-        ),
-        {
-          version: version.semver.content,
-          url: version.homepage.content.replace(/\/$/, ''),
-          summary: version.notes.summary.content,
-        }
-      );
-      return true;
+  // check the Internet for a version update if it's time
+  if (checkInternet) {
+    const version = getVersionFromWeb(!allowBeta);
+    if (version) {
+      // track this update check
+      activeState.updateEpoch = Date.now();
+      if (
+        version &&
+        version.compare &&
+        version.compare.content &&
+        version.compare.content === 'upgrade'
+      ) {
+        let homepage = version.homepage.content.replace(/\/$/, '');
+        showWarning(
+          localize(
+            'LaserPost update "{version}" available:\n\n{summary}\n\nRelease notes and download: {url}'
+          ),
+          {
+            version: version.semver.content,
+            url: homepage,
+            summary: version.notes.summary.content,
+          }
+        );
+
+        // update the version in state so we can update notes to reflect updates available without
+        // needing to go to the internet to figure it out
+        activeState.installedSemver = semVer;
+        activeState.updateSemver = version.semver.content;
+        activeState.updateURL = homepage;
+        activeState.updateSummary = version.notes.summary.content;
+      } else {
+        // we are up to date, so clear out any tracked available versions in state
+        delete activeState.installedSemver;
+        delete activeState.updateSemver;
+        delete activeState.updateURL;
+        delete activeState.updateSummary;
+      }
+    } else {
+      // we failed to get version info, so reset the timer to try again soon
+      // set the clock of last check back a full check cycle, except add some time so we don't check
+      // every single post (see RETRY_VERSION_CHECK_ON_FAILURE_TIME_MS, which is typically one hour)
+      activeState.updateEpoch =
+        Date.now() -
+        timeBetweenChecksMs +
+        RETRY_VERSION_CHECK_ON_FAILURE_TIME_MS;
     }
-    return false;
   }
-  // we failed to get version info, so reset the timer to try again soon
-  activeState.updateEpoch += RETRY_VERSION_CHECK_ON_FAILURE_TIME_MS;
+
+  // update notes (as important) if we have an update available
+  if (activeState.updateSemver) {
+    writeNote(
+      localize(
+        '*****\n' +
+          '***** LaserPost update "{version}" available:\n' +
+          '*****\n' +
+          '***** {summary}\n' +
+          '*****\n' +
+          '***** Release notes and download: {url}\n' +
+          '*****'
+      ),
+      {
+        version: activeState.updateSemver,
+        url: activeState.updateURL,
+        summary: activeState.updateSummary,
+      },
+      true
+    );
+    return true;
+  }
+
+  // no updates available at this time
   return false;
 }
 
@@ -2584,7 +2686,8 @@ function stateLoad() {
   // bring in all lines from the file
   let xmlString = '';
   try {
-    for (let x = 0; x < 5; ++x) {
+    // load all lines.  The readln method throws error at EOF, so we just read until we get an error
+    while (true) {
       xmlString += xmlFile.readln();
     }
   } catch (ex) {}
@@ -2638,7 +2741,7 @@ function stateSave() {
         xmlFile.writeln(
           format('  <{key}>{value}</{key}>', {
             key: key,
-            value: activeState[key],
+            value: encodeXML(activeState[key]),
           })
         );
       }
