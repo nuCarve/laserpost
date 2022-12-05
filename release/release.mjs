@@ -53,6 +53,7 @@ const sourceFiles = [
   'camConversion.js',
   'lightburn.js',
   'updates.js',
+  'xml.js',
   'xmlState.js',
   'debug.js',
   'arcToBezier.js',
