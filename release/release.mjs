@@ -28,10 +28,18 @@
  * Additional license and attribution requrements are included in subsections below.
  */
 
-import { writeFile } from 'fs';
+/*
+ * Simple release manager for LaserPost.  
+ *
+ * Takes all files listed in `sourceFiles` and merges them in order, and
+ * performing a substitution of `VERSION_TAG` (`'0.0.0-version'`) with the
+ * version number contained in a `version.json` file.  
+ *
+ * See README.md for more information. 
+ */
+
 import fsp from 'fs/promises';
 import path from 'path';
-import { exit } from 'process';
 import * as url from 'url';
 
 // array of source files to merge, in order
@@ -90,4 +98,5 @@ async function release(duplicatePath) {
   }
 }
 
+// start the release, using the optional command line argument with the target duplicate directory
 await release((process.argv.length > 2) ? path.resolve(process.argv[2]) : undefined);
