@@ -26,6 +26,24 @@ Submit an [issue](https://github.com/nuCarve/laserpost/issues/new) or send us a 
 Use the [GitHub issue tracker](https://github.com/nuCarve/laserpost/issues) to search known issues or create a new issue.  You may also 
 [send a private message](https://nucarve.com/about#contact) to the nuCarve team.
 
+## Building
+
+To build LaserPost, you will need [`nodejs`](https://nodejs.org/en/) installed.  No external packages are used, so NPM is not required.
+
+From the root directory in the project, issue the command:
+
+```sh
+node release/release.mjs
+```
+
+This will pull all the various `js` files together into a single `release/dist/laserpost.cps` file, as well as apply the version number that is defined in the `version.json` file.  
+
+Since Fusion 360 needs the post located in a specific directory, you can also specify a path to a file to store a duplicate of the generated file, such as:
+
+```sh
+node release/release.mjs "C:\Users\myname\AppData\Local\Autodesk\Autodesk Fusion 360\32TABC6DD2N8Q\W.login\M\D23203423432806\CAMPosts\laserpost.cps"
+```
+
 ## License
 
 See the [LICENSE](LICENSE) file.
