@@ -1,7 +1,7 @@
 /**************************************************************************************
  *
  * LaserPost module: xmlState.js
- * 
+ *
  * State and XML file support
  *
  *************************************************************************************/
@@ -16,101 +16,99 @@
  * The XML file is expected to contain `<laserpost>` and then one key for each object entry
  * with <memberName>value</memberName>
  */
- function stateLoad() {
-    // set up path to the state file, and see if it exists
+function stateLoad() {
+  // set up path to the state file, and see if it exists
+  const statePath = FileSystem.getCombinedPath(
+    getConfigurationFolder(),
+    STATE_FILENAME
+  );
+  try {
+    const xmlFile = new TextFile(statePath, false, 'ansi');
+  } catch (ex) {
+    // no file, so set an empty state
+    origState = {};
+    activeState = {};
+    return;
+  }
+
+  // bring in all lines from the file
+  let xmlString = '';
+  try {
+    // load all lines.  The readln method throws error at EOF, so we just read until we get an error
+    while (true) {
+      xmlString += xmlFile.readln();
+    }
+  } catch (ex) {}
+  xmlFile.close();
+
+  const xmlObject = parseXML(xmlString);
+  if (!xmlObject || !xmlObject.laserpost) origState = {};
+  else {
+    origState = xmlObject.laserpost;
+    for (key in origState)
+      if (origState[key].content) origState[key] = origState[key].content;
+      else delete origState[key];
+  }
+  activeState = JSON.parse(JSON.stringify(origState));
+}
+
+/**
+ * Determine if the state (activeState) has changed (shallow compare with origState)
+ *
+ * @returns `true` if the state is dirty and should be written.
+ */
+function stateIsDirty() {
+  if (Object.keys(origState).length != Object.keys(activeState).length)
+    return true;
+  for (key in origState) if (origState[key] != activeState[key]) return true;
+  return false;
+}
+
+/**
+ * Writes the activeState to the XML state file, if it is dirty (has changed since it
+ * was last loaded)
+ */
+function stateSave() {
+  // make sure something has changed....
+  if (stateIsDirty()) {
+    // make sure to tell the user why we need security rights if we don't have them
+    ensureSecurityRights();
+
+    // write the state to the XML file
     const statePath = FileSystem.getCombinedPath(
       getConfigurationFolder(),
       STATE_FILENAME
     );
+    let xmlFile;
     try {
-      const xmlFile = new TextFile(statePath, false, 'ansi');
-    } catch (ex) {
-      // no file, so set an empty state
-      origState = {};
-      activeState = {};
-      return;
-    }
-  
-    // bring in all lines from the file
-    let xmlString = '';
-    try {
-      // load all lines.  The readln method throws error at EOF, so we just read until we get an error
-      while (true) {
-        xmlString += xmlFile.readln();
-      }
-    } catch (ex) {}
-    xmlFile.close();
-  
-    const xmlObject = parseXML(xmlString);
-    if (!xmlObject || !xmlObject.laserpost) origState = {};
-    else {
-      origState = xmlObject.laserpost;
-      for (key in origState)
-        if (origState[key].content) origState[key] = origState[key].content;
-        else delete origState[key];
-    }
-    activeState = JSON.parse(JSON.stringify(origState));
-  }
-  
-  /**
-   * Determine if the state (activeState) has changed (shallow compare with origState)
-   *
-   * @returns `true` if the state is dirty and should be written.
-   */
-  function stateIsDirty() {
-    if (Object.keys(origState).length != Object.keys(activeState).length)
-      return true;
-    for (key in origState) if (origState[key] != activeState[key]) return true;
-    return false;
-  }
-  
-  /**
-   * Writes the activeState to the XML state file, if it is dirty (has changed since it
-   * was last loaded)
-   */
-  function stateSave() {
-    // make sure something has changed....
-    if (stateIsDirty()) {
-      // make sure to tell the user why we need security rights if we don't have them
-      ensureSecurityRights();
-  
-      // write the state to the XML file
-      const statePath = FileSystem.getCombinedPath(
-        getConfigurationFolder(),
-        STATE_FILENAME
-      );
-      let xmlFile;
-      try {
-        // write the XML state to the file
-        xmlFile = new TextFile(statePath, true, 'ansi');
-        xmlFile.writeln('<?xml version="1.0" encoding="UTF-8"?>');
-        xmlFile.writeln('<laserpost>');
-        for (key in activeState) {
-          xmlFile.writeln(
-            format('  <{key}>{value}</{key}>', {
-              key: key,
-              value: encodeXML(activeState[key]),
-            })
-          );
-        }
-        xmlFile.writeln('</laserpost>');
-        xmlFile.close();
-      } catch (ex) {
-        showWarning(
-          localize(
-            'Warning: Unable to save state file, but post should continue to work correctly (error "{error}")'
-          ),
-          {
-            error: ex.toString(),
-          }
+      // write the XML state to the file
+      xmlFile = new TextFile(statePath, true, 'ansi');
+      xmlFile.writeln('<?xml version="1.0" encoding="UTF-8"?>');
+      xmlFile.writeln('<laserpost>');
+      for (key in activeState) {
+        xmlFile.writeln(
+          format('  <{key}>{value}</{key}>', {
+            key: key,
+            value: encodeXML(activeState[key]),
+          })
         );
-        if (xmlFile) {
-          try {
-            xmlFile.close();
-          } catch (ex) {}
+      }
+      xmlFile.writeln('</laserpost>');
+      xmlFile.close();
+    } catch (ex) {
+      showWarning(
+        localize(
+          'Warning: Unable to save state file, but post should continue to work correctly (error "{error}")'
+        ),
+        {
+          error: ex.toString(),
         }
+      );
+      if (xmlFile) {
+        try {
+          xmlFile.close();
+        } catch (ex) {}
       }
     }
   }
-  
-  
+}

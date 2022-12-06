@@ -1,7 +1,7 @@
 /**************************************************************************************
  *
  * LaserPost module: globals.js
- * 
+ *
  * Global variables used internally by the post-processor
  *
  *************************************************************************************/
@@ -33,4 +33,3 @@ let groups = [];
 // references an array of operations, which in turn contain all the shapes associated with
 // that operation.
 let project = { cutSettings: [], operationSets: [] };
-

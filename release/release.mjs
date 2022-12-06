@@ -29,13 +29,13 @@
  */
 
 /*
- * Simple release manager for LaserPost.  
+ * Simple release manager for LaserPost.
  *
  * Takes all files listed in `sourceFiles` and merges them in order, and
  * performing a substitution of `VERSION_TAG` (`'0.0.0-version'`) with the
- * version number contained in a `version.json` file.  
+ * version number contained in a `version.json` file.
  *
- * See README.md for more information. 
+ * See README.md for more information.
  */
 
 import fsp from 'fs/promises';
@@ -73,7 +73,7 @@ const VERSION_TAG = /0.0.0-version/g;
 /**
  * Release LaserPost by merging a series of source files into a single file, and performing
  * substitution of version numbers.
- * 
+ *
  * @param duplicatePath - optional, if defined a duplicate of the generated file is copied to this path.
  */
 async function release(duplicatePath) {
@@ -100,4 +100,6 @@ async function release(duplicatePath) {
 }
 
 // start the release, using the optional command line argument with the target duplicate directory
-await release((process.argv.length > 2) ? path.resolve(process.argv[2]) : undefined);
+await release(
+  process.argv.length > 2 ? path.resolve(process.argv[2]) : undefined
+);

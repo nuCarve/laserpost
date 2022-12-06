@@ -65,4 +65,3 @@ minimumCircularSweep = toRad(0.01);
 maximumCircularSweep = Math.PI * 2;
 allowHelicalMoves = false;
 allowedCircularPlanes = 1 << PLANE_XY;
-

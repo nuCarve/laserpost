@@ -179,10 +179,7 @@ function identifySegments(operation, cutSetting) {
         // point (and therefore closing a shape)
         for (let i = startPathIndex; i < currentPathIndex; ++i) {
           const priorPath = operation.paths[i];
-          if (
-            currentPath.x == priorPath.x &&
-            currentPath.y == priorPath.y
-          ) {
+          if (currentPath.x == priorPath.x && currentPath.y == priorPath.y) {
             // we have a closure.  Do we have any prior points we need to break off?
             if (startPathIndex != i) {
               segments.push({
@@ -417,19 +414,33 @@ function generatePathShape(
   let c1 = undefined;
 
   // capture our starting position
-  let position = { x: operation.paths[segmentStart].x, y: operation.paths[segmentStart].y };
+  let position = {
+    x: operation.paths[segmentStart].x,
+    y: operation.paths[segmentStart].y,
+  };
 
   // gather all points from the segment (from start to end) into vectors (the individual points) and primitives (the connection between vectors)
   // this is also where we do the conversion of circular paths into bezier curves for LightBurn
   let firstSegment = true;
-  for (let segmentIndex = segmentStart + 1; segmentIndex <= segmentEnd; ++segmentIndex, firstSegment = false) {
+  for (
+    let segmentIndex = segmentStart + 1;
+    segmentIndex <= segmentEnd;
+    ++segmentIndex, firstSegment = false
+  ) {
     const path = operation.paths[segmentIndex];
-  
+
     switch (path.type) {
       case PATH_TYPE_MOVE:
         break;
       case PATH_TYPE_LINEAR:
-        writeComment("LINEAR Vector push: [{x}, {y}]", {x: formatPosition.format(position.x), y: formatPosition.format(position.y)}, COMMENT_INSANE);
+        writeComment(
+          'LINEAR Vector push: [{x}, {y}]',
+          {
+            x: formatPosition.format(position.x),
+            y: formatPosition.format(position.y),
+          },
+          COMMENT_INSANE
+        );
         shape.vectors.push({
           x: position.x,
           y: position.y,
@@ -439,7 +450,14 @@ function generatePathShape(
 
         // add a primitive connecting the vectors, except if we are on the first one (we don't have a line yet)
         if (!firstSegment) {
-          writeComment("LINEAR Primitive push: {start}-{end}", {start: formatPosition.format(shape.vectors.length - 2), end: formatPosition.format(shape.vectors.length - 1)}, COMMENT_INSANE);
+          writeComment(
+            'LINEAR Primitive push: {start}-{end}',
+            {
+              start: formatPosition.format(shape.vectors.length - 2),
+              end: formatPosition.format(shape.vectors.length - 1),
+            },
+            COMMENT_INSANE
+          );
           shape.primitives.push({
             type: c1 ? PRIMITIVE_TYPE_BEZIER : PRIMITIVE_TYPE_LINE,
             start: shape.vectors.length - 2,
@@ -451,13 +469,18 @@ function generatePathShape(
 
         break;
       case PATH_TYPE_SEMICIRCLE:
-        writeComment("Semicircle, start [{startX},{startY}], end [{x}, {y}], center [{centerX}, {centerY}]", 
-        {
-          startX: formatPosition.format(position.x), startY: formatPosition.format(position.y),
-          x: formatPosition.format(path.x), y: formatPosition.format(path.y),
-          centerX: formatPosition.format(path.centerX), centerY: formatPosition.format(path.centerY)
-        },
-        COMMENT_INSANE);
+        writeComment(
+          'Semicircle, start [{startX},{startY}], end [{x}, {y}], center [{centerX}, {centerY}]',
+          {
+            startX: formatPosition.format(position.x),
+            startY: formatPosition.format(position.y),
+            x: formatPosition.format(path.x),
+            y: formatPosition.format(path.y),
+            centerX: formatPosition.format(path.centerX),
+            centerY: formatPosition.format(path.centerY),
+          },
+          COMMENT_INSANE
+        );
         // convert the path style curvature (start, end, centerpoint) into bezier vectors - which can result in more vectors to make the curve
         const curves = circularToBezier(
           { x: position.x, y: position.y },
@@ -483,12 +506,23 @@ function generatePathShape(
         // process all curves
         let curvePosition = { x: position.x, y: position.y };
 
-        for (let curveIndex = 0; curveIndex < curves.length; ++curveIndex, firstSegment = false) {
+        for (
+          let curveIndex = 0;
+          curveIndex < curves.length;
+          ++curveIndex, firstSegment = false
+        ) {
           // set up the control points for exiting this vector
           let c0 = { x: curves[curveIndex].x1, y: curves[curveIndex].y1 };
 
           // push this vector into the list
-          writeComment("CURVE Vector push: [{x}, {y}]", {x: formatPosition.format(curvePosition.x), y: formatPosition.format(curvePosition.y)}, COMMENT_INSANE);
+          writeComment(
+            'CURVE Vector push: [{x}, {y}]',
+            {
+              x: formatPosition.format(curvePosition.x),
+              y: formatPosition.format(curvePosition.y),
+            },
+            COMMENT_INSANE
+          );
           shape.vectors.push({
             x: curvePosition.x,
             y: curvePosition.y,
@@ -500,7 +534,14 @@ function generatePathShape(
 
           // add a primitive to connect them, except if we are on the first one (we don't have a line yet)
           if (!firstSegment) {
-            writeComment("CURVE Primitive push: {start}-{end}", {start: formatPosition.format(shape.vectors.length - 2), end: formatPosition.format(shape.vectors.length - 1)}, COMMENT_INSANE);
+            writeComment(
+              'CURVE Primitive push: {start}-{end}',
+              {
+                start: formatPosition.format(shape.vectors.length - 2),
+                end: formatPosition.format(shape.vectors.length - 1),
+              },
+              COMMENT_INSANE
+            );
             shape.primitives.push({
               type: c1 ? PRIMITIVE_TYPE_BEZIER : PRIMITIVE_TYPE_LINE,
               start: shape.vectors.length - 2,
@@ -525,7 +566,11 @@ function generatePathShape(
   // segment, add the final vector and primitive to connect them.
   if (segmentClosed) {
     // closed - so connect primitive to start vector as our ending point
-    writeComment("CLOSE Primitive push: {start}-{end}", {start: formatPosition.format(shape.vectors.length - 1), end: 0}, COMMENT_INSANE);
+    writeComment(
+      'CLOSE Primitive push: {start}-{end}',
+      { start: formatPosition.format(shape.vectors.length - 1), end: 0 },
+      COMMENT_INSANE
+    );
     shape.primitives.push({
       type: c1 ? PRIMITIVE_TYPE_BEZIER : PRIMITIVE_TYPE_LINE,
       start: shape.vectors.length - 1,
