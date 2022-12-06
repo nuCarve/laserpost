@@ -429,7 +429,7 @@ function generatePathShape(
       case PATH_TYPE_MOVE:
         break;
       case PATH_TYPE_LINEAR:
-        writeComment("LINEAR Vector push: [{x}, {y}]", {x: position.x, y: position.y}, COMMENT_INSANE);
+        writeComment("LINEAR Vector push: [{x}, {y}]", {x: formatPosition.format(position.x), y: formatPosition.format(position.y)}, COMMENT_INSANE);
         shape.vectors.push({
           x: position.x,
           y: position.y,
@@ -439,7 +439,7 @@ function generatePathShape(
 
         // add a primitive connecting the vectors, except if we are on the first one (we don't have a line yet)
         if (!firstSegment) {
-          writeComment("LINEAR Primitive push: {start}-{end}", {start: shape.vectors.length - 2, end: shape.vectors.length - 1}, COMMENT_INSANE);
+          writeComment("LINEAR Primitive push: {start}-{end}", {start: formatPosition.format(shape.vectors.length - 2), end: formatPosition.format(shape.vectors.length - 1)}, COMMENT_INSANE);
           shape.primitives.push({
             type: c1 ? PRIMITIVE_TYPE_BEZIER : PRIMITIVE_TYPE_LINE,
             start: shape.vectors.length - 2,
@@ -488,7 +488,7 @@ function generatePathShape(
           let c0 = { x: curves[curveIndex].x1, y: curves[curveIndex].y1 };
 
           // push this vector into the list
-          writeComment("CURVE Vector push: [{x}, {y}]", {x: curvePosition.x, y: curvePosition.y}, COMMENT_INSANE);
+          writeComment("CURVE Vector push: [{x}, {y}]", {x: formatPosition.format(curvePosition.x), y: formatPosition.format(curvePosition.y)}, COMMENT_INSANE);
           shape.vectors.push({
             x: curvePosition.x,
             y: curvePosition.y,
@@ -500,7 +500,7 @@ function generatePathShape(
 
           // add a primitive to connect them, except if we are on the first one (we don't have a line yet)
           if (!firstSegment) {
-            writeComment("CURVE Primitive push: {start}-{end}", {start: shape.vectors.length - 2, end: shape.vectors.length - 1}, COMMENT_INSANE);
+            writeComment("CURVE Primitive push: {start}-{end}", {start: formatPosition.format(shape.vectors.length - 2), end: formatPosition.format(shape.vectors.length - 1)}, COMMENT_INSANE);
             shape.primitives.push({
               type: c1 ? PRIMITIVE_TYPE_BEZIER : PRIMITIVE_TYPE_LINE,
               start: shape.vectors.length - 2,
@@ -525,7 +525,7 @@ function generatePathShape(
   // segment, add the final vector and primitive to connect them.
   if (segmentClosed) {
     // closed - so connect primitive to start vector as our ending point
-    writeComment("CLOSE Primitive push: {start}-{end}", {start: shape.vectors.length - 1, end: 0}, COMMENT_INSANE);
+    writeComment("CLOSE Primitive push: {start}-{end}", {start: formatPosition.format(shape.vectors.length - 1), end: 0}, COMMENT_INSANE);
     shape.primitives.push({
       type: c1 ? PRIMITIVE_TYPE_BEZIER : PRIMITIVE_TYPE_LINE,
       start: shape.vectors.length - 1,
