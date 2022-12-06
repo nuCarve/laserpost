@@ -63,11 +63,11 @@
           switch (path.type) {
             case PATH_TYPE_LINEAR:
               writeComment(
-                '      Path #{pathId}: LINEAR [{endX}, {endY}] at {feed} mm/min',
+                '      Path #{pathId}: LINEAR [{x}, {y}] at {feed} mm/min',
                 {
                   pathId: p,
-                  endX: formatPosition.format(path.endX),
-                  endY: formatPosition.format(path.endY),
+                  x: formatPosition.format(path.x),
+                  y: formatPosition.format(path.y),
                   feed: formatSpeed.format(path.feed),
                 },
                 COMMENT_INSANE
@@ -76,14 +76,14 @@
             case PATH_TYPE_SEMICIRCLE:
             case PATH_TYPE_CIRCLE:
               writeComment(
-                '      Path #{pathId}: {pathType} ({direction}) [{endX}, {endY}] centered on [{centerX}, {centerY}] at {feed} mm/min',
+                '      Path #{pathId}: {pathType} ({direction}) [{x}, {y}] centered on [{centerX}, {centerY}] at {feed} mm/min',
                 {
                   pathId: p,
                   pathType: path.type == PATH_TYPE_SEMICIRCLE ? 'SEMI-CIRCLE' : 'CIRCLE',
                   centerX: formatPosition.format(path.centerX),
                   centerY: formatPosition.format(path.centerY),
-                  endX: formatPosition.format(path.endX),
-                  endY: formatPosition.format(path.endY),
+                  x: formatPosition.format(path.x),
+                  y: formatPosition.format(path.y),
                   direction: path.clockwise ? 'CW' : 'CCW',
                   feed: formatSpeed.format(path.feed),
                 },
@@ -92,11 +92,11 @@
               break;
             case PATH_TYPE_MOVE:
               writeComment(
-                '      Path #{pathId}: MOVE [{endX}, {endY}]',
+                '      Path #{pathId}: MOVE [{x}, {y}]',
                 {
                   pathId: p,
-                  endX: formatPosition.format(path.endX),
-                  endY: formatPosition.format(path.endY),
+                  x: formatPosition.format(path.x),
+                  y: formatPosition.format(path.y),
                   feed: formatSpeed.format(path.feed),
                 },
                 COMMENT_INSANE

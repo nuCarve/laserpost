@@ -346,10 +346,10 @@
     // is laser currently on?  If not, we ignore this request (other than debugging logic)
     if (currentPower) {
       writeComment(
-        'onLinear LASER: [{endX}, {endY}] at {feed} mm/min',
+        'onLinear LASER: [{x}, {y}] at {feed} mm/min',
         {
-          endX: formatPosition.format(x),
-          endY: formatPosition.format(y),
+          x: formatPosition.format(x),
+          y: formatPosition.format(y),
           feed: formatSpeed.format(feed),
         },
         COMMENT_DEBUG
@@ -358,16 +358,16 @@
       // add this path segment
       operation.paths.push({
         type: PATH_TYPE_LINEAR,
-        endX: x,
-        endY: y,
+        x: x,
+        y: y,
         feed: feed,
       });
     } else {
       writeComment(
-        'onLinear MOVE: [{endX}, {endY}]',
+        'onLinear MOVE: [{x}, {y}]',
         {
-          endX: formatPosition.format(x),
-          endY: formatPosition.format(y),
+          x: formatPosition.format(x),
+          y: formatPosition.format(y),
         },
         COMMENT_INSANE
       );
@@ -378,8 +378,8 @@
       // add this path segment
       operation.paths.push({
         type: PATH_TYPE_MOVE,
-        endX: x,
-        endY: y,
+        x: x,
+        y: y,
         feed: feed,
       });
     }
@@ -437,9 +437,9 @@
       type: isFullCircle() ? PATH_TYPE_CIRCLE : PATH_TYPE_SEMICIRCLE,
       centerX: cx,
       centerY: cy,
-      // todo: rename endX/endY
-      endX: x,
-      endY: y,
+      // todo: rename x/y
+      x: x,
+      y: y,
       clockwise: clockwise,
       feed: feed,
     });

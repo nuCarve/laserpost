@@ -180,8 +180,8 @@ function identifySegments(operation, cutSetting) {
         for (let i = startPathIndex; i < currentPathIndex; ++i) {
           const priorPath = operation.paths[i];
           if (
-            currentPath.endX == priorPath.endX &&
-            currentPath.endY == priorPath.endY
+            currentPath.x == priorPath.x &&
+            currentPath.y == priorPath.y
           ) {
             // we have a closure.  Do we have any prior points we need to break off?
             if (startPathIndex != i) {
@@ -344,8 +344,8 @@ function generateElipseShape(
     y: operation.paths[segmentEnd].centerY,
   };
   const center = {
-    x: operation.paths[segmentEnd].endX,
-    y: operation.paths[segmentEnd].endY,
+    x: operation.paths[segmentEnd].x,
+    y: operation.paths[segmentEnd].y,
   };
 
   // determine the radius of this circle
@@ -417,7 +417,7 @@ function generatePathShape(
   let c1 = undefined;
 
   // capture our starting position
-  let position = { x: operation.paths[segmentStart].endX, y: operation.paths[segmentStart].endY };
+  let position = { x: operation.paths[segmentStart].x, y: operation.paths[segmentStart].y };
 
   // gather all points from the segment (from start to end) into vectors (the individual points) and primitives (the connection between vectors)
   // this is also where we do the conversion of circular paths into bezier curves for LightBurn
@@ -451,29 +451,29 @@ function generatePathShape(
 
         break;
       case PATH_TYPE_SEMICIRCLE:
-        writeComment("Semicircle, start [{startX},{startY}], end [{endX}, {endY}], center [{centerX}, {centerY}]", 
+        writeComment("Semicircle, start [{startX},{startY}], end [{x}, {y}], center [{centerX}, {centerY}]", 
         {
           startX: formatPosition.format(position.x), startY: formatPosition.format(position.y),
-          endX: formatPosition.format(path.endX), endY: formatPosition.format(path.endY),
+          x: formatPosition.format(path.x), y: formatPosition.format(path.y),
           centerX: formatPosition.format(path.centerX), centerY: formatPosition.format(path.centerY)
         },
         COMMENT_INSANE);
         // convert the path style curvature (start, end, centerpoint) into bezier vectors - which can result in more vectors to make the curve
         const curves = circularToBezier(
           { x: position.x, y: position.y },
-          { x: path.endX, y: path.endY },
+          { x: path.x, y: path.y },
           { x: path.centerX, y: path.centerY },
           path.clockwise
         );
 
         // debug info
         writeComment(
-          'generatePathShape: converting to bezier [{startX}, {startY}] to [{endX}, {endY}] center [{centerX}, {centerY}]',
+          'generatePathShape: converting to bezier [{startX}, {startY}] to [{x}, {y}] center [{centerX}, {centerY}]',
           {
             startX: formatPosition.format(position.x),
             startY: formatPosition.format(position.y),
-            endX: formatPosition.format(path.endX),
-            endY: formatPosition.format(path.endY),
+            x: formatPosition.format(path.x),
+            y: formatPosition.format(path.y),
             centerX: formatPosition.format(path.centerX),
             centerY: formatPosition.format(path.centerY),
           },
@@ -518,7 +518,7 @@ function generatePathShape(
     }
 
     // update our position
-    position = { x: path.endX, y: path.endY };
+    position = { x: path.x, y: path.y };
   }
   // if this is a closed segment, add a primitive to connect the last to the first, and update
   // the starting vector to have the entry bezier control point if we have one.  If an open
@@ -536,8 +536,8 @@ function generatePathShape(
   } else {
     // open - so add the final vector and connect them
     shape.vectors.push({
-      x: operation.paths[segmentEnd].endX,
-      y: operation.paths[segmentEnd].endY,
+      x: operation.paths[segmentEnd].x,
+      y: operation.paths[segmentEnd].y,
       c0x: undefined,
       c0y: undefined,
       c1x: c1 ? c1.x : undefined, // include the entry control point if the prior vector had left it for us
@@ -738,32 +738,32 @@ function traceStockOutline() {
   // add a path outlining the stock
   paths.push({
     type: PATH_TYPE_MOVE,
-    endX: stock.minX + workspaceOffsets.x,
-    endY: stock.minY + workspaceOffsets.y,
+    x: stock.minX + workspaceOffsets.x,
+    y: stock.minY + workspaceOffsets.y,
     feed: STOCK_FEED_RATE,
   });
   paths.push({
     type: PATH_TYPE_LINEAR,
-    endX: stock.maxX + workspaceOffsets.x,
-    endY: stock.minY + workspaceOffsets.y,
+    x: stock.maxX + workspaceOffsets.x,
+    y: stock.minY + workspaceOffsets.y,
     feed: STOCK_FEED_RATE,
   });
   paths.push({
     type: PATH_TYPE_LINEAR,
-    endX: stock.maxX + workspaceOffsets.x,
-    endY: stock.maxY + workspaceOffsets.y,
+    x: stock.maxX + workspaceOffsets.x,
+    y: stock.maxY + workspaceOffsets.y,
     feed: STOCK_FEED_RATE,
   });
   paths.push({
     type: PATH_TYPE_LINEAR,
-    endX: stock.minX + workspaceOffsets.x,
-    endY: stock.maxY + workspaceOffsets.y,
+    x: stock.minX + workspaceOffsets.x,
+    y: stock.maxY + workspaceOffsets.y,
     feed: STOCK_FEED_RATE,
   });
   paths.push({
     type: PATH_TYPE_LINEAR,
-    endX: stock.minX + workspaceOffsets.x,
-    endY: stock.minY + workspaceOffsets.y,
+    x: stock.minX + workspaceOffsets.x,
+    y: stock.minY + workspaceOffsets.y,
     feed: STOCK_FEED_RATE,
   });
 }
