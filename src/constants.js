@@ -25,9 +25,14 @@ const COMMENT_DEBUG = 2;
 const COMMENT_INSANE = 3;
 
 // path types from CAM
+const PATH_TYPE_MOVE = 'move';
 const PATH_TYPE_LINEAR = 'linear';
 const PATH_TYPE_SEMICIRCLE = 'semicircle';
 const PATH_TYPE_CIRCLE = 'circle';
+
+// segments types used after breaking apart paths into segments
+const SEGMENT_TYPE_CIRCLE = 'shape-circle';
+const SEGMENT_TYPE_PATH = 'shape-path';
 
 // define enum for layer modes
 const LAYER_MODE_LINE = 'line';

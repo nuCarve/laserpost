@@ -28,9 +28,9 @@ let groups = [];
 // when the project array is written to the file.
 //
 // cutSettings is an array of individual, unique layers found while processing all CAM paths.
-// operationGroups is an array that contains one entry for each group (which could be multiple
+// operationSets is an array that contains one entry for each group (which could be multiple
 // operations when group names are user, otherwise it's one per operation).  Groups then
 // references an array of operations, which in turn contain all the shapes associated with
 // that operation.
-let project = { cutSettings: [], operationGroups: [] };
+let project = { cutSettings: [], operationSets: [] };
 

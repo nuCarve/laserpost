@@ -60,40 +60,49 @@
         for (let p = 0; p < operation.paths.length; ++p) {
           const path = operation.paths[p];
   
-          if (path.type == PATH_TYPE_LINEAR)
-            writeComment(
-              '      Path #{pathId}: {pathType} from [{startX}, {startY}] to [{endX}, {endY}] at {feed} mm/min',
-              {
-                pathId: p,
-                pathType: path.type,
-                startX: formatPosition.format(path.startX),
-                startY: formatPosition.format(path.startY),
-                endX: formatPosition.format(path.endX),
-                endY: formatPosition.format(path.endY),
-                feed: formatSpeed.format(path.feed),
-              },
-              COMMENT_INSANE
-            );
-          else if (
-            path.type == PATH_TYPE_SEMICIRCLE ||
-            path.type == PATH_TYPE_CIRCLE
-          )
-            writeComment(
-              '      Path #{pathId}: {pathType} ({direction}) from [{startX}, {startY}] to [{endX}, {endY}] centered on [{centerX}, {centerY}] at {feed} mm/min',
-              {
-                pathId: p,
-                pathType: path.type,
-                startX: formatPosition.format(path.startX),
-                startY: formatPosition.format(path.startY),
-                centerX: formatPosition.format(path.centerX),
-                centerY: formatPosition.format(path.centerY),
-                endX: formatPosition.format(path.endX),
-                endY: formatPosition.format(path.endY),
-                direction: path.clockwise ? 'CW' : 'CCW',
-                feed: formatSpeed.format(path.feed),
-              },
-              COMMENT_INSANE
-            );
+          switch (path.type) {
+            case PATH_TYPE_LINEAR:
+              writeComment(
+                '      Path #{pathId}: LINEAR [{endX}, {endY}] at {feed} mm/min',
+                {
+                  pathId: p,
+                  endX: formatPosition.format(path.endX),
+                  endY: formatPosition.format(path.endY),
+                  feed: formatSpeed.format(path.feed),
+                },
+                COMMENT_INSANE
+              );
+              break;
+            case PATH_TYPE_SEMICIRCLE:
+            case PATH_TYPE_CIRCLE:
+              writeComment(
+                '      Path #{pathId}: {pathType} ({direction}) [{endX}, {endY}] centered on [{centerX}, {centerY}] at {feed} mm/min',
+                {
+                  pathId: p,
+                  pathType: path.type == PATH_TYPE_SEMICIRCLE ? 'SEMI-CIRCLE' : 'CIRCLE',
+                  centerX: formatPosition.format(path.centerX),
+                  centerY: formatPosition.format(path.centerY),
+                  endX: formatPosition.format(path.endX),
+                  endY: formatPosition.format(path.endY),
+                  direction: path.clockwise ? 'CW' : 'CCW',
+                  feed: formatSpeed.format(path.feed),
+                },
+                COMMENT_INSANE
+              );
+              break;
+            case PATH_TYPE_MOVE:
+              writeComment(
+                '      Path #{pathId}: MOVE [{endX}, {endY}]',
+                {
+                  pathId: p,
+                  endX: formatPosition.format(path.endX),
+                  endY: formatPosition.format(path.endY),
+                  feed: formatSpeed.format(path.feed),
+                },
+                COMMENT_INSANE
+              );
+              break;
+          }
         }
       }
     }
@@ -104,13 +113,13 @@
    */
   function dumpProject() {
     // structure of the project object:
-    // project.operationGroups[{ shapeGroups: {type: SHAPE_TYPE_*, powerScale, cutIndex, ...)}, cutSettings: [{index, priority, minPower, maxPower, speed, layerMode, customCutSetting}}]
-    //   for shapeGroups:
+    // project.operationSets[{ shapeSets: {type: SHAPE_TYPE_*, powerScale, cutIndex, ...)}, cutSettings: [{index, priority, minPower, maxPower, speed, layerMode, customCutSetting}}]
+    //   for shapeSets:
     //     when SHAPE_TYPE_ELIPSE: centerX, centerY, radius
     //     when SHAPE_TYPE_PATH: vectors[], primitives: []
     writeComment(
       'Dump: Project ({groupCount} operation groups):',
-      { groupCount: project.operationGroups.length },
+      { groupCount: project.operationSets.length },
       COMMENT_DEBUG
     );
     writeComment('  Cut settings:', {}, COMMENT_DEBUG);
@@ -144,17 +153,17 @@
         );
     }
   
-    for (let og = 0; og < project.operationGroups.length; ++og) {
-      writeComment('  Operation group #{id}:', { id: og }, COMMENT_DEBUG);
-      for (let o = 0; o < project.operationGroups[og].operations.length; ++o) {
+    for (let os = 0; os < project.operationSets.length; ++os) {
+      writeComment('  Operation group #{id}:', { id: os }, COMMENT_DEBUG);
+      for (let o = 0; o < project.operationSets[os].operations.length; ++o) {
         writeComment('    Operation #{id}:', { id: o }, COMMENT_DEBUG);
         writeComment('      Shape groups:', {}, COMMENT_DEBUG);
         for (
-          let s = 0;
-          s < project.operationGroups[og].operations[o].shapeGroups.length;
-          ++s
+          let ss = 0;
+          ss < project.operationSets[os].operations[o].shapeSets.length;
+          ++ss
         ) {
-          const shape = project.operationGroups[og].operations[o].shapeGroups[s];
+          const shape = project.operationSets[os].operations[o].shapeSets[ss];
   
           // dump the shape into insane comments
           writeComment(

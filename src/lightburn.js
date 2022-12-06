@@ -171,8 +171,8 @@
     // process all operation groups.  These are groups of operations and generate a grouping for
     // LightBurn when there is more than one operation in the group (when the group name property has
     // been used by the user)
-    for (let og = 0; og < project.operationGroups.length; ++og) {
-      const opGroup = project.operationGroups[og];
+    for (let os = 0; os < project.operationSets.length; ++os) {
+      const opGroup = project.operationSets[os];
   
       // do we have more than one operation in this group?  If so, and enabled, go ahead and group it
       if (
@@ -196,7 +196,7 @@
   
         // do we need to group shapes within our operation?
         if (
-          operation.shapeGroups.length > 1 &&
+          operation.shapeSets.length > 1 &&
           getProperty('lightburn0600GroupShapes')
         ) {
           writeXML('Shape', { Type: 'Group' }, true);
@@ -205,8 +205,8 @@
         }
   
         // loop through all shapes within this operation
-        for (let s = 0; s < operation.shapeGroups.length; ++s) {
-          const shape = operation.shapeGroups[s];
+        for (let ss = 0; ss < operation.shapeSets.length; ++ss) {
+          const shape = operation.shapeSets[ss];
   
           // write the shape, based on it's type
           if (shape.type == SHAPE_TYPE_ELIPSE) writeShapeElipse(shape);
@@ -215,7 +215,7 @@
   
         // if we grouped the shapes, close the group
         if (
-          operation.shapeGroups.length > 1 &&
+          operation.shapeSets.length > 1 &&
           getProperty('lightburn0600GroupShapes')
         ) {
           writeXMLClose();

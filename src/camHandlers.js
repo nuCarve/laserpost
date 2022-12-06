@@ -216,7 +216,7 @@
     const groupName = currentSection.getProperty('op0800GroupName');
     if (groupName == '') groupName = undefined;
   
-    currentGroup = getGroup(groupName, {
+    currentGroup = getGroupByName(groupName, {
       groupName: groupName,
       operations: [],
     });
@@ -336,21 +336,18 @@
    * @param feed Feedrate to use.
    */
   function onLinear(x, y, z, feed) {
-    var start = getCurrentPosition();
-  
     // adjust offsets
     x += workspaceOffsets.x;
     y += workspaceOffsets.y;
-    start.x += workspaceOffsets.x;
-    start.y += workspaceOffsets.y;
+
+    // set up quick reference to the current operation
+    const operation = currentGroup.operations[currentGroup.operations.length - 1];
   
     // is laser currently on?  If not, we ignore this request (other than debugging logic)
     if (currentPower) {
       writeComment(
-        'onLinear LASER: [{startX}, {startY}] to [{endX}, {endY}] at {feed} mm/min',
+        'onLinear LASER: [{endX}, {endY}] at {feed} mm/min',
         {
-          startX: formatPosition.format(start.x),
-          startY: formatPosition.format(start.y),
           endX: formatPosition.format(x),
           endY: formatPosition.format(y),
           feed: formatSpeed.format(feed),
@@ -359,25 +356,32 @@
       );
   
       // add this path segment
-      currentGroup.operations[currentGroup.operations.length - 1].paths.push({
+      operation.paths.push({
         type: PATH_TYPE_LINEAR,
-        startX: start.x,
-        startY: start.y,
         endX: x,
         endY: y,
         feed: feed,
       });
     } else {
       writeComment(
-        'onLinear MOVE: [{startX}, {startY}] to [{endX}, {endY}]',
+        'onLinear MOVE: [{endX}, {endY}]',
         {
-          startX: formatPosition.format(start.x),
-          startY: formatPosition.format(start.y),
           endX: formatPosition.format(x),
           endY: formatPosition.format(y),
         },
         COMMENT_INSANE
       );
+      // small optimization - if top operation is a move, replace it as only the latest move matters
+      if (operation.paths.length > 0 && operation.paths[operation.paths.length - 1].type == PATH_TYPE_MOVE)
+        operation.paths.pop();
+
+      // add this path segment
+      operation.paths.push({
+        type: PATH_TYPE_MOVE,
+        endX: x,
+        endY: y,
+        feed: feed,
+      });
     }
   }
   
@@ -403,6 +407,9 @@
       );
       return;
     }
+
+    // get quick reference to current operation
+    const operation = currentGroup.operations[currentGroup.operations.length - 1];
   
     // adjust offsets
     cx += workspaceOffsets.x;
@@ -410,19 +417,14 @@
     x += workspaceOffsets.x;
     y += workspaceOffsets.y;
   
-    var start = getCurrentPosition();
-    start.x += workspaceOffsets.x;
-    start.y += workspaceOffsets.y;
-  
     writeComment(
-      'onCircular: {clockwise} {fullSemi}, [{sx}, {sy}] to [{ex}, {ey}] center [{cx}, {cy}], feed={feed} mm/min',
+      'onCircular: {clockwise} {fullSemi} [{ex}, {ey}] center [{cx}, {cy}], feed={feed} mm/min',
       {
         clockwise: clockwise ? 'CW' : 'CCW',
         fullSemi: isFullCircle() ? 'circle' : 'semicircle',
-        sy: formatPosition.format(start.x),
-        sx: formatPosition.format(start.y),
         cx: formatPosition.format(cx),
         cy: formatPosition.format(cy),
+        // todo: rename ex/ey
         ex: formatPosition.format(x),
         ey: formatPosition.format(y),
         feed: formatSpeed.format(feed),
@@ -431,12 +433,11 @@
     );
   
     // add this path segment
-    currentGroup.operations[currentGroup.operations.length - 1].paths.push({
+    operation.paths.push({
       type: isFullCircle() ? PATH_TYPE_CIRCLE : PATH_TYPE_SEMICIRCLE,
-      startX: start.x,
-      startY: start.y,
       centerX: cx,
       centerY: cy,
+      // todo: rename endX/endY
       endX: x,
       endY: y,
       clockwise: clockwise,
