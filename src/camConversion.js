@@ -116,7 +116,7 @@ function identifySegments(operation, cutSetting) {
   // all operations must start with a PATH_TYPE_MOVE to set the starting position
   if (operation.paths[0].type !== PATH_TYPE_MOVE) {
     error(localize('CAM operations error: Missing starting position'));
-    return;
+    return [];
   }
 
   // initialize our starting point in the segments list.  This is updated as we break off segments, so we can
