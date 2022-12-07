@@ -484,7 +484,7 @@ function generatePathShape(
         break;
       case PATH_TYPE_SEMICIRCLE:
         writeComment(
-          'Semicircle, start [{startX},{startY}], end [{x}, {y}], center [{centerX}, {centerY}]',
+          'Semicircle, start {clockwise} [{startX},{startY}], end [{x}, {y}], center [{centerX}, {centerY}]',
           {
             startX: formatPosition.format(position.x),
             startY: formatPosition.format(position.y),
@@ -492,6 +492,7 @@ function generatePathShape(
             y: formatPosition.format(path.y),
             centerX: formatPosition.format(path.centerX),
             centerY: formatPosition.format(path.centerY),
+            clockwise: path.clockwise ? 'CW' : 'CCW'
           },
           COMMENT_INSANE
         );
@@ -624,7 +625,7 @@ function generatePathShape(
  * @returns Array of curves
  */
 function circularToBezier(startPoint, endPoint, centerPoint, clockwise) {
-  // determine distance of lines from center to start and end
+  // determine distance of lines from center to start and end (resulting in center at 0,0)
   const startCenterDelta = {
     x: startPoint.x - centerPoint.x,
     y: startPoint.y - centerPoint.y,
@@ -647,12 +648,27 @@ function circularToBezier(startPoint, endPoint, centerPoint, clockwise) {
   // determine the angle from the center/start to the center/end, which is used to determine if we
   // are going clockwise or counterclockwise the short or long way
   let angleStartCenterEnd = angleCenterEnd - angleCenterStart;
-  // let TEMPBEFORE = angleStartCenterEnd;
   if (angleStartCenterEnd >= Math.PI) angleStartCenterEnd -= Math.PI * 2;
   if (angleStartCenterEnd < 0) angleStartCenterEnd += Math.PI * 2;
 
   // if our clockwise direction is the long way, set largeArcFlag so bezier generates the long way around
-  const largeArcFlag = clockwise == angleStartCenterEnd <= Math.PI / 2;
+  // determine if we have a long or short CCW angle, and then adjust for the desired CW/CCW
+  const ccwLargeArc = (angleStartCenterEnd > Math.PI);
+  const largeArcFlag = clockwise ? !ccwLargeArc : ccwLargeArc;
+
+  writeComment("circularToBezier: [{px}, {py}]-[{cx},{cy}], {largeArcFlag} arc",
+    {
+      px: formatPosition.format(startPoint.x),
+      py: formatPosition.format(startPoint.y),
+      cx: formatPosition.format(endPoint.x),
+      cy: formatPosition.format(endPoint.y),
+      rx: formatRadius.format(radius),
+      ry: formatRadius.format(radius),
+      xAxisRotation: 0 ,
+      largeArcFlag: largeArcFlag ? 'LARGE' : 'SMALL',
+      sweepFlag: !clockwise,
+      },
+    COMMENT_INSANE);
 
   // convert circular (points/radius) to bezier
   const curves = arcToBezier({
