@@ -66,7 +66,7 @@ const USE_AIR_ASSIST_GAS = 'gas';
 // define the name of the group used to trace the stock outline border, and the feed rate
 // to associate with it (which is required, but not meaningful as the layer is turned off)
 const STOCK_GROUP_NAME = 'Stock trace outline';
-const STOCK_FEED_RATE = 1000;
+const STOCK_FEED_RATE = 6000;
 
 // name of the state storage file
 const STATE_FILENAME = 'laserpost.xml';

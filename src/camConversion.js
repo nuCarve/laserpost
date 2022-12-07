@@ -48,7 +48,11 @@ function groupsToProject() {
       // always out the "outside" edges. We also scan until we find a value as we may have a MOVE path type which
       // might not have a feedrate
       let feedrate = 0;
-      for (pathIndex = Math.floor(groupOperation.paths.length / 2); pathIndex < groupOperation.paths.length; ++pathIndex) {
+      for (
+        pathIndex = Math.floor(groupOperation.paths.length / 2);
+        pathIndex < groupOperation.paths.length;
+        ++pathIndex
+      ) {
         if (groupOperation.paths[pathIndex].feed > 0) {
           feedrate = groupOperation.paths[pathIndex].feed;
           break;
@@ -492,7 +496,7 @@ function generatePathShape(
             y: formatPosition.format(path.y),
             centerX: formatPosition.format(path.centerX),
             centerY: formatPosition.format(path.centerY),
-            clockwise: path.clockwise ? 'CW' : 'CCW'
+            clockwise: path.clockwise ? 'CW' : 'CCW',
           },
           COMMENT_INSANE
         );
@@ -653,10 +657,11 @@ function circularToBezier(startPoint, endPoint, centerPoint, clockwise) {
 
   // if our clockwise direction is the long way, set largeArcFlag so bezier generates the long way around
   // determine if we have a long or short CCW angle, and then adjust for the desired CW/CCW
-  const ccwLargeArc = (angleStartCenterEnd > Math.PI);
+  const ccwLargeArc = angleStartCenterEnd > Math.PI;
   const largeArcFlag = clockwise ? !ccwLargeArc : ccwLargeArc;
 
-  writeComment("circularToBezier: [{px}, {py}]-[{cx},{cy}], {largeArcFlag} arc",
+  writeComment(
+    'circularToBezier: [{px}, {py}]-[{cx},{cy}], {largeArcFlag} arc',
     {
       px: formatPosition.format(startPoint.x),
       py: formatPosition.format(startPoint.y),
@@ -664,11 +669,12 @@ function circularToBezier(startPoint, endPoint, centerPoint, clockwise) {
       cy: formatPosition.format(endPoint.y),
       rx: formatRadius.format(radius),
       ry: formatRadius.format(radius),
-      xAxisRotation: 0 ,
+      xAxisRotation: 0,
       largeArcFlag: largeArcFlag ? 'LARGE' : 'SMALL',
       sweepFlag: !clockwise,
-      },
-    COMMENT_INSANE);
+    },
+    COMMENT_INSANE
+  );
 
   // convert circular (points/radius) to bezier
   const curves = arcToBezier({
@@ -744,19 +750,21 @@ function getCutSetting(cutSettingSpecs) {
       // improved with a deep object comparison (preceeded by filtering out unwanted fields)
       matchFound =
         cutSetting.customCutSettingXML == cutSettingSpecs.customCutSettingXML;
-    // standard properties - see if we match
-    else
+    else {
+      // standard properties - see if we match
       matchFound =
         cutSetting.minPower == cutSettingSpecs.minPower &&
         cutSetting.maxPower == cutSettingSpecs.maxPower &&
         cutSetting.speed == cutSettingSpecs.speed &&
         cutSetting.layerMode == cutSettingSpecs.layerMode &&
-        cutSetting.laserEnable == cutSettingSpecs.laserEable &&
+        cutSetting.laserEnable == cutSettingSpecs.laserEnable &&
+        cutSetting.powerScale == cutSettingSpecs.powerScale &&
         cutSetting.useAir == cutSettingSpecs.useAir &&
         cutSetting.zOffset == cutSettingSpecs.zOffset &&
         cutSetting.passes == cutSettingSpecs.passes &&
         cutSetting.zStep == cutSettingSpecs.zStep &&
-        cutSetting.customCutSetting === undefined;
+        cutSetting.customCutSetting == undefined;
+    }
 
     // do we have a match?
     if (matchFound) {
@@ -798,10 +806,15 @@ function traceStockOutline() {
 
   // set up an operation to contain the stock outline
   const paths = [];
-  currentGroup.operations.push({
+currentGroup.operations.push({
     operationName: STOCK_GROUP_NAME,
     minPower: 100,
     maxPower: 100,
+    speed: STOCK_FEED_RATE,
+    zOffset: 0,
+    passes: 1,
+    zStep: 0,
+    useAir: USE_AIR_OFF,
     laserEnable: LASER_ENABLE_OFF,
     layerMode: LAYER_MODE_LINE,
     powerScale: 100,
