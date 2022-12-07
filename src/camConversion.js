@@ -41,13 +41,27 @@ function groupsToProject() {
       });
       const projOperation = projOpSet.operations[index - 1];
 
+      // determine the feedrate to use.  CAM specifies feedrate at the operation level, but only delivers it
+      // during individual movements.  Technically three feedrates are available - cutting, lead-in and lead-out.
+      // Eventually we may build out a unique layer for each speed, but for now we just use the cutting speed.
+      // To find the cutting speed, we pull the value from the interior of the path, as lead-in and lead-out are
+      // always out the "outside" edges. We also scan until we find a value as we may have a MOVE path type which
+      // might not have a feedrate
+      let feedrate = 0;
+      for (pathIndex = Math.floor(groupOperation.paths.length / 2); pathIndex < groupOperation.paths.length; ++pathIndex) {
+        if (groupOperation.paths[pathIndex].feed > 0) {
+          feedrate = groupOperation.paths[pathIndex].feed;
+          break;
+        }
+      }
+
       // find (or create) a layer (<CutSetting>) for this operation (all shapes within
       // a CAM operation share the same cut setting)
       const cutSetting = getCutSetting({
         name: groupOperation.operationName,
         minPower: groupOperation.minPower,
         maxPower: groupOperation.maxPower,
-        speed: groupOperation.paths[0].feed / 60, // LightBurn is mm/sec, CAM is mm/min
+        speed: feedrate / 60, // LightBurn is mm/sec, CAM is mm/min
         layerMode: groupOperation.layerMode,
         laserEnable: groupOperation.laserEnable,
         powerSource: groupOperation.powerSource,

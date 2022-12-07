@@ -165,7 +165,8 @@ function onSection() {
   var minPower = 0;
   var maxPower = 0;
   let powerSource;
-  switch (currentSection.jetMode) {
+
+  switch (currentSection.getJetMode()) {
     case JET_MODE_ETCHING:
       minPower = getProperty('laserPower0100EtchMin');
       maxPower = getProperty('laserPower0200EtchMax');
@@ -185,7 +186,7 @@ function onSection() {
       error(
         localize('Unsupported cutting mode') +
           ' (' +
-          currentSection.jetMode +
+          currentSection.getJetMode() +
           ')'
       );
       return;
@@ -364,14 +365,15 @@ function onLinear(x, y, z, feed) {
     });
   } else {
     writeComment(
-      'onLinear MOVE: [{x}, {y}]',
+      'onLinear MOVE: [{x}, {y}] at {feed} mm/min',
       {
         x: formatPosition.format(x),
         y: formatPosition.format(y),
+        feed: formatSpeed.format(feed)
       },
       COMMENT_INSANE
     );
-    // small optimization - if top operation is a move, replace it as only the latest move matters
+    // if top operation is a move, replace it as only the latest move matters
     if (
       operation.paths.length > 0 &&
       operation.paths[operation.paths.length - 1].type == PATH_TYPE_MOVE
