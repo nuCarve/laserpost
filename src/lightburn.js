@@ -237,14 +237,14 @@ function writeShapes() {
 /**
  * Write an elipse (a closed circle) to the LightBurn file
  *
- * @param shape Shape information (cutIndex, radius, centerX, centerY) to write
+ * @param shape Shape information (cutSetting, radius, centerX, centerY) to write
  */
 function writeShapeElipse(shape) {
   writeXML(
     'Shape',
     {
       Type: 'Ellipse',
-      CutIndex: shape.cutIndex,
+      CutIndex: shape.cutSetting.index,
       Rx: formatRadius.format(shape.radius),
       Ry: formatRadius.format(shape.radius),
     },
@@ -263,10 +263,10 @@ function writeShapeElipse(shape) {
 /**
  * Write a path (lines and beziers) to the LightBurn file
  *
- * @param shape Shape information (cutIndex, vectors[], primitives[]) to write
+ * @param shape Shape information (cutSetting, vectors[], primitives[]) to write
  */
 function writeShapePath(shape) {
-  writeXML('Shape', { Type: 'Path', CutIndex: shape.cutIndex }, true);
+  writeXML('Shape', { Type: 'Path', CutIndex: shape.cutSetting.index }, true);
   writeXML('XForm', { content: '1 0 0 1 0 0' });
 
   // output the vectors

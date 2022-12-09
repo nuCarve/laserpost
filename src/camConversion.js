@@ -308,7 +308,7 @@ function generateShapesFromSegments(
 
     // create a new shape in our shape set for this operation (to organize the shapes together by operation)
     projOperation.shapeSets.push({
-      cutIndex: cutSetting.index,
+      cutSetting: cutSetting,
     });
     const shape = projOperation.shapeSets[projOperation.shapeSets.length - 1];
 
@@ -744,8 +744,8 @@ function getGroupByName(groupName, defaults) {
  * @returns The cutSetting object from the project that matches the specs (creating one if a match isn't found)
  */
 function getCutSetting(cutSettingSpecs) {
-  for (let cutIndex = 0; cutIndex < project.cutSettings.length; ++cutIndex) {
-    const cutSetting = project.cutSettings[cutIndex];
+  for (let cutSettingsIndex = 0; cutSettingsIndex < project.cutSettings.length; ++cutSettingsIndex) {
+    const cutSetting = project.cutSettings[cutSettingsIndex];
     let matchFound = false;
 
     // look to see if we already have a matching cutsetting, based on the custom XML if provided,
@@ -781,10 +781,12 @@ function getCutSetting(cutSettingSpecs) {
 
       // move this layer to the end of the layer list, which helps to ensure the last cutting operation doesn't
       // end up happening too early, as often that operation makes the material less stable
-      project.cutSettings.splice(cutIndex, 1);
+      project.cutSettings.splice(cutSettingsIndex, 1);
       project.cutSettings.push(cutSetting);
-      for (let newIndex = 0; newIndex < project.cutSettings.length; ++newIndex)
+      for (let newIndex = 0; newIndex < project.cutSettings.length; ++newIndex) {
         project.cutSettings[newIndex].index = newIndex;
+        project.cutSettings[newIndex].priority = newIndex;
+      }
 
       // return the found setting
       return cutSetting;

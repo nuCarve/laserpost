@@ -113,11 +113,6 @@ function dumpGroups() {
  * Dump the contents of the project (LightBurn style shapes) to comments in the file.
  */
 function dumpProject() {
-  // structure of the project object:
-  // project.operationSets[{ shapeSets: {type: SHAPE_TYPE_*, powerScale, cutIndex, ...)}, cutSettings: [{index, priority, minPower, maxPower, speed, layerMode, customCutSetting}}]
-  //   for shapeSets:
-  //     when SHAPE_TYPE_ELIPSE: centerX, centerY, radius
-  //     when SHAPE_TYPE_PATH: vectors[], primitives: []
   writeComment(
     'Dump: Project ({groupCount} operation groups):',
     { groupCount: project.operationSets.length },
@@ -168,10 +163,10 @@ function dumpProject() {
 
         // dump the shape into insane comments
         writeComment(
-          '        Shape (type={type}, cutIndex={cutIndex}, powerScale={powerScale})',
+          '        Shape (type={type}, layer={cutIndex}, powerScale={powerScale})',
           {
             type: shape.type,
-            cutIndex: shape.cutIndex,
+            cutIndex: shape.cutSetting.index,
             powerScale: shape.powerScale,
           },
           COMMENT_DEBUG
