@@ -354,11 +354,11 @@ function generateElipseShape(
   powerScale
 ) {
   // gather the positions being used for the circle
-  const start = {
+  const center = {
     x: operation.paths[segmentEnd].centerX,
     y: operation.paths[segmentEnd].centerY,
   };
-  const center = {
+  const start = {
     x: operation.paths[segmentEnd].x,
     y: operation.paths[segmentEnd].y,
   };
