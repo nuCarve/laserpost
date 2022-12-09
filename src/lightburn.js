@@ -43,8 +43,8 @@ function writeCutSettings() {
   writeNote('');
   writeNote('Layers:', false);
 
-  for (let i = 0; i < project.cutSettings.length; ++i) {
-    const cutSetting = project.cutSettings[i];
+  for (let cutSettingsIndex = 0; cutSettingsIndex < project.cutSettings.length; ++cutSettingsIndex) {
+    const cutSetting = project.cutSettings[cutSettingsIndex];
 
     writeNote('  ' + localize('{layer}: {name}'), {
       layer: formatLeadingZero.format(cutSetting.index),
@@ -57,7 +57,7 @@ function writeCutSettings() {
       );
       writeComment(
         localize(
-          'CutSetting (layer) {layer}: Settings overridden with custom CutSetting property'
+          'CutSetting {layer}: Settings overridden with custom CutSetting property'
         ),
         {
           layer: formatLeadingZero.format(cutSetting.index),
@@ -65,16 +65,17 @@ function writeCutSettings() {
         COMMENT_DETAIL
       );
     } else {
-      if (cutSetting.laserEnable !== LASER_ENABLE_OFF) {
-        const laserNames = {};
-        laserNames[LASER_ENABLE_1] = localize('laser 1');
-        laserNames[LASER_ENABLE_2] = localize('laser 2');
-        laserNames[LASER_ENABLE_BOTH] = localize('lasers 1 and 2');
+      const laserNames = {};
+      laserNames[LASER_ENABLE_OFF] = localize('lasers off');
+      laserNames[LASER_ENABLE_1] = localize('laser 1');
+      laserNames[LASER_ENABLE_2] = localize('laser 2');
+      laserNames[LASER_ENABLE_BOTH] = localize('lasers 1 and 2');
 
+      if (cutSetting.laserEnable !== LASER_ENABLE_OFF) {
         writeNote(
           '    ' +
             localize(
-              'Power {min}-{max}% speed {speed} using {lasers} (air {air}, Z offset {zOffset}, passes {passes}, z step {zStep})'
+              'Power {min}-{max}% at {speed} using {lasers} (air {air}, Z offset {zOffset}, passes {passes}, z-step {zStep})'
             ),
           {
             min: cutSetting.minPower,
@@ -87,28 +88,27 @@ function writeCutSettings() {
             zStep: cutSetting.zStep,
           }
         );
-
-        // format for comments
-        writeComment(
-          'CutSetting (layer) {id}: power {min}-{max}% ({source}), speed {speed} {lasers} (air {air}, Z offset {zOffset}, passes {passes}, z step {zStep})',
-          {
-            id: formatLeadingZero.format(cutSetting.index),
-            min: cutSetting.minPower,
-            max: cutSetting.maxPower,
-            source: cutSetting.powerSource,
-            speed: speedToUnits(cutSetting.speed),
-            lasers: laserNames[cutSetting.laserEnable],
-            air: cutSetting.useAir ? localize('on') : localize('off'),
-            zOffset: cutSetting.zOffset,
-            passes: cutSetting.passes,
-            zStep: cutSetting.zStep,
-          },
-          COMMENT_DETAIL
-        );
       } else {
         // laser is off
         writeNote('    ' + localize('Output turned off'));
       }
+      // format for comments
+      writeComment(
+        'CutSetting (layer) {id}: power {min}-{max}% at {speed} using {lasers} (air {air}, Z offset {zOffset}, passes {passes}, z step {zStep}) [inherited from {source}]',
+        {
+          id: formatLeadingZero.format(cutSetting.index),
+          min: cutSetting.minPower,
+          max: cutSetting.maxPower,
+          source: cutSetting.powerSource,
+          speed: speedToUnits(cutSetting.speed),
+          lasers: laserNames[cutSetting.laserEnable],
+          air: cutSetting.useAir ? localize('on') : localize('off'),
+          zOffset: cutSetting.zOffset,
+          passes: cutSetting.passes,
+          zStep: cutSetting.zStep,
+        },
+        COMMENT_DETAIL
+      );
     }
 
     // if not custom, generate the cut setting
@@ -171,8 +171,8 @@ function writeShapes() {
   // process all operation groups.  These are groups of operations and generate a grouping for
   // LightBurn when there is more than one operation in the group (when the group name property has
   // been used by the user)
-  for (let os = 0; os < project.operationSets.length; ++os) {
-    const opGroup = project.operationSets[os];
+  for (let setIndex = 0; setIndex < project.operationSets.length; ++setIndex) {
+    const opGroup = project.operationSets[setIndex];
 
     // do we have more than one operation in this group?  If so, and enabled, go ahead and group it
     if (
@@ -187,8 +187,8 @@ function writeShapes() {
     }
 
     // process all operations within the group
-    for (let o = 0; o < opGroup.operations.length; ++o) {
-      const operation = opGroup.operations[o];
+    for (let operationIndex = 0; operationIndex < opGroup.operations.length; ++operationIndex) {
+      const operation = opGroup.operations[operationIndex];
 
       writeComment(localize('Operation: {name}'), {
         name: operation.operationName,
@@ -205,8 +205,8 @@ function writeShapes() {
       }
 
       // loop through all shapes within this operation
-      for (let ss = 0; ss < operation.shapeSets.length; ++ss) {
-        const shape = operation.shapeSets[ss];
+      for (let shapeSetsIndex = 0; shapeSetsIndex < operation.shapeSets.length; ++shapeSetsIndex) {
+        const shape = operation.shapeSets[shapeSetsIndex];
 
         // write the shape, based on it's type
         if (shape.type == SHAPE_TYPE_ELIPSE) writeShapeElipse(shape);
@@ -270,8 +270,8 @@ function writeShapePath(shape) {
   writeXML('XForm', { content: '1 0 0 1 0 0' });
 
   // output the vectors
-  for (let i = 0; i < shape.vectors.length; ++i) {
-    const vector = shape.vectors[i];
+  for (let shapeVectorIndex = 0; shapeVectorIndex < shape.vectors.length; ++shapeVectorIndex) {
+    const vector = shape.vectors[shapeVectorIndex];
     writeXML('V', {
       vx: formatPosition.format(vector.x),
       vy: formatPosition.format(vector.y),
@@ -289,8 +289,8 @@ function writeShapePath(shape) {
   }
 
   // output the primitives
-  for (let i = 0; i < shape.primitives.length; ++i) {
-    const primitive = shape.primitives[i];
+  for (let sharePrimitiveIndex = 0; sharePrimitiveIndex < shape.primitives.length; ++sharePrimitiveIndex) {
+    const primitive = shape.primitives[sharePrimitiveIndex];
 
     writeXML('P', {
       T: primitive.type == PRIMITIVE_TYPE_LINE ? 'L' : 'B',
@@ -399,3 +399,4 @@ function speedToUnits(speedInMMPM) {
 
   return formatSpeed.format(speedInMMPM) + ' ' + localize('mm/sec');
 }
+

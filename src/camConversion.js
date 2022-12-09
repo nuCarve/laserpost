@@ -16,8 +16,8 @@
  */
 function groupsToProject() {
   // loop through all groups
-  for (let g = 0; g < groups.length; ++g) {
-    const group = groups[g];
+  for (let groupIndex = 0; groupIndex < groups.length; ++groupIndex) {
+    const group = groups[groupIndex];
 
     // create a new operation set in the project to collect all the operations together in LightBurn
     // that share the same group name
@@ -28,8 +28,12 @@ function groupsToProject() {
     const projOpSet = project.operationSets[project.operationSets.length - 1];
 
     // loop through all operations on this group
-    for (let o = 0; o < group.operations.length; ++o) {
-      const groupOperation = group.operations[o];
+    for (
+      let operationIndex = 0;
+      operationIndex < group.operations.length;
+      ++operationIndex
+    ) {
+      const groupOperation = group.operations[operationIndex];
 
       // if no points, skip this one
       if (groupOperation.paths.length == 0) continue;
@@ -195,32 +199,32 @@ function identifySegments(operation, cutSetting) {
 
         // look backwards in our current path segments and see if we can find this point connecting to another
         // point (and therefore closing a shape)
-        for (let i = startPathIndex; i < currentPathIndex; ++i) {
-          const priorPath = operation.paths[i];
+        for (let priorPathIndex = startPathIndex; priorPathIndex < currentPathIndex; ++priorPathIndex) {
+          const priorPath = operation.paths[priorPathIndex];
           if (currentPath.x == priorPath.x && currentPath.y == priorPath.y) {
             // we have a closure.  Do we have any prior points we need to break off?
-            if (startPathIndex != i) {
+            if (startPathIndex != priorPathIndex) {
               segments.push({
                 start: startPathIndex,
-                end: i,
+                end: priorPathIndex,
                 closed: false,
                 type: SEGMENT_TYPE_PATH,
               });
               writeComment(
                 'groupsToProject: Breaking off open segment (due to next closure): {start} to {end}',
-                { start: startPathIndex, end: i },
+                { start: startPathIndex, end: priorPathIndex },
                 COMMENT_INSANE
               );
             }
             segments.push({
-              start: i,
+              start: priorPathIndex,
               end: currentPathIndex,
               closed: true,
               type: SEGMENT_TYPE_PATH,
             });
             writeComment(
               'groupsToProject: Breaking off closed segment: {start} to {end}',
-              { start: i, end: currentPathIndex },
+              { start: priorPathIndex, end: currentPathIndex },
               COMMENT_INSANE
             );
 
@@ -251,9 +255,9 @@ function identifySegments(operation, cutSetting) {
 
   // dump the segments into insane comments
   writeComment('groupsToProject: Segmentation list:', {}, COMMENT_INSANE);
-  for (let i = 0; i < segments.length; ++i) {
+  for (let segmentIndex = 0; segmentIndex < segments.length; ++segmentIndex) {
     let type;
-    switch (segments[i].type) {
+    switch (segments[segmentIndex].type) {
       case SEGMENT_TYPE_CIRCLE:
         type = 'CIRCLE';
         break;
@@ -261,16 +265,16 @@ function identifySegments(operation, cutSetting) {
         type = 'PATH';
         break;
       default:
-        type = format('Unknown ({type})', { type: segments[i].type });
+        type = format('Unknown ({type})', { type: segments[segmentIndex].type });
         break;
     }
     writeComment(
       '  #{num}: {type} {start} to {end} ({openClosed})',
       {
-        num: i,
-        start: segments[i].start,
-        end: segments[i].end,
-        openClosed: segments[i].closed ? 'closed' : 'open',
+        num: segmentIndex,
+        start: segments[segmentIndex].start,
+        end: segments[segmentIndex].end,
+        openClosed: segments[segmentIndex].closed ? 'closed' : 'open',
         type: type,
       },
       COMMENT_INSANE
@@ -299,8 +303,8 @@ function generateShapesFromSegments(
 ) {
   // process all segments and convert them into shapes (vectors and primities), including conversion of
   // non-linear paths from circular (start/end/center points) to bezier (center point, with two control points)
-  for (let i = 0; i < segments.length; ++i) {
-    const segment = segments[i];
+  for (let segmentIndex = 0; segmentIndex < segments.length; ++segmentIndex) {
+    const segment = segments[segmentIndex];
 
     // create a new shape in our shape set for this operation (to organize the shapes together by operation)
     projOperation.shapeSets.push({
@@ -703,13 +707,14 @@ function circularToBezier(startPoint, endPoint, centerPoint, clockwise) {
  */
 function getGroupByName(groupName, defaults) {
   let group = undefined;
+
   if (groupName)
-    for (let l = 0; l < groups.length; ++l) {
+    for (let groupIndex = 0; groupIndex < groups.length; ++groupIndex) {
       if (
-        groups[l].groupName &&
-        groups[l].groupName.toLowerCase() == groupName.toLowerCase()
+        groups[groupIndex].groupName &&
+        groups[groupIndex].groupName.toLowerCase() == groupName.toLowerCase()
       ) {
-        group = groups[l];
+        group = groups[groupIndex];
         break;
       }
     }
@@ -739,8 +744,8 @@ function getGroupByName(groupName, defaults) {
  * @returns The cutSetting object from the project that matches the specs (creating one if a match isn't found)
  */
 function getCutSetting(cutSettingSpecs) {
-  for (let c = 0; c < project.cutSettings.length; ++c) {
-    const cutSetting = project.cutSettings[c];
+  for (let cutIndex = 0; cutIndex < project.cutSettings.length; ++cutIndex) {
+    const cutSetting = project.cutSettings[cutIndex];
     let matchFound = false;
 
     // look to see if we already have a matching cutsetting, based on the custom XML if provided,
@@ -773,6 +778,15 @@ function getCutSetting(cutSettingSpecs) {
 
       // combine operation names for the layer name
       cutSetting.name = cutSetting.operationNames.join(', ');
+
+      // move this layer to the end of the layer list, which helps to ensure the last cutting operation doesn't
+      // end up happening too early, as often that operation makes the material less stable
+      project.cutSettings.splice(cutIndex, 1);
+      project.cutSettings.push(cutSetting);
+      for (let newIndex = 0; newIndex < project.cutSettings.length; ++newIndex)
+        project.cutSettings[newIndex].index = newIndex;
+
+      // return the found setting
       return cutSetting;
     }
   }
@@ -806,7 +820,7 @@ function traceStockOutline() {
 
   // set up an operation to contain the stock outline
   const paths = [];
-currentGroup.operations.push({
+  currentGroup.operations.push({
     operationName: STOCK_GROUP_NAME,
     minPower: 100,
     maxPower: 100,

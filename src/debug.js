@@ -31,8 +31,8 @@ function dumpGroups() {
     { groupCount: groups.length },
     COMMENT_DEBUG
   );
-  for (let l = 0; l < groups.length; ++l) {
-    const group = groups[l];
+  for (let groupsIndex = 0; groupsIndex < groups.length; ++groupsIndex) {
+    const group = groups[groupsIndex];
 
     writeComment(
       '  Group "{name}" ({opCount} operations)',
@@ -42,8 +42,8 @@ function dumpGroups() {
       },
       COMMENT_DEBUG
     );
-    for (let o = 0; o < group.operations.length; ++o) {
-      const operation = group.operations[o];
+    for (let groupOperationsIndex = 0; groupOperationsIndex < group.operations.length; ++groupOperationsIndex) {
+      const operation = group.operations[groupOperationsIndex];
 
       writeComment(
         '    Operation "{name}" ({min}-{max}% power, power scale {powerScale}%, layer mode {layerMode} ({pathCount} paths)',
@@ -57,15 +57,15 @@ function dumpGroups() {
         },
         COMMENT_DEBUG
       );
-      for (let p = 0; p < operation.paths.length; ++p) {
-        const path = operation.paths[p];
+      for (let pathIndex = 0; pathIndex < operation.paths.length; ++pathIndex) {
+        const path = operation.paths[pathIndex];
 
         switch (path.type) {
           case PATH_TYPE_LINEAR:
             writeComment(
               '      Path #{pathId}: LINEAR [{x}, {y}] at {feed} mm/min',
               {
-                pathId: p,
+                pathId: pathIndex,
                 x: formatPosition.format(path.x),
                 y: formatPosition.format(path.y),
                 feed: formatSpeed.format(path.feed),
@@ -78,7 +78,7 @@ function dumpGroups() {
             writeComment(
               '      Path #{pathId}: {pathType} ({direction}) [{x}, {y}] centered on [{centerX}, {centerY}] at {feed} mm/min',
               {
-                pathId: p,
+                pathId: pathIndex,
                 pathType:
                   path.type == PATH_TYPE_SEMICIRCLE ? 'SEMI-CIRCLE' : 'CIRCLE',
                 centerX: formatPosition.format(path.centerX),
@@ -95,7 +95,7 @@ function dumpGroups() {
             writeComment(
               '      Path #{pathId}: MOVE [{x}, {y}]',
               {
-                pathId: p,
+                pathId: pathIndex,
                 x: formatPosition.format(path.x),
                 y: formatPosition.format(path.y),
                 feed: formatSpeed.format(path.feed),
@@ -124,13 +124,13 @@ function dumpProject() {
     COMMENT_DEBUG
   );
   writeComment('  Cut settings:', {}, COMMENT_DEBUG);
-  for (let c = 0; c < project.cutSettings.length; ++c) {
-    const cutSetting = project.cutSettings[c];
+  for (let cutSettingsIndex = 0; cutSettingsIndex < project.cutSettings.length; ++cutSettingsIndex) {
+    const cutSetting = project.cutSettings[cutSettingsIndex];
     if (cutSetting.customCutSettingXML)
       writeComment(
         '    #{id}: index={index}, priority={priority}, customCutSettingXML:\n{xml}',
         {
-          id: c,
+          id: cutSettingsIndex,
           index: cutSetting.index,
           priority: cutSetting.priority,
           xml: cutSetting.customCutSettingXML,
@@ -141,7 +141,7 @@ function dumpProject() {
       writeComment(
         '    #{id}: {minPower}-{maxPower}% power at {speed} mm/min, index={index}, priority={priority}, layerMode={layerMode}, laserEnable={laserEnable}',
         {
-          id: c,
+          id: cutSettingsIndex,
           index: cutSetting.index,
           priority: cutSetting.priority,
           minPower: cutSetting.minPower,
@@ -154,17 +154,17 @@ function dumpProject() {
       );
   }
 
-  for (let os = 0; os < project.operationSets.length; ++os) {
-    writeComment('  Operation group #{id}:', { id: os }, COMMENT_DEBUG);
-    for (let o = 0; o < project.operationSets[os].operations.length; ++o) {
-      writeComment('    Operation #{id}:', { id: o }, COMMENT_DEBUG);
+  for (let operationSetsIndex = 0; operationSetsIndex < project.operationSets.length; ++operationSetsIndex) {
+    writeComment('  Operation group #{id}:', { id: operationSetsIndex }, COMMENT_DEBUG);
+    for (let operationIndex = 0; operationIndex < project.operationSets[operationSetsIndex].operations.length; ++operationIndex) {
+      writeComment('    Operation #{id}:', { id: operationIndex }, COMMENT_DEBUG);
       writeComment('      Shape groups:', {}, COMMENT_DEBUG);
       for (
-        let ss = 0;
-        ss < project.operationSets[os].operations[o].shapeSets.length;
-        ++ss
+        let shapeSetIndex = 0;
+        shapeSetIndex < project.operationSets[operationSetsIndex].operations[operationIndex].shapeSets.length;
+        ++shapeSetIndex
       ) {
-        const shape = project.operationSets[os].operations[o].shapeSets[ss];
+        const shape = project.operationSets[operationSetsIndex].operations[operationIndex].shapeSets[shapeSetIndex];
 
         // dump the shape into insane comments
         writeComment(
@@ -188,25 +188,25 @@ function dumpProject() {
           );
         } else {
           writeComment('        Vector list:', {}, COMMENT_INSANE);
-          for (let i = 0; i < shape.vectors.length; ++i)
+          for (let shapeVectorIndex = 0; shapeVectorIndex < shape.vectors.length; ++shapeVectorIndex)
             writeComment(
               '        Vector #{id}: point=[{x}, {y}]{c0}{c1}',
               {
-                id: i,
-                x: formatPosition.format(shape.vectors[i].x),
-                y: formatPosition.format(shape.vectors[i].y),
+                id: shapeVectorIndex,
+                x: formatPosition.format(shape.vectors[shapeVectorIndex].x),
+                y: formatPosition.format(shape.vectors[shapeVectorIndex].y),
                 c0:
-                  shape.vectors[i].c0x !== undefined
+                  shape.vectors[shapeVectorIndex].c0x !== undefined
                     ? format('c0=[{x}, {y}]', {
-                        x: formatPosition.format(shape.vectors[i].c0x),
-                        y: formatPosition.format(shape.vectors[i].c0y),
+                        x: formatPosition.format(shape.vectors[shapeVectorIndex].c0x),
+                        y: formatPosition.format(shape.vectors[shapeVectorIndex].c0y),
                       })
                     : '',
                 c1:
-                  shape.vectors[i].c1x !== undefined
+                  shape.vectors[shapeVectorIndex].c1x !== undefined
                     ? format(', c1=[{x}, {y}]', {
-                        x: formatPosition.format(shape.vectors[i].c1x),
-                        y: formatPosition.format(shape.vectors[i].c1y),
+                        x: formatPosition.format(shape.vectors[shapeVectorIndex].c1x),
+                        y: formatPosition.format(shape.vectors[shapeVectorIndex].c1y),
                       })
                     : '',
               },
@@ -214,14 +214,14 @@ function dumpProject() {
             );
 
           writeComment('        Primitive list:', {}, COMMENT_INSANE);
-          for (let i = 0; i < shape.primitives.length; ++i)
+          for (let shapePrimitiveIndex = 0; shapePrimitiveIndex < shape.primitives.length; ++shapePrimitiveIndex)
             writeComment(
               '          Primitive #{id}: type={type}, start={start}, end={end}',
               {
-                id: i,
-                type: shape.primitives[i].type,
-                start: shape.primitives[i].start,
-                end: shape.primitives[i].end,
+                id: shapePrimitiveIndex,
+                type: shape.primitives[shapePrimitiveIndex].type,
+                start: shape.primitives[shapePrimitiveIndex].start,
+                end: shape.primitives[shapePrimitiveIndex].end,
               },
               COMMENT_INSANE
             );

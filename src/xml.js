@@ -76,7 +76,7 @@ function writeXMLClose() {
 function writeBlock() {
   const spaces = '                                        ';
   write(spaces.slice(0, xmlStack.length * 2));
-  for (let i = 0; i < arguments.length; ++i) write(arguments[i]);
+  for (let argumentsIndex = 0; argumentsIndex < arguments.length; ++argumentsIndex) write(arguments[argumentsIndex]);
   writeln('');
 }
 
@@ -221,10 +221,10 @@ function parseXML(xml) {
     // parse the attributes
     let match = xmlElement.match(/\w+\=\".*?\"/g);
     if (match !== null) {
-      for (let i = 0; i < match.length; i++) {
-        let index = match[i].indexOf('"');
-        let attrName = match[i].substring(0, index - 1);
-        let attrValue = match[i].substring(index + 1, match[i].length - 1);
+      for (let matchIndex = 0; matchIndex < match.length; matchIndex++) {
+        let index = match[matchIndex].indexOf('"');
+        let attrName = match[matchIndex].substring(0, index - 1);
+        let attrValue = match[matchIndex].substring(index + 1, match[matchIndex].length - 1);
         currentTagObject[attrName] = decodeXML(attrValue);
       }
     }

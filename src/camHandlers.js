@@ -111,8 +111,8 @@ function onOpen() {
   var tools = getToolTable();
   if (tools.getNumberOfTools() > 0) {
     writeComment(localize('Tools'));
-    for (var i = 0; i < tools.getNumberOfTools(); ++i) {
-      var tool = tools.getTool(i);
+    for (var toolIndex = 0; toolIndex < tools.getNumberOfTools(); ++toolIndex) {
+      var tool = tools.getTool(toolIndex);
       writeComment(
         '  ' +
           localize(
