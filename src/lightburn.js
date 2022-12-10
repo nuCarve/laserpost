@@ -310,6 +310,13 @@ function writeShapePath(shape) {
  * not near the top of the file.
  */
 function writeXMLHeader() {
+  // locate the first section and extract the stock origin information to define the LightBurn mirror X/Y header
+  const section = getSection(0);
+  const mirror = {
+    x: section.modelPlane.getElement(0, 0) != section.workPlane.getElement(0, 0),
+    y: section.modelPlane.getElement(1, 1) != section.workPlane.getElement(1, 1)
+  };
+
   writeln('<?xml version="1.0" encoding="UTF-8"?>');
   writeXML(
     'LightBurnProject',
@@ -317,8 +324,8 @@ function writeXMLHeader() {
       AppVersion: '1.2.04',
       FormatVersion: 0,
       MaterialHeight: 0,
-      MirrorX: false,
-      MirrorY: false,
+      MirrorX: mirror.x,
+      MirrorY: mirror.y,
     },
     true
   );
