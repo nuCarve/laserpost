@@ -165,7 +165,7 @@ function identifySegments(operation, cutSetting) {
             start: startPathIndex,
             end: currentPathIndex - 1,
             closed: false,
-            type: SEGMENT_TYPE_CIRCLE,
+            type: SEGMENT_TYPE_PATH,
           });
           writeComment(
             'groupsToProject: Breaking off open segment (due to next circle): {start} to {end}',
