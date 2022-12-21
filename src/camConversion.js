@@ -199,9 +199,18 @@ function identifySegments(operation, cutSetting) {
 
         // look backwards in our current path segments and see if we can find this point connecting to another
         // point (and therefore closing a shape)
-        for (let priorPathIndex = startPathIndex; priorPathIndex < currentPathIndex; ++priorPathIndex) {
+        for (
+          let priorPathIndex = startPathIndex;
+          priorPathIndex < currentPathIndex;
+          ++priorPathIndex
+        ) {
           const priorPath = operation.paths[priorPathIndex];
-          if (currentPath.x == priorPath.x && currentPath.y == priorPath.y) {
+
+          // if (currentPath.x == priorPath.x && currentPath.y == priorPath.y) {
+          if (
+            closeEquals(currentPath.x, priorPath.x) &&
+            closeEquals(currentPath.y, priorPath.y)
+          ) {
             // we have a closure.  Do we have any prior points we need to break off?
             if (startPathIndex != priorPathIndex) {
               segments.push({
@@ -265,7 +274,9 @@ function identifySegments(operation, cutSetting) {
         type = 'PATH';
         break;
       default:
-        type = format('Unknown ({type})', { type: segments[segmentIndex].type });
+        type = format('Unknown ({type})', {
+          type: segments[segmentIndex].type,
+        });
         break;
     }
     writeComment(
@@ -744,7 +755,11 @@ function getGroupByName(groupName, defaults) {
  * @returns The cutSetting object from the project that matches the specs (creating one if a match isn't found)
  */
 function getCutSetting(cutSettingSpecs) {
-  for (let cutSettingsIndex = 0; cutSettingsIndex < project.cutSettings.length; ++cutSettingsIndex) {
+  for (
+    let cutSettingsIndex = 0;
+    cutSettingsIndex < project.cutSettings.length;
+    ++cutSettingsIndex
+  ) {
     const cutSetting = project.cutSettings[cutSettingsIndex];
     let matchFound = false;
 
@@ -783,7 +798,11 @@ function getCutSetting(cutSettingSpecs) {
       // end up happening too early, as often that operation makes the material less stable
       project.cutSettings.splice(cutSettingsIndex, 1);
       project.cutSettings.push(cutSetting);
-      for (let newIndex = 0; newIndex < project.cutSettings.length; ++newIndex) {
+      for (
+        let newIndex = 0;
+        newIndex < project.cutSettings.length;
+        ++newIndex
+      ) {
         project.cutSettings[newIndex].index = newIndex;
         project.cutSettings[newIndex].priority = newIndex;
       }
@@ -870,4 +889,15 @@ function traceStockOutline() {
     y: stock.minY + workspaceOffsets.y,
     feed: STOCK_FEED_RATE,
   });
+}
+
+/**
+ * Compare two numbers to see if they are nearly equal, based on the accuracy defined by `accuracyInMM`
+ * 
+ * @param a First numeric value to compare
+ * @param b Second numeric value to compare
+ * @returns `true` if they are the same, within the accuracy defined by the global constant `accuracyInMM`
+ */
+function closeEquals(a, b) {
+  return Math.round(a / accuracyInMM) == Math.round(b / accuracyInMM);
 }
