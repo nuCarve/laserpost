@@ -261,12 +261,24 @@ function writeShapeElipse(shape) {
 }
 
 /**
- * Write a path (lines and beziers) to the LightBurn file
+ * Write a path (lines and beziers) to the LightBurn file.  Skips shapes that are not closed yet
+ * have been set up to use fill modes, as LightBurn won't render these.
  *
  * @param shape Shape information (cutSetting, vectors[], primitives[]) to write
  */
 function writeShapePath(shape) {
-  writeXML('Shape', { Type: 'Path', CutIndex: shape.cutSetting.index }, true);
+  // check if this shape uses a fill mode (any mode other than line), and also if the
+  // shape is not closed.  If so, drop the shape but add a comment to explain why (because LightBurn
+  // will not render unclosed shapes).  Almost always this is due to unnecessary extra lines, such
+  // as from complex SVG extrudes or lead-in/lead-out operations (for which using etch usually
+  // fixes this)
+  let commentOutShape = false;
+  if (shape.cutSetting.layerMode != LAYER_MODE_LINE && !shape.closed) {
+    writeComment('Removing shape as LightBurn generates warnings and removes unclosed fill shapes');
+    commentOutShape = true;
+  }
+
+  writeXML('Shape', { Type: 'Path', CutIndex: shape.cutSetting.index }, true, commentOutShape);
   writeXML('XForm', { content: '1 0 0 1 0 0' });
 
   // output the vectors

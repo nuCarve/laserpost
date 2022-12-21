@@ -19,12 +19,14 @@
  * @param tag Name of the tag
  * @param parameters Object containing key/value pairs for each parameter
  * @param leaveOpen Optional (default false) flag to specify to leave the tag open, pending a future call to `writeXMLClose`
+ * @param commentOut Optional (default false) flag to specify the tag should be commented out (`<!-- ... -->`)
  */
-function writeXML(tag, parameters, leaveOpen) {
+function writeXML(tag, parameters, leaveOpen, commentOut) {
   if (parameters === undefined) parameters = {};
   if (leaveOpen === undefined) leaveOpen = false;
+  if (commentOut === undefined) commentOut = false;
 
-  let xml = '<' + tag;
+  let xml = '<' + (commentOut ? '!-- ' : '') + tag;
   for (key in parameters) {
     if (
       (typeof parameters[key] === 'string' ||
@@ -45,12 +47,12 @@ function writeXML(tag, parameters, leaveOpen) {
     if (parameters.content) xml += encodeXML(parameters.content);
   } else {
     if (parameters.content)
-      xml += '>' + encodeXML(parameters.content) + '</' + tag + '>';
-    else xml += ' />';
+      xml += '>' + encodeXML(parameters.content) + '</' + tag + (commentOut ? ' --' : '') + '>';
+    else xml += ' ' + (commentOut ? '--' : '') + '/>';
   }
 
   writeBlock(xml);
-  if (leaveOpen) xmlStack.push(tag);
+  if (leaveOpen) xmlStack.push({ tag: tag, commentOut: commentOut });
 }
 
 /**
@@ -65,7 +67,9 @@ function writeXMLClose() {
     );
     return;
   }
-  writeBlock('</' + xmlStack.pop() + '>');
+  
+  const tag = xmlStack.pop();
+  writeBlock('</' + tag.tag + (tag.commentOut ? ' --' : '') + '>');
 }
 
 /**

@@ -326,7 +326,7 @@ function generateShapesFromSegments(
     // build out the shape
     switch (segment.type) {
       case SEGMENT_TYPE_CIRCLE:
-        // cirlces create LightBurn elipses (no vertex/primitive)
+        // circles create LightBurn elipses (no vertex/primitive)
         generateElipseShape(
           shape,
           operation,
@@ -389,6 +389,7 @@ function generateElipseShape(
   shape.centerY = center.y;
   shape.radius = radius;
   shape.powerScale = powerScale;
+  shape.closed = true;
 
   // debug info
   writeComment(
@@ -432,6 +433,7 @@ function generatePathShape(
   shape.vectors = [];
   shape.primitives = [];
   shape.powerScale = powerScale;
+  shape.closed = segmentClosed;
 
   // debug info
   writeComment(
