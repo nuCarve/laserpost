@@ -149,7 +149,7 @@ function identifySegments(operation, cutSetting) {
           });
 
           writeComment(
-            'groupsToProject: Breaking off open segment (due to move): {start} to {end}',
+            'identifySegments: Breaking off open segment (due to move): {start} to {end}',
             { start: startPathIndex, end: currentPathIndex - 1 },
             COMMENT_INSANE
           );
@@ -168,7 +168,7 @@ function identifySegments(operation, cutSetting) {
             type: SEGMENT_TYPE_PATH,
           });
           writeComment(
-            'groupsToProject: Breaking off open segment (due to next circle): {start} to {end}',
+            'identifySegments: Breaking off open segment (due to next circle): {start} to {end}',
             { start: startPathIndex, end: currentPathIndex - 1 },
             COMMENT_INSANE
           );
@@ -182,7 +182,7 @@ function identifySegments(operation, cutSetting) {
         });
 
         writeComment(
-          'groupsToProject: Breaking off closed segment (circle): {start} to {end}',
+          'identifySegments: Breaking off closed segment (circle): {start} to {end}',
           {
             start: currentPathIndex - 1,
             end: currentPathIndex,
@@ -211,7 +211,7 @@ function identifySegments(operation, cutSetting) {
                 type: SEGMENT_TYPE_PATH,
               });
               writeComment(
-                'groupsToProject: Breaking off open segment (due to next closure): {start} to {end}',
+                'identifySegments: Breaking off open segment (due to next closure): {start} to {end}',
                 { start: startPathIndex, end: priorPathIndex },
                 COMMENT_INSANE
               );
@@ -223,7 +223,7 @@ function identifySegments(operation, cutSetting) {
               type: SEGMENT_TYPE_PATH,
             });
             writeComment(
-              'groupsToProject: Breaking off closed segment: {start} to {end}',
+              'identifySegments: Breaking off closed segment: {start} to {end}',
               { start: priorPathIndex, end: currentPathIndex },
               COMMENT_INSANE
             );
@@ -247,14 +247,14 @@ function identifySegments(operation, cutSetting) {
       type: SEGMENT_TYPE_PATH,
     });
     writeComment(
-      'groupsToProject: Breaking off open segment (due to last segment): {start} to {end}',
+      'identifySegments: Breaking off open segment (due to last segment): {start} to {end}',
       { start: startPathIndex, end: operation.paths.length - 1 },
       COMMENT_INSANE
     );
   }
 
   // dump the segments into insane comments
-  writeComment('groupsToProject: Segmentation list:', {}, COMMENT_INSANE);
+  writeComment('identifySegments: Segmentation list:', {}, COMMENT_INSANE);
   for (let segmentIndex = 0; segmentIndex < segments.length; ++segmentIndex) {
     let type;
     switch (segments[segmentIndex].type) {
