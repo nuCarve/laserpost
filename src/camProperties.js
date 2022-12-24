@@ -248,7 +248,7 @@ properties = {
     title: localize('Air assist'),
     description: localize(
       'Sets if the layer uses air.  "Off" / "On" always set the air to the specified state, "Tool Assist Gas" will set the air off when ' +
-        'the tools "Cutting Data" (section "Process inputs") property "Assist gas" is "None" (or blank) and turn the air on for any other value.'
+        'the tools "Cutting Data" (section "Process inputs") property "Assist gas" is "None" (or "off" or blank) and turn the air on for any other value.'
     ),
     type: 'enum',
     values: [

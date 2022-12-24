@@ -209,7 +209,7 @@ function onSection() {
       useAir = true;
       break;
     case USE_AIR_ASSIST_GAS:
-      useAir = tool.assistGas.toLowerCase() != 'none' && tool.assistGas != '';
+      useAir = tool.assistGas.toLowerCase() != localize('none') && tool.assistGas.toLowerCase() != localize('off') && tool.assistGas != '';
       break;
   }
 
