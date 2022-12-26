@@ -82,7 +82,7 @@ function groupsToProject() {
       });
 
       // convert the group (paths) into segments (groups of shapes)
-      const segments = identifySegments(groupOperation, cutSetting);
+      const segments = identifySegments(groupOperation);
 
       // build out shapes for each segments
       generateShapesFromSegments(
@@ -106,15 +106,14 @@ function groupsToProject() {
  *
  * Paths from CAM sometimes have segments as lead-ins (for example, a through cut adds a short cut to ensure a full cut
  * at the start / end of the geometry), and so to make sure we can close shapes whenever possible (when end point of a cut
- * matches the start point of the geometry), we need to search across all the paths in the operation, and break them
+ * matches the start point of the geometry), we search across all the paths in the operation, and break them
  * into unique path sets - where each set is a contiguous path from start to end and broken out into a separate set whenever
  * the geometry can be closed (to define a fillable shape in LightBurn).
  *
  * @param operation Operation containing the path points
- * @param cutSetting The cutSetting to use with this operation
  * @returns Array of start/end indexes (of operation paths) and if the shape is closed ([{start, end, closed}])
  */
-function identifySegments(operation, cutSetting) {
+function identifySegments(operation) {
   const segments = [];
 
   // all operations must start with a PATH_TYPE_MOVE to set the starting position
@@ -123,60 +122,52 @@ function identifySegments(operation, cutSetting) {
     return [];
   }
 
-  // initialize our starting point in the segments list.  This is updated as we break off segments, so we can
-  // search backwards to find common points to close shapes
-  let startPathIndex = 0;
+  // two "passes": First we find operation defined segments (where a set of laser-on movements are grouped separated
+  // by laser-off periods, or where natural full ellipse segments exist).  Then, for non-ellipse segments, we
+  // then scan that area to see if we can find the largest closed segment available and break it out from any
+  // prior/ending non-closed segments.
+  let opSegmentStart = 0;
 
-  // walk all paths on this operation, skipping the first one (it was a MOVE)
   for (
-    let currentPathIndex = 1;
-    currentPathIndex < operation.paths.length;
-    ++currentPathIndex
+    let opSegmentIndex = 0;
+    opSegmentIndex <= operation.paths.length;
+    ++opSegmentIndex
   ) {
-    startPath = operation.paths[startPathIndex];
-    const currentPath = operation.paths[currentPathIndex];
+    // get a reference to the segment path, except if at the very end (past the last path segment) as we
+    // simulate a MOVE operation so we can see if there is anything to break off
+    const opSegmentPath =
+      opSegmentIndex < operation.paths.length
+        ? operation.paths[opSegmentIndex]
+        : { type: PATH_TYPE_MOVE };
 
-    switch (currentPath.type) {
-      case PATH_TYPE_MOVE:
-        // movement - check if we have any segments pending, and break them off if so
-        if (currentPathIndex - startPathIndex > 1) {
-          // break off the prior elements
+    if (
+      opSegmentPath.type == PATH_TYPE_MOVE ||
+      opSegmentPath.type == PATH_TYPE_CIRCLE
+    ) {
+      // we have a natural break from opSegmentStart thru (opSegmentIndex - 1)
+      if (opSegmentStart < opSegmentIndex) {
+        const independentSegments = scanSegmentForClosure(
+          opSegmentStart,
+          opSegmentIndex - 1,
+          operation
+        );
+
+        for (let indSegIndex = 0; indSegIndex < independentSegments.length; ++indSegIndex) {
+          const nextSegment = independentSegments[indSegIndex];
           segments.push({
-            start: startPathIndex,
-            end: currentPathIndex - 1,
-            closed: false,
+            start: nextSegment.start,
+            end: nextSegment.end,
+            closed: nextSegment.closed,
             type: SEGMENT_TYPE_PATH,
           });
+        }
+      }
 
-          writeComment(
-            'identifySegments: Breaking off open segment (due to move): {start} to {end}',
-            { start: startPathIndex, end: currentPathIndex - 1 },
-            COMMENT_INSANE
-          );
-        }
-        // set our new segments start point
-        startPathIndex = currentPathIndex;
-        break;
-      case PATH_TYPE_CIRCLE:
-        // circles are their own shapes, so if any paths are pending we need to break them off
-        if (currentPathIndex - startPathIndex > 1) {
-          // break off the prior elements
-          segments.push({
-            start: startPathIndex,
-            end: currentPathIndex - 1,
-            closed: false,
-            type: SEGMENT_TYPE_PATH,
-          });
-          writeComment(
-            'identifySegments: Breaking off open segment (due to next circle): {start} to {end}',
-            { start: startPathIndex, end: currentPathIndex - 1 },
-            COMMENT_INSANE
-          );
-        }
+      if (opSegmentPath.type == PATH_TYPE_CIRCLE) {
         // break off the circle itself
         segments.push({
-          start: currentPathIndex - 1,
-          end: currentPathIndex,
+          start: opSegmentIndex - 1,
+          end: opSegmentIndex,
           closed: true,
           type: SEGMENT_TYPE_CIRCLE,
         });
@@ -184,82 +175,17 @@ function identifySegments(operation, cutSetting) {
         writeComment(
           'identifySegments: Breaking off closed segment (circle): {start} to {end}',
           {
-            start: currentPathIndex - 1,
-            end: currentPathIndex,
+            start: opSegmentIndex - 1,
+            end: opSegmentIndex,
           },
           COMMENT_INSANE
         );
 
-        // set our new segments start point
-        startPathIndex = currentPathIndex;
-        break;
-      case PATH_TYPE_LINEAR:
-      case PATH_TYPE_SEMICIRCLE:
-        // we treat linear and semicircle the same, as they both convert into vertex/primitive shapes
+      }
 
-        // look backwards in our current path segments and see if we can find this point connecting to another
-        // point (and therefore closing a shape)
-        for (
-          let priorPathIndex = startPathIndex;
-          priorPathIndex < currentPathIndex;
-          ++priorPathIndex
-        ) {
-          const priorPath = operation.paths[priorPathIndex];
-
-          // if (currentPath.x == priorPath.x && currentPath.y == priorPath.y) {
-          if (
-            closeEquals(currentPath.x, priorPath.x) &&
-            closeEquals(currentPath.y, priorPath.y)
-          ) {
-            // we have a closure.  Do we have any prior points we need to break off?
-            if (startPathIndex != priorPathIndex) {
-              segments.push({
-                start: startPathIndex,
-                end: priorPathIndex,
-                closed: false,
-                type: SEGMENT_TYPE_PATH,
-              });
-              writeComment(
-                'identifySegments: Breaking off open segment (due to next closure): {start} to {end}',
-                { start: startPathIndex, end: priorPathIndex },
-                COMMENT_INSANE
-              );
-            }
-            segments.push({
-              start: priorPathIndex,
-              end: currentPathIndex,
-              closed: true,
-              type: SEGMENT_TYPE_PATH,
-            });
-            writeComment(
-              'identifySegments: Breaking off closed segment: {start} to {end}',
-              { start: priorPathIndex, end: currentPathIndex },
-              COMMENT_INSANE
-            );
-
-            // set our new segments start point
-            startPathIndex = currentPathIndex;
-            break;
-          }
-        }
-        break;
+      // set segment start to this segment
+      opSegmentStart = opSegmentIndex;
     }
-  }
-
-  // done processing all paths, but we may have some path components remaining to break off
-  // (comparing the last start position against total length of the path list)
-  if (startPathIndex != operation.paths.length - 1) {
-    segments.push({
-      start: startPathIndex,
-      end: operation.paths.length - 1,
-      closed: false,
-      type: SEGMENT_TYPE_PATH,
-    });
-    writeComment(
-      'identifySegments: Breaking off open segment (due to last segment): {start} to {end}',
-      { start: startPathIndex, end: operation.paths.length - 1 },
-      COMMENT_INSANE
-    );
   }
 
   // dump the segments into insane comments
@@ -293,6 +219,89 @@ function identifySegments(operation, cutSetting) {
   }
 
   return segments;
+}
+
+
+/**
+ * Scans a segment (of paths) to find the largest closure (if any).  Returns an array of segmentations, which
+ * may be a single element array if no closures found (or a single perfect closure), and could contain as much
+ * as three elements - one for a non-closed starting segment, one for a closed segment, and one for the non-closed
+ * ending segment.
+ * 
+ * @param startIndex Starting index within the operation to scan
+ * @param endIndex Ending index within the operation to scan
+ * @param operation Operation entry with all paths
+ * @returns Array containing the object {start, end, closed}
+ */
+function scanSegmentForClosure(startIndex, endIndex, operation) {
+  // scan this natural operation segment to see if we can find a closure, using points from the end of the
+  // segment and comparing them to the start of the segment and close out way inwards.  This helps to break
+  // off any lead-in/lead-outs while finding the largest shape closure we can
+  for (let endScanIndex = endIndex; endScanIndex > startIndex; --endScanIndex) {
+    const endSegmentPath = operation.paths[endScanIndex];
+
+    // now scan from start and come forwards looking for a closure
+    for (
+      let startScanIndex = startIndex;
+      startScanIndex < endScanIndex;
+      ++startScanIndex
+    ) {
+      const startSegmentPath = operation.paths[startScanIndex];
+
+      // do an approximate comparison to see if we have a closure
+      if (
+        closeEquals(startSegmentPath.x, endSegmentPath.x) &&
+        closeEquals(startSegmentPath.y, endSegmentPath.y)
+      ) {
+        // closure found, so break this operation apart
+        const result = [];
+
+        // break off prior if available
+        if (startScanIndex > startIndex) {
+          result.push({
+            start: startIndex,
+            end: startScanIndex,
+            closed: false,
+          });
+          writeComment(
+            'scanSegmentForClosure: Break off open segment (before closure): {start} to {end}',
+            { start: startIndex, end: startScanIndex },
+            COMMENT_INSANE
+          );
+        }
+
+        // break off this closed segment
+        result.push({ start: startScanIndex, end: endScanIndex, closed: true });
+        writeComment(
+          'scanSegmentForClosure: Break off closed segment: {start} to {end}',
+          { start: startScanIndex, end: endScanIndex },
+          COMMENT_INSANE
+        );
+
+        // break off trailing if available
+        if (endScanIndex < endIndex) {
+          result.push({
+            start: endScanIndex,
+            end: endIndex,
+            closed: false,
+          });
+          writeComment(
+            'scanSegmentForClosure: Break off open segment (after closure): {start} to {end}',
+            { start: endScanIndex, end: endIndex },
+            COMMENT_INSANE
+          );
+        }
+        return result;
+      }
+    }
+  }
+  // none found
+  writeComment(
+    'scanSegmentForClosure: Fully open segment: {start} to {end}',
+    { start: startIndex, end: endIndex },
+    COMMENT_INSANE
+  );
+  return [{ start: startIndex, end: endIndex, closed: false }];
 }
 
 /**
@@ -895,11 +904,12 @@ function traceStockOutline() {
 
 /**
  * Compare two numbers to see if they are nearly equal, based on the accuracy defined by `accuracyInMM`
- * 
+ *
  * @param a First numeric value to compare
  * @param b Second numeric value to compare
  * @returns `true` if they are the same, within the accuracy defined by the global constant `accuracyInMM`
  */
 function closeEquals(a, b) {
-  return Math.round(a / accuracyInMM) == Math.round(b / accuracyInMM);
+  return Math.abs(a - b) <= accuracyInMM;
+  // return Math.round(a / accuracyInMM) == Math.round(b / accuracyInMM);
 }

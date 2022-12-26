@@ -82,7 +82,7 @@ const UPDATE_FREQUENCY_DAILY = 'daily';
 const UPDATE_FREQUENCY_WEEKLY = 'weekly';
 const UPDATE_FREQUENCY_MONTHLY = 'monthly';
 
-// accuracy of units from CAM to determine if a segment is closed or not
+// accuracy of units from CAM to determine if a segment is closed or connected
 const accuracyInMM = .01;
 
 // Map of characters and symbols for XML encoding/decoding
