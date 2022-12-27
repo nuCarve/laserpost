@@ -215,7 +215,7 @@ properties = {
     scope: 'machine',
   },
   machine0300AutomaticUpdate: {
-    title: localize('Automatic update'),
+    title: localize('Check for updates'),
     description: localize(
       'Set how often LaserPost should check and notify that updates are available.'
     ),
@@ -228,7 +228,7 @@ properties = {
       { title: localize('Weekly'), id: UPDATE_FREQUENCY_WEEKLY },
       { title: localize('Monthly'), id: UPDATE_FREQUENCY_MONTHLY },
     ],
-    value: UPDATE_FREQUENCY_HOURLY, // todo: change to DAILY when at RC/STABLE
+    value: UPDATE_FREQUENCY_DAILY,
     scope: 'machine',
   },
   machine0400UpdateAllowBeta: {
@@ -237,7 +237,7 @@ properties = {
       'Enable to allow beta releases, disable for stable releases only.'
     ),
     type: 'boolean',
-    value: true, // todo: change to false when at RC/STABLE
+    value: false,
     scope: 'machine',
   },
 
