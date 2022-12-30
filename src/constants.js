@@ -5,6 +5,7 @@
  * Constants used internally by the post-processor
  *
  *************************************************************************************/
+
 // define enum for comment detail levels
 const INCLUDE_COMMENTS_NONE = 'none';
 const INCLUDE_COMMENTS_NORMAL = 'normal';
@@ -68,8 +69,8 @@ const USE_AIR_ASSIST_GAS = 'gas';
 const STOCK_GROUP_NAME = 'Stock trace outline';
 const STOCK_FEED_RATE = 6000;
 
-// name of the state storage file
-const STATE_FILENAME = 'laserpost.xml';
+// extension name of the state storage file
+const STATE_EXTENSION = 'xml';
 
 // time to wait on retry of version update checks when the API fails to respond
 const RETRY_VERSION_CHECK_ON_FAILURE_TIME_MS = 60 * 60 * 1000;

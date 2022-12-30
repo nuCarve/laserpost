@@ -5,6 +5,7 @@
  * Global variables used internally by the post-processor
  *
  *************************************************************************************/
+
 let xmlStack = []; // stack containing all currently open (nested) XML tags in output generation
 let includeComments = INCLUDE_COMMENTS_NORMAL; // comment level to include in lbrn file - set from preferences
 let includeNotes = INCLUDE_NOTES_SHOW_IMPORTANT; // notes level to include in lbrn file - set from preferences
@@ -13,8 +14,8 @@ let notesImportant = false; // true when notes contain something "important" (su
 let currentGroup = undefined; // tracks the current group in use, set in `onSection`.
 let currentPower = undefined; // track if the laser is powered on, used to understand CAM movements vs. cuts
 let workspaceOffsets = { x: 0, y: 0 }; // offsets the geometry in the workspace based on preferences
-let activeState = undefined; // current state that will be persisted to the STATE_FILENAME when done
-let origState = undefined; // original state loaded from STATE_FILENAME and should not be changed
+let activeState = undefined; // current state that will be persisted to the state file when done
+let origState = undefined; // original state loaded from state file and should not be changed
 
 // groups is an array of CAM positions, organized by groupings (default is one per operation, but the user
 // can specify shared group names to combine operations into grouped collections).  In general, data is
