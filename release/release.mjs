@@ -42,7 +42,6 @@ import fsp from 'node:fs/promises';
 import fs from 'node:fs';
 import path from 'node:path';
 import * as url from 'node:url';
-import { EOL } from 'node:os';
 
 // array of source files to merge, in order
 const sourceFiles = [
@@ -210,10 +209,10 @@ function processMacros(source, macros) {
  * @param path Path to write to
  */
 function writeSource(source, path) {
-  const output = fs.createWriteStream(releaseFilePath);
+  const output = fs.createWriteStream(path);
   for (const line of source)
     if (line !== undefined)
-      output.write(line + EOL);
+      output.write(line + '\n');
   output.end();
 }
 
