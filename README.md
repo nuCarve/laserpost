@@ -28,20 +28,24 @@ Use the [GitHub issue tracker](https://github.com/nuCarve/laserpost/issues) to s
 
 ## Building
 
-To build LaserPost, you will need [`nodejs`](https://nodejs.org/en/) installed.  No external packages are used, so NPM is not required.
+To build LaserPost, you will need [`nodejs`](https://nodejs.org/en/) installed (must be >= node 18.11.0).  No external packages are used, so NPM is not required.
 
-From the root directory in the project, issue the command:
+The command line accepts arguments that specify macro names used for conditionally building the different versions
+of LaserPost (so the source can be easily shared across targets).  You must specify at least one macro, which currently
+are `lbrn` and `svg`.  
+
+For example, to build for LightFrom, from the root directory in the project, issue the command:
 
 ```sh
-node release/release.mjs
+node release/release.mjs lbrn
 ```
 
-This will pull all the various `js` files together into a single `release/dist/laserpost.cps` file, as well as apply the version number that is defined in the `version.json` file.  
+This will pull all the various `js` files together into a single `release/dist/laserpost-lbrn.cps` file, as well as apply the version number that is defined in the `version.json` file.  
 
-Since Fusion 360 needs the post located in a specific directory, you can also specify a path to a file to store a duplicate of the generated file, such as:
+Since Fusion 360 needs the post located in a specific directory, you can also specify a path to the directory to store a duplicate of the generated file using the `-f <path>` option, such as:
 
 ```sh
-node release/release.mjs "C:\Users\myname\AppData\Local\Autodesk\Autodesk Fusion 360\32TABC6DD2N8Q\W.login\M\D23203423432806\CAMPosts\laserpost.cps"
+node release/release.mjs svg -f="C:\Users\myname\AppData\Local\Autodesk\Autodesk Fusion 360\32TABC6DD2N8Q\W.login\M\D23203423432806\CAMPosts"
 ```
 
 ## License
