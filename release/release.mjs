@@ -45,19 +45,20 @@ import * as url from 'node:url';
 
 // array of source files to merge, in order
 const sourceFiles = [
-  'laserpost.js',
-  'constants.js',
-  'globals.js',
-  'formatters.js',
-  'camProperties.js',
-  'camHandlers.js',
-  'camConversion.js',
-  'lightburn.js',
-  'updates.js',
-  'xml.js',
-  'xmlState.js',
-  'debug.js',
-  'arcToBezier.js',
+  { file: 'laserpost.js', macro: undefined },
+  { file: 'constants.js', macro: undefined },
+  { file: 'globals.js', macro: undefined },
+  { file: 'formatters.js', macro: undefined },
+  { file: 'camProperties.js', macro: undefined },
+  { file: 'camHandlers.js', macro: undefined },
+  { file: 'camConversion.js', macro: undefined },
+  { file: 'lightburn.js', macro: 'LBRN' },
+  { file: 'svg.js', macro: 'SVG' },
+  { file: 'updates.js', macro: undefined },
+  { file: 'xml.js', macro: undefined },
+  { file: 'xmlState.js', macro: undefined },
+  { file: 'debug.js', macro: undefined },
+  { file: 'arcToBezier.js', macro: undefined },
 ];
 
 // determine the directory that holds the release project
@@ -70,6 +71,20 @@ const releaseFilePath = path.resolve(distPath, 'laserpost.cps');
 const versionFile = path.resolve(releasePath, 'version.json');
 // unique tag in files to substitute with the version number
 const VERSION_TAG = /0.0.0-version/g;
+
+/**
+ * Searches all macros for a specified named macro.
+ *
+ * @param macros Array of macros
+ * @param name Macro to locate
+ * @returns Macro object found, or undefined if not located
+ */
+function findMacro(macros, name) {
+  for (const macro of macros) {
+    if (macro.name.toUpperCase() == name.toUpperCase()) return macro;
+    return undefined;
+  }
+}
 
 /**
  * Handle processing of macros in the source file.  Macros are:
@@ -117,13 +132,8 @@ function processMacros(source, macros) {
             activeMacros.length == 0 ||
             activeMacros[activeMacros.length - 1].include
           ) {
-            let macroInclude = false;
-            for (const macro of macros) {
-              if (macro.name == macroName.toUpperCase()) {
-                macroInclude = true;
-                break;
-              }
-            }
+            let macroInclude = findMacro(macros, macroName) !== undefined;
+
             // save this macro with state based on if it is known or not
             activeMacros.push({
               name: macroName,
@@ -177,7 +187,6 @@ function processMacros(source, macros) {
       }
       // mark this specific line for removal
       removeLine = true;
-
     }
 
     // remove this line if not allowed (or this line is marked for removal)
@@ -204,15 +213,13 @@ function processMacros(source, macros) {
 
 /**
  * Writes the source array (of source lines) to the specified file path, overwriting any file there.
- * 
+ *
  * @param source Array of strings to write, ignoring any undefined entry
  * @param path Path to write to
  */
 function writeSource(source, path) {
   const output = fs.createWriteStream(path);
-  for (const line of source)
-    if (line !== undefined)
-      output.write(line + '\n');
+  for (const line of source) if (line !== undefined) output.write(line + '\n');
   output.end();
 }
 
@@ -230,14 +237,19 @@ async function release(macros, duplicatePath) {
   let releaseSource = [];
   for (let sourceFile of sourceFiles) {
     let lastLineIsBlank = false;
-    const file = await fsp.open(path.resolve(sourcePath, sourceFile));
+    // does this file require a macro to be included?
+    if (sourceFile.macro !== undefined) {
+      if (!findMacro(macros, sourceFile.macro)) continue;
+    }
+
+    // read in all lines from the file
+    const file = await fsp.open(path.resolve(sourcePath, sourceFile.file));
     for await (const line of file.readLines()) {
       releaseSource.push(line);
-      lastLineIsBlank = (line.trim() == '');
+      lastLineIsBlank = line.trim() == '';
     }
     // add a blank line if missing from last line of source
-    if (!lastLineIsBlank)
-      releaseSource.push('');
+    if (!lastLineIsBlank) releaseSource.push('');
   }
 
   // add the version to our macros
