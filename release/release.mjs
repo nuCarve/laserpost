@@ -144,9 +144,6 @@ function processMacros(source, macros) {
           }
           // our parent disabled us, so always disable this macro
           else {
-            console.log(
-              'parent disabled: ' + activeMacros[activeMacros.length - 1].name
-            );
             activeMacros.push({
               name: macroName,
               include: false,
@@ -172,7 +169,8 @@ function processMacros(source, macros) {
           activeMacros[activeMacros.length - 1].primary = false;
           if (!activeMacros[activeMacros.length - 1].parentDisabled)
             activeMacros[activeMacros.length - 1].include =
-              !activeMacros[activeMacros.length - 1];
+              !activeMacros[activeMacros.length - 1].include
+
           // disabled by parent
           else activeMacros[activeMacros.length - 1].include = false;
           break;
