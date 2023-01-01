@@ -6,9 +6,8 @@
  *
  *************************************************************************************/
 
-// path "d" tag as it is built up from shapes
-let svgPath = "";
-let svgPathCutIndex = undefined;
+// shared object to track the in-progress path
+let activePath;
 
 /**
  * Write the generic SVG file header
@@ -51,20 +50,19 @@ function writeHeader() {
   writeCommentAndNote(codeMoreInformation);
   writeCommentAndNote('');
 
-  writeXML(
-    'g',
-    {
-      id: 'flip-x',
-      transform$origin: mmFormat(maxX/2) + " " + mmFormat(maxY/2),
-      transform: 'scale(-1, 1)',
-    },
-    true
-  );
-  writeXML('title', { content: 'Title test' });
-  writeXML('desc', { content: 'desc test' });
+  // writeXML(
+  //   'g',
+  //   {
+  //     id: 'flip-x',
+  //     transform$origin: mmFormat(maxX/2) + " " + mmFormat(maxY/2),
+  //     transform: 'scale(-1, 1)',
+  //   },
+  //   true
+  // );
+  // writeXML('title', { content: 'Title test' });
+  // writeXML('desc', { content: 'desc test' });
 
-  svgPath = "";
-  svgPathCutIndex = undefined;
+  activePath = { path: "" };
   /*
   // add LightBurn CutSettings
   writeCutSettings();
@@ -124,8 +122,12 @@ function writeShapes() {
       ) {
         const shape = operation.shapeSets[shapeSetsIndex];
 
+        // set the name and id for the path
+        activePath.name = operation.operationName;
+        activePath.id = 1;
+
         // write the shape, based on it's type
-        if (shape.type == SHAPE_TYPE_ELIPSE) writeShapeElipse(shape);
+        if (shape.type == SHAPE_TYPE_ELLIPSE) writeShapeEllipse(shape);
         else writeShapePath(shape);
       }
       closeShapePath();
@@ -170,7 +172,7 @@ function writeTrailer() {
     // });
   }
 
-  writeXMLClose();
+  // writeXMLClose();
   writeXMLClose();
 }
 
@@ -344,11 +346,11 @@ function writeCutSettings() {
 }
 
 /**
- * Write an elipse (a closed circle) to the LightBurn file
+ * Write an ellipse (a closed circle) to the LightBurn file
  *
  * @param shape Shape information (cutSetting, radius, centerX, centerY) to write
  */
-function writeShapeElipse(shape) {
+function writeShapeEllipse(shape) {
   // // close out any partially completed shape
   // closeShapePath();
   // // generate the ellipse
@@ -365,14 +367,17 @@ function writeShapeElipse(shape) {
   // );
 
   // if different layer specs are used, close the shape and save the new layer index
-  if (shape.cutSetting.index != svgPathCutIndex) {
+  if (shape.cutSetting.index != activePath.cutIndex) {
     closeShapePath();
-    svgPathCutIndex = shape.cutSetting.index;
+    activePath.cutIndex = shape.cutSetting.index;
   }
 
+  // transform our coordinates
+  const start = transform({ x: shape.centerX + shape.radius, y: shape.centerY });
+
   // construct the ellipse using two have arcs
-  svgPath += (svgPath == "" ? "" : " ") +
-    'M ' + mmFormat(shape.centerX - shape.radius) + ',' + mmFormat(shape.centerY) +
+  activePath.path += (activePath.path == "" ? "" : " ") +
+    'M ' + mmFormat(start.x) + ',' + mmFormat(start.y) +
     ' a ' + mmFormat(shape.radius) + ',' + mmFormat(shape.radius) + " 0 1,0 " + mmFormat(shape.radius * 2) + ',0' +
     ' a ' + mmFormat(shape.radius) + ',' + mmFormat(shape.radius) + " 0 1,0 " + mmFormat(-shape.radius * 2) + ',0'
   
@@ -386,9 +391,9 @@ function writeShapeElipse(shape) {
  */
 function writeShapePath(shape) {
   // if different layer specs are used, close the shape and save the new layer index
-  if (shape.cutSetting.index != svgPathCutIndex) {
+  if (shape.cutSetting.index != activePath.cutIndex) {
     closeShapePath();
-    svgPathCutIndex = shape.cutSetting.index;
+    activePath.cutIndex = shape.cutSetting.index;
   }
 
   // check if this shape uses a fill mode (any mode other than line), and also if the
@@ -396,7 +401,7 @@ function writeShapePath(shape) {
   // will not render unclosed shapes).  Almost always this is due to unnecessary extra lines, such
   // as from complex SVG extrudes or lead-in/lead-out operations (for which using etch usually
   // fixes this)
-  let commentOutShape = false;
+  // let commentOutShape = false;
   // todo: decide if this logic is useful in SVG or not...
   // if (shape.cutSetting.layerMode != LAYER_MODE_LINE && !shape.closed) {
   //   writeComment(
@@ -405,38 +410,37 @@ function writeShapePath(shape) {
   //   commentOutShape = true;
   // }
 
+  // transform our start coordinate
+  const start = transform(shape.vectors[0]);
+
   // walk all primtives to build up an SVG path string
-  svgPath += (svgPath == "" ? "" : " ") +
-    'M ' + mmFormat(shape.vectors[0].x) + ',' + mmFormat(shape.vectors[0].y);
+  activePath.path += (activePath.path == "" ? "" : " ") +
+    'M ' + mmFormat(start.x) + ',' + mmFormat(start.y);
   for (
     let shapePrimitiveIndex = 0;
     shapePrimitiveIndex < shape.primitives.length;
     ++shapePrimitiveIndex
   ) {
     const primitive = shape.primitives[shapePrimitiveIndex];
-    const endXY = shape.vectors[primitive.end];
+    const endXY = transform(shape.vectors[primitive.end]);
 
     if (primitive.type == PRIMITIVE_TYPE_LINE)
-      svgPath += ' L ' + mmFormat(endXY.x) + ',' + mmFormat(endXY.y);
+      activePath.path += ' L ' + mmFormat(endXY.x) + ',' + mmFormat(endXY.y);
     else {
+      const startXY = transform(shape.vectors[primitive.start]);
+      const c0 = transform({ x: shape.vectors[primitive.start].c0x, y: shape.vectors[primitive.start].c0y });
+      const c1 = transform({ x: shape.vectors[primitive.end].c1x, y: shape.vectors[primitive.end].c1y});
+
       const bezier1 = {
-        x: shape.vectors[primitive.start].c0x
-          ? shape.vectors[primitive.start].c0x
-          : shape.vectors[primitive.start].x,
-        y: shape.vectors[primitive.start].c0y
-          ? shape.vectors[primitive.start].c0y
-          : shape.vectors[primitive.start].y,
+        x: c0.x ? c0.x : startXY.x,
+        y: c0.y ? c0.y : startXY.y,
       };
       const bezier2 = {
-        x: shape.vectors[primitive.end].c1x
-          ? shape.vectors[primitive.end].c1x
-          : shape.vectors[primitive.end].x,
-        y: shape.vectors[primitive.end].c1y
-          ? shape.vectors[primitive.end].c1y
-          : shape.vectors[primitive.end].y,
+        x: c1.x ? c1.x : endXY.x,
+        y: c1.y ? c1.y : endXY.y
       };
 
-      svgPath +=
+      activePath.path +=
         ' C ' +
         mmFormat(bezier1.x) +
         ',' +
@@ -454,21 +458,23 @@ function writeShapePath(shape) {
 }
 
 /**
- * Path shape properties are enqueued in the `svgPath` global so that we can generate them as a single path
+ * Path shape properties are enqueued in the `activePath` global so that we can generate them as a single path
  * element, allowing for improved fill-modes to handle details such as interior shapes on letters.  The actual
  * writing of the path element is done here, if any path is pending.
  */
 function closeShapePath() {
-  if (svgPath != "") {
+  if (activePath.path != "") {
     // get our layer cut settings
-    const cutSetting = project.cutSettings[svgPathCutIndex];
+    const cutSetting = project.cutSettings[activePath.cutIndex];
+    
 
     if (cutSetting.layerMode == LAYER_MODE_LINE)
-      writeXML('path', { d: svgPath, stroke: 'blue', stroke$width: '1px', fill: 'none' });
+      writeXML('path', { id: activePath.name + "-" + activePath.id, d: activePath.path, stroke: 'blue', stroke$width: '1px', fill: 'none' });
     else
-      writeXML('path', { d: svgPath, stroke: 'none', fill: 'yellow', fill$mode: 'evenodd' });
+      writeXML('path', { id: activePath.name + "-" + activePath.id, d: activePath.path, stroke: 'none', fill: 'yellow', fill$mode: 'evenodd' });
+    activePath.id++;
 
-    svgPath = "";
+    activePath.path = "";
   }
 }
 
@@ -484,4 +490,21 @@ function closeShapePath() {
  */
 function mmFormat(mm) {
   return formatPosition.format(mm * 3.779527559);
+}
+
+/**
+ * Perform transformation of coordinates to flip the coordinate space so the SVG file is correctly rendered.  This
+ * could have been done using the svg transform w/scale(-1, 1), but not all laser programs correctly handle the
+ * translation (I'm looking at you, LaserWeb)
+ * 
+ * @param xy Object with `x` and `y` properties to translate
+ * returns Object with same properties, but now translated
+ */
+function transform(xy) {
+  // let minX = getGlobalParameter('stock-lower-x');
+  // let minY = getGlobalParameter('stock-lower-y');
+  let maxX = getGlobalParameter('stock-upper-x');
+  // let maxY = getGlobalParameter('stock-upper-y');
+
+  return { x: maxX - xy.x, y: xy.y }
 }

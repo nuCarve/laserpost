@@ -45,7 +45,7 @@ const SPEED_UNITS_MMPS = 'mmps';
 const SPEED_UNITS_MMPM = 'mmpm';
 
 // LightBurn shape types
-const SHAPE_TYPE_ELIPSE = 'elipse';
+const SHAPE_TYPE_ELLIPSE = 'ellipse';
 const SHAPE_TYPE_PATH = 'path';
 const SHAPE_TYPE_GROUP = 'group';
 

@@ -119,7 +119,7 @@ function writeShapes() {
         const shape = operation.shapeSets[shapeSetsIndex];
 
         // write the shape, based on it's type
-        if (shape.type == SHAPE_TYPE_ELIPSE) writeShapeElipse(shape);
+        if (shape.type == SHAPE_TYPE_ELLIPSE) writeShapeEllipse(shape);
         else writeShapePath(shape);
       }
 
@@ -337,11 +337,11 @@ function writeCutSettings() {
 }
 
 /**
- * Write an elipse (a closed circle) to the LightBurn file
+ * Write an ellipse (a closed circle) to the LightBurn file
  *
  * @param shape Shape information (cutSetting, radius, centerX, centerY) to write
  */
-function writeShapeElipse(shape) {
+function writeShapeEllipse(shape) {
   writeXML(
     'Shape',
     {

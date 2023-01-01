@@ -335,8 +335,8 @@ function generateShapesFromSegments(
     // build out the shape
     switch (segment.type) {
       case SEGMENT_TYPE_CIRCLE:
-        // circles create LightBurn elipses (no vertex/primitive)
-        generateElipseShape(
+        // circles create LightBurn ellipses (no vertex/primitive)
+        generateEllipseShape(
           shape,
           operation,
           segment.start,
@@ -359,18 +359,18 @@ function generateShapesFromSegments(
 }
 
 /**
- * Generates a LightBurn Elipse, from a full circle CAM operation
+ * Generates a LightBurn Ellipse, from a full circle CAM operation
  *
  * Converts the CAM style path (start xy and center xy) into LightBurn style
- * elipse of center xy and radius.
+ * ellipse of center xy and radius.
  *
- * @param shape Shape object to complete with the elipse information
+ * @param shape Shape object to complete with the ellipse information
  * @param operation Path data for all shapes within this operation
  * @param segmentStart Index into operation to the circle that starts this position
  * @param segmentEnd Index into operation to the circle that defines the shape
  * @param powerScale Power scale to use for this shape
  */
-function generateElipseShape(
+function generateEllipseShape(
   shape,
   operation,
   segmentStart,
@@ -393,7 +393,7 @@ function generateElipseShape(
   const radius = Math.sqrt(deltaX * deltaX + deltaY * deltaY);
 
   // add the shape
-  shape.type = SHAPE_TYPE_ELIPSE;
+  shape.type = SHAPE_TYPE_ELLIPSE;
   shape.centerX = center.x;
   shape.centerY = center.y;
   shape.radius = radius;
@@ -402,7 +402,7 @@ function generateElipseShape(
 
   // debug info
   writeComment(
-    'generateElipseShape: converting to circle on segments {segmentStart}-{segmentEnd}: [{startX}, {startY}] center [{centerX}, {centerY}] with radius {radius}',
+    'generateEllipseShape: converting to circle on segments {segmentStart}-{segmentEnd}: [{startX}, {startY}] center [{centerX}, {centerY}] with radius {radius}',
     {
       startX: formatPosition.format(start.x),
       startY: formatPosition.format(start.y),

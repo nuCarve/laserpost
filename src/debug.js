@@ -171,7 +171,7 @@ function dumpProject() {
           },
           COMMENT_DEBUG
         );
-        if (shape.type == SHAPE_TYPE_ELIPSE) {
+        if (shape.type == SHAPE_TYPE_ELLIPSE) {
           writeComment(
             '          Circle center=[{centerX}, {centerY}], radius={radius}',
             {
