@@ -97,3 +97,29 @@ const xmlEncodeMap = {
   '\n': '&#xA;',
   '\r': '&#xD;',
 };
+
+// #if SVG
+// map of colors to localized names and hex value
+const layerColorMap = { 
+  black: { name: localize("Black"), hex: "000000" },
+  green: { name: localize("Green"), hex: "178837" },
+  blue: { name: localize("Blue"), hex: "2b63a3" },
+  maroon: { name: localize("Maroon"), hex: "991209" },
+  magenta: { name: localize("Magenta"), hex: "01484" },
+  orange: { name: localize("Orange"), hex: "f39915" },
+  red: { name: localize("Red"), hex: "#f7130d" },
+  gold: { name: localize("Gold"), hex: "facc14" },
+};
+
+// ordered color table - colors for layers are selected in this order
+const layerColors = [
+  "black",
+  "green",
+  "blue",
+  "maroon",
+  "magenta",
+  "orange",
+  "red",
+  "gold",
+]
+// #endif

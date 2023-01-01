@@ -43,12 +43,12 @@ function writeHeader() {
   );
   writeXML('desc', { content: generatedBy });
   writeln('');
-  writeCommentAndNote(localize('Post processor: {description} ({version})'), {
-    description: description,
-    version: semVer,
-  });
-  writeCommentAndNote(codeMoreInformation);
-  writeCommentAndNote('');
+  // writeCommentAndNote(localize('Post processor: {description} ({version})'), {
+  //   description: description,
+  //   version: semVer,
+  // });
+  // writeCommentAndNote(codeMoreInformation);
+  // writeCommentAndNote('');
 
   // writeXML(
   //   'g',
@@ -62,7 +62,7 @@ function writeHeader() {
   // writeXML('title', { content: 'Title test' });
   // writeXML('desc', { content: 'desc test' });
 
-  activePath = { path: "" };
+  activePath = { path: '' };
   /*
   // add LightBurn CutSettings
   writeCutSettings();
@@ -87,9 +87,8 @@ function writeShapes() {
       writeComment(localize('Group: "{name}"'), { group: opGroup.groupName });
 
       writeXML('g', { id: opGroup.groupName }, true);
-      writeXML('title', { content: 'Title test in group operations' });
-      writeXML('desc', { content: 'desc test in group operations' });
-        }
+      writeXML('desc', { content: localize('Group: "{name}", { group: opGroup.groupName ')});
+    }
 
     // process all operations within the group
     for (
@@ -109,9 +108,9 @@ function writeShapes() {
         getProperty('lightburn0600GroupShapes')
       ) {
         writeXML('g', { id: operation.operationName }, true);
-        writeXML('title', { content: 'Title test in operation shapes' });
-        writeXML('desc', { content: 'desc test in operation shapes' });
-      
+        writeXML('desc', { content: format(localize('Operation: {name}'), {
+          name: operation.operationName,
+        })});
       }
 
       // loop through all shapes within this operation
@@ -373,14 +372,32 @@ function writeShapeEllipse(shape) {
   }
 
   // transform our coordinates
-  const start = transform({ x: shape.centerX + shape.radius, y: shape.centerY });
+  const start = transform({
+    x: shape.centerX + shape.radius,
+    y: shape.centerY,
+  });
 
   // construct the ellipse using two have arcs
-  activePath.path += (activePath.path == "" ? "" : " ") +
-    'M ' + mmFormat(start.x) + ',' + mmFormat(start.y) +
-    ' a ' + mmFormat(shape.radius) + ',' + mmFormat(shape.radius) + " 0 1,0 " + mmFormat(shape.radius * 2) + ',0' +
-    ' a ' + mmFormat(shape.radius) + ',' + mmFormat(shape.radius) + " 0 1,0 " + mmFormat(-shape.radius * 2) + ',0'
-  
+  activePath.path +=
+    (activePath.path == '' ? '' : ' ') +
+    'M ' +
+    mmFormat(start.x) +
+    ',' +
+    mmFormat(start.y) +
+    ' a ' +
+    mmFormat(shape.radius) +
+    ',' +
+    mmFormat(shape.radius) +
+    ' 0 1,0 ' +
+    mmFormat(shape.radius * 2) +
+    ',0' +
+    ' a ' +
+    mmFormat(shape.radius) +
+    ',' +
+    mmFormat(shape.radius) +
+    ' 0 1,0 ' +
+    mmFormat(-shape.radius * 2) +
+    ',0';
 }
 
 /**
@@ -414,8 +431,12 @@ function writeShapePath(shape) {
   const start = transform(shape.vectors[0]);
 
   // walk all primtives to build up an SVG path string
-  activePath.path += (activePath.path == "" ? "" : " ") +
-    'M ' + mmFormat(start.x) + ',' + mmFormat(start.y);
+  activePath.path +=
+    (activePath.path == '' ? '' : ' ') +
+    'M ' +
+    mmFormat(start.x) +
+    ',' +
+    mmFormat(start.y);
   for (
     let shapePrimitiveIndex = 0;
     shapePrimitiveIndex < shape.primitives.length;
@@ -428,8 +449,14 @@ function writeShapePath(shape) {
       activePath.path += ' L ' + mmFormat(endXY.x) + ',' + mmFormat(endXY.y);
     else {
       const startXY = transform(shape.vectors[primitive.start]);
-      const c0 = transform({ x: shape.vectors[primitive.start].c0x, y: shape.vectors[primitive.start].c0y });
-      const c1 = transform({ x: shape.vectors[primitive.end].c1x, y: shape.vectors[primitive.end].c1y});
+      const c0 = transform({
+        x: shape.vectors[primitive.start].c0x,
+        y: shape.vectors[primitive.start].c0y,
+      });
+      const c1 = transform({
+        x: shape.vectors[primitive.end].c1x,
+        y: shape.vectors[primitive.end].c1y,
+      });
 
       const bezier1 = {
         x: c0.x ? c0.x : startXY.x,
@@ -437,7 +464,7 @@ function writeShapePath(shape) {
       };
       const bezier2 = {
         x: c1.x ? c1.x : endXY.x,
-        y: c1.y ? c1.y : endXY.y
+        y: c1.y ? c1.y : endXY.y,
       };
 
       activePath.path +=
@@ -463,19 +490,41 @@ function writeShapePath(shape) {
  * writing of the path element is done here, if any path is pending.
  */
 function closeShapePath() {
-  if (activePath.path != "") {
+  if (activePath.path != '') {
     // get our layer cut settings
     const cutSetting = project.cutSettings[activePath.cutIndex];
-    
 
     if (cutSetting.layerMode == LAYER_MODE_LINE)
-      writeXML('path', { id: activePath.name + "-" + activePath.id, d: activePath.path, stroke: 'blue', stroke$width: '1px', fill: 'none' });
+      writeXML('path', {
+        id: activePath.name + '-' + activePath.id,
+        d: activePath.path,
+        stroke: cutIndexToRGBColor(activePath.cutIndex),
+        stroke$width: '1px',
+        fill: 'none',
+      });
     else
-      writeXML('path', { id: activePath.name + "-" + activePath.id, d: activePath.path, stroke: 'none', fill: 'yellow', fill$mode: 'evenodd' });
+      writeXML('path', {
+        id: activePath.name + '-' + activePath.id,
+        d: activePath.path,
+        stroke: cutSetting.layerMode == LAYER_MODE_FILL ? 'none' : cutIndexToRGBColor(activePath.cutIndex),
+        fill: cutIndexToRGBColor(activePath.cutIndex),
+        fill$mode: 'evenodd',
+      });
     activePath.id++;
 
-    activePath.path = "";
+    activePath.path = '';
   }
+}
+
+/**
+ * Converts a cut index (layer number) to an RGB color string, such as '#123456'.  If the cut index exceeds the
+ * total number of known colors, the last color is reused.
+ * 
+ * @param cutIndex Cut index (layer number) to convert to an RGB color
+ * @returns RGB color including '#' prefix (such as '#123456')
+ */
+function cutIndexToRGBColor(cutIndex) {
+  return '#' + layerColorMap[layerColors[Math.min(cutIndex, layerColors.length - 1)]].hex;
 }
 
 /**
@@ -496,7 +545,7 @@ function mmFormat(mm) {
  * Perform transformation of coordinates to flip the coordinate space so the SVG file is correctly rendered.  This
  * could have been done using the svg transform w/scale(-1, 1), but not all laser programs correctly handle the
  * translation (I'm looking at you, LaserWeb)
- * 
+ *
  * @param xy Object with `x` and `y` properties to translate
  * returns Object with same properties, but now translated
  */
@@ -506,5 +555,5 @@ function transform(xy) {
   let maxX = getGlobalParameter('stock-upper-x');
   // let maxY = getGlobalParameter('stock-upper-y');
 
-  return { x: maxX - xy.x, y: xy.y }
+  return { x: maxX - xy.x, y: xy.y };
 }
