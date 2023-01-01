@@ -273,6 +273,7 @@ function onSection() {
       powerSource: powerSource,
       customCutSettingXML: customCutSettingXML,
       customCutSetting: parsedXML,
+      kerf: tool.getKerfWidth(),
       paths: [],
     });
   } else {
@@ -288,6 +289,7 @@ function onSection() {
       zOffset: zOffset,
       passes: passes,
       zStep: zStep,
+      kerf: tool.getKerfWidth(),
       customCutSettingXML: '',
       paths: [],
     });

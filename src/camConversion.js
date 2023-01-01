@@ -77,6 +77,7 @@ function groupsToProject() {
         zOffset: groupOperation.zOffset,
         passes: groupOperation.passes,
         zStep: groupOperation.zStep,
+        kerf: groupOperation.kerf,
         customCutSettingXML: groupOperation.customCutSettingXML,
         customCutSetting: groupOperation.customCutSetting,
       });
@@ -866,6 +867,7 @@ function traceStockOutline() {
     powerScale: 100,
     powerSource: localize('stock dimensions'),
     customCutSettingXML: '',
+    kerf: 0.1,
     paths: paths,
   });
 

@@ -63,10 +63,6 @@ function writeHeader() {
   // writeXML('desc', { content: 'desc test' });
 
   activePath = { path: '' };
-  /*
-  // add LightBurn CutSettings
-  writeCutSettings();
-  */
 }
 
 /**
@@ -151,24 +147,40 @@ function writeShapes() {
 }
 
 /**
- * Writes the LightBurn (.lbrn) trailer information, including optionally adding notes and
- * closing off the LightBurnProject section opened in `writeHeader`.
+ * Writes the SVG trailer information, including optionally adding notes and
+ * closing off the XML opened in `writeHeader`.
  *
  * Notes are injected (if requested in post preferences by the user) using the `notes` variable.
  */
 function writeTrailer() {
   if (includeNotes != INCLUDE_NOTES_NONE && notes != '') {
-    // determine if we cause LightBurn to show notes on file load
-    let showOnLoad = false;
+    // determine if we should tell the user via a warning dialog that the notes are available
+    let showNotesWarning = false;
     if (includeNotes == INCLUDE_NOTES_SHOW_IMPORTANT)
-      showOnLoad = notesImportant;
-    else if (includeNotes == INCLUDE_NOTES_SHOW) showOnLoad = true;
+      showNotesWarning = notesImportant;
+    else if (includeNotes == INCLUDE_NOTES_SHOW) showNotesWarning = true;
 
-    // todo: implement notes
-    // writeXML('Notes', {
-    //   ShowOnLoad: showOnLoad ? 1 : 0,
-    //   Notes: notes,
-    // });
+    // add layer properties to notes
+    writeCutSettings();
+
+    // write notes to the <programName>-notes.txt file (we could write to svg using <text>, but
+    // many laser programs either render these poorly or fail to load them at all)
+    // todo: adjusting "show on load" (etc) naming, and remove "hidden" (for SVG)
+    // todo: Consider changing default for show to always for svg only
+    // todo: Move show notes out of machine and onto post
+    // todo: See if we can get tool and cut setting name for improved description ("MDF 3mm cut")
+    var path = FileSystem.getCombinedPath(FileSystem.getFolderPath(getOutputPath()), programName + "-notes.txt");
+    redirectToFile(path);
+    writeln(notes);
+    closeRedirection();
+
+    // tell the user if they requested it
+    if (showNotesWarning)
+      if (notesImportant)
+        showWarning(localize("There are important notes available from the post, please see:\n\n{path}"), { path: path });
+      else
+        showWarning(localize("Layer setup notes have been generated in the file:\n\n{path}"), { path: path });
+
   }
 
   // writeXMLClose();
@@ -212,8 +224,7 @@ function writeCommentLine(text) {
 }
 
 /**
- * Adds the <CutSetting> tags for all LightBurn layers as well as update notes to describe
- * the layers
+ * Adds the CutSettings (layer) information to the notes.
  */
 function writeCutSettings() {
   writeNote('');
@@ -226,8 +237,9 @@ function writeCutSettings() {
   ) {
     const cutSetting = project.cutSettings[cutSettingsIndex];
 
-    writeNote('  ' + localize('{layer}: {name}'), {
-      layer: formatLeadingZero.format(cutSetting.index),
+    writeNote('  ' + localize('Layer {layer} ({color}): {name}'), {
+      layer: cutSetting.index,
+      color: cutIndexToColorName(cutSetting.index),
       name: cutSetting.name,
     });
 
@@ -235,9 +247,10 @@ function writeCutSettings() {
       writeNote(
         '    ' + localize('Settings overridden with custom CutSetting property')
       );
+      // todo: remove all CutSetting stuff from SVG
       writeComment(
         localize(
-          'CutSetting {layer}: Settings overridden with custom CutSetting property'
+          'Layer {layer}: Settings overridden with custom CutSetting property'
         ),
         {
           layer: formatLeadingZero.format(cutSetting.index),
@@ -274,9 +287,10 @@ function writeCutSettings() {
       }
       // format for comments
       writeComment(
-        'CutSetting (layer) {id}: power {min}-{max}% at {speed} using {lasers} (air {air}, Z offset {zOffset}, passes {passes}, z step {zStep}) [inherited from {source}]',
+        'Layer {id} ({color}): power {min}-{max}% at {speed} using {lasers} (air {air}, Z offset {zOffset}, passes {passes}, z step {zStep}) [inherited from {source}]',
         {
-          id: formatLeadingZero.format(cutSetting.index),
+          id: cutSetting.index,
+          color: cutIndexToColorName(cutSetting.index),
           min: cutSetting.minPower,
           max: cutSetting.maxPower,
           source: cutSetting.powerSource,
@@ -289,57 +303,6 @@ function writeCutSettings() {
         },
         COMMENT_DETAIL
       );
-    }
-
-    // if not custom, generate the cut setting
-    if (!cutSetting.customCutSetting) {
-      // determine our cut setting type
-      let types = {};
-      types[LAYER_MODE_LINE] = 'Cut';
-      types[LAYER_MODE_FILL] = 'Scan';
-      types[LAYER_MODE_OFFSET_FILL] = 'Offset';
-
-      writeXML('CutSetting', { type: types[cutSetting.layerMode] }, true);
-
-      writeXML('index', { Value: cutSetting.index });
-      writeXML('name', { Value: cutSetting.name });
-      writeXML('minPower', { Value: cutSetting.minPower });
-      writeXML('maxPower', { Value: cutSetting.maxPower });
-      writeXML('minPower2', { Value: cutSetting.minPower });
-      writeXML('maxPower2', { Value: cutSetting.maxPower });
-      writeXML('speed', { Value: formatSpeed.format(cutSetting.speed) });
-      writeXML('priority', { Value: cutSetting.priority });
-      writeXML('runBlower', { Value: cutSetting.useAir ? 1 : 0 });
-      writeXML('zOffset', { Value: cutSetting.zOffset });
-      writeXML('numPasses', { Value: cutSetting.passes });
-      writeXML('zPerPass', { Value: cutSetting.zStep });
-
-      // write the settings for select select and output enable/disable
-      switch (cutSetting.laserEnable) {
-        case LASER_ENABLE_OFF:
-          writeXML('doOutput', { Value: '0' });
-          break;
-        case LASER_ENABLE_1:
-          writeXML('enableLaser1', { Value: '1' });
-          writeXML('enableLaser2', { Value: '0' });
-          break;
-        case LASER_ENABLE_2:
-          writeXML('enableLaser1', { Value: '0' });
-          writeXML('enableLaser2', { Value: '1' });
-          break;
-        case LASER_ENABLE_BOTH:
-          writeXML('enableLaser1', { Value: '1' });
-          writeXML('enableLaser2', { Value: '1' });
-          break;
-      }
-      writeXMLClose();
-    } else {
-      // adjust the properties that we must override on custom
-      const custom = cutSetting.customCutSetting.CutSetting;
-      custom.index = { Value: cutSetting.index };
-      custom.priority = { Value: cutSetting.priority };
-      custom.name = { Value: cutSetting.name };
-      writeXMLObject('CutSetting', custom);
     }
   }
 }
@@ -499,7 +462,7 @@ function closeShapePath() {
         id: activePath.name + '-' + activePath.id,
         d: activePath.path,
         stroke: cutIndexToRGBColor(activePath.cutIndex),
-        stroke$width: '1px',
+        stroke$width: mmFormat(cutSetting.kerf),
         fill: 'none',
       });
     else
@@ -525,6 +488,17 @@ function closeShapePath() {
  */
 function cutIndexToRGBColor(cutIndex) {
   return '#' + layerColorMap[layerColors[Math.min(cutIndex, layerColors.length - 1)]].hex;
+}
+
+/**
+ * Converts a cut index (layer number) to the color name, such as 'orange'.  If the cut index exceeds the
+ * total number of known colors, the last color is reused.
+ * 
+ * @param cutIndex Cut index (layer number) to convert to a color name
+ * @returns Name of the color for the layer (localized)
+ */
+function cutIndexToColorName(cutIndex) {
+  return layerColorMap[layerColors[Math.min(cutIndex, layerColors.length - 1)]].name;
 }
 
 /**
