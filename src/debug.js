@@ -192,18 +192,18 @@ function dumpProject() {
                 y: formatPosition.format(shape.vectors[shapeVectorIndex].y),
                 c0:
                   shape.vectors[shapeVectorIndex].c0x !== undefined
-                    ? format('c0=[{x}, {y}]', {
+                    ? format(' c0=[{x}, {y}]', {
                         x: formatPosition.format(shape.vectors[shapeVectorIndex].c0x),
                         y: formatPosition.format(shape.vectors[shapeVectorIndex].c0y),
                       })
-                    : '',
+                    : ' c0=n/a',
                 c1:
                   shape.vectors[shapeVectorIndex].c1x !== undefined
                     ? format(', c1=[{x}, {y}]', {
                         x: formatPosition.format(shape.vectors[shapeVectorIndex].c1x),
                         y: formatPosition.format(shape.vectors[shapeVectorIndex].c1y),
                       })
-                    : '',
+                    : ' c1=n/a',
               },
               COMMENT_INSANE
             );

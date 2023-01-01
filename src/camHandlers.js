@@ -24,8 +24,8 @@ function onOpen() {
     y: getProperty('work0300OffsetX'),
   };
 
-  // emit the the required XML header
-  writeXMLHeader();
+  // emit the the required file header
+  writeFileHeader();
 
   // if we have a program name/comment, add it to the file as comments and in notes
   if (programName || programComment) {
@@ -502,7 +502,6 @@ function onClose() {
 
   // render the file
   writeHeader();
-  writeCutSettings();
   writeShapes();
   writeTrailer();
 
