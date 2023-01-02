@@ -347,20 +347,22 @@ function writeShapeEllipse(shape) {
     mmFormat(start.x) +
     ',' +
     mmFormat(start.y) +
-    ' a ' +
+    ' A ' +
     mmFormat(shape.radius) +
     ',' +
     mmFormat(shape.radius) +
-    ' 0 1,0 ' +
-    mmFormat(shape.radius * 2) +
-    ',0' +
-    ' a ' +
+    ' 0 0 1 ' +
+    mmFormat(start.x + shape.radius * 2) +
+    ',' +
+    mmFormat(start.y) +
+    ' A ' +
     mmFormat(shape.radius) +
     ',' +
     mmFormat(shape.radius) +
-    ' 0 1,0 ' +
-    mmFormat(-shape.radius * 2) +
-    ',0';
+    ' 0 0 1 ' +
+    mmFormat(start.x) +
+    ',' +
+    mmFormat(start.y);
 }
 
 /**
