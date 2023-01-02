@@ -15,89 +15,172 @@
  * in the `project` array.
  */
 function groupsToProject() {
-  // loop through all groups
-  for (let groupIndex = 0; groupIndex < groups.length; ++groupIndex) {
-    const group = groups[groupIndex];
+  /*
+    todo: New strategy:
+    - if group-by-layers, create top level layers for each layer
+    - if not group-by-layers, create single layer with index of -1
+    - [layer top has link to the CutSetting object, or cut index?]
+    - Loop all top level layers, call layerToProject(index...)
+    - Port the code below to layerToProject and test on index -1=all, else must match
+    - Change generation and debug code to handle new top-level layers
+    - Figure out how to handle comments and notes based on these new layer-based rules
+  */
 
-    // create a new operation set in the project to collect all the operations together in LightBurn
-    // that share the same group name
-    project.operationSets.push({
-      groupName: group.groupName,
-      operations: [],
-    });
-    const projOpSet = project.operationSets[project.operationSets.length - 1];
+  // process all groups and build out the unique layers that are used
+  createLayers();
 
-    // loop through all operations on this group
-    for (
-      let operationIndex = 0;
-      operationIndex < group.operations.length;
-      ++operationIndex
-    ) {
-      const groupOperation = group.operations[operationIndex];
+  // construct all top-level layers
+  createProjectLayers();
 
-      // if no points, skip this one
-      if (groupOperation.paths.length == 0) continue;
-
-      // set up a project operation inside the project set (each operation is grouped to make managing them in LightBurn easier)
-      const index = projOpSet.operations.push({
-        shapeSets: [],
-        operationName: groupOperation.operationName,
-      });
-      const projOperation = projOpSet.operations[index - 1];
-
-      // determine the feedrate to use.  CAM specifies feedrate at the operation level, but only delivers it
-      // during individual movements.  Technically three feedrates are available - cutting, lead-in and lead-out.
-      // Eventually we may build out a unique layer for each speed, but for now we just use the cutting speed.
-      // To find the cutting speed, we pull the value from the interior of the path, as lead-in and lead-out are
-      // always out the "outside" edges. We also scan until we find a value as we may have a MOVE path type which
-      // might not have a feedrate
-      let feedrate = 0;
-      for (
-        pathIndex = Math.floor(groupOperation.paths.length / 2);
-        pathIndex < groupOperation.paths.length;
-        ++pathIndex
-      ) {
-        if (groupOperation.paths[pathIndex].feed > 0) {
-          feedrate = groupOperation.paths[pathIndex].feed;
-          break;
-        }
-      }
-
-      // find (or create) a layer (<CutSetting>) for this operation (all shapes within
-      // a CAM operation share the same cut setting)
-      const cutSetting = getCutSetting({
-        name: groupOperation.operationName,
-        minPower: groupOperation.minPower,
-        maxPower: groupOperation.maxPower,
-        speed: feedrate / 60, // LightBurn is mm/sec, CAM is mm/min
-        layerMode: groupOperation.layerMode,
-        laserEnable: groupOperation.laserEnable,
-        powerSource: groupOperation.powerSource,
-        useAir: groupOperation.useAir,
-        zOffset: groupOperation.zOffset,
-        passes: groupOperation.passes,
-        zStep: groupOperation.zStep,
-        kerf: groupOperation.kerf,
-        powerScale: groupOperation.powerScale,
-        customCutSettingXML: groupOperation.customCutSettingXML,
-        customCutSetting: groupOperation.customCutSetting,
-      });
-
-      // convert the group (paths) into segments (groups of shapes)
-      const segments = identifySegments(groupOperation);
-
-      // build out shapes for each segments
-      generateShapesFromSegments(
-        groupOperation,
-        segments,
-        cutSetting,
-        projOperation
-      );
-    }
-  }
+  // add operations to the top-level layer grouping
+  populateProjectLayers();
 
   // dump the project to comments to assist with debugging problems
   dumpProject();
+}
+
+/**
+ * Scan all groups and build out the list of unique layers in use, including setting the index for the 
+ * layer (cutSetting) on the operations in the project.
+ */
+function createLayers() {
+    // loop through all groups
+    for (let groupIndex = 0; groupIndex < groups.length; ++groupIndex) {
+      const group = groups[groupIndex];
+      // loop through all operations on this group
+      for (
+        let operationIndex = 0;
+        operationIndex < group.operations.length;
+        ++operationIndex
+      ) {
+        const groupOperation = group.operations[operationIndex];
+        // if no points, skip this one
+        if (groupOperation.paths.length == 0) continue;
+
+        // determine the feedrate to use.  CAM specifies feedrate at the operation level, but only delivers it
+        // during individual movements.  Technically three feedrates are available - cutting, lead-in and lead-out.
+        // Eventually we may build out a unique layer for each speed, but for now we just use the cutting speed.
+        // To find the cutting speed, we pull the value from the interior of the path, as lead-in and lead-out are
+        // always out the "outside" edges. We also scan until we find a value as we may have a MOVE path type which
+        // might not have a feedrate
+        let feedrate = 0;
+        for (
+          pathIndex = Math.floor(groupOperation.paths.length / 2);
+          pathIndex < groupOperation.paths.length;
+          ++pathIndex
+        ) {
+          if (groupOperation.paths[pathIndex].feed > 0) {
+            feedrate = groupOperation.paths[pathIndex].feed;
+            break;
+          }
+        }
+
+        // find (or create) a layer (<CutSetting>) for this operation (all shapes within
+        // a CAM operation share the same cut setting)
+        const cutSetting = getCutSetting({
+          name: groupOperation.operationName,
+          minPower: groupOperation.minPower,
+          maxPower: groupOperation.maxPower,
+          speed: feedrate / 60, // LightBurn is mm/sec, CAM is mm/min
+          layerMode: groupOperation.layerMode,
+          laserEnable: groupOperation.laserEnable,
+          powerSource: groupOperation.powerSource,
+          useAir: groupOperation.useAir,
+          zOffset: groupOperation.zOffset,
+          passes: groupOperation.passes,
+          zStep: groupOperation.zStep,
+          kerf: groupOperation.kerf,
+          powerScale: groupOperation.powerScale,
+          customCutSettingXML: groupOperation.customCutSettingXML,
+          customCutSetting: groupOperation.customCutSetting,
+        });
+
+        // add the reference to this cutSetting layer to the operation
+        groupOperation.index = cutSetting.index;
+      }
+    }  
+}
+
+/**
+ * Creates the top-level project layers, which then will (eventually) contain all operation sets
+ * either organized by layer (when grouping by layer), or lumped into a single layer (when not grouping by layer)
+ */
+function createProjectLayers() {
+  // determine if we are grouping by layer or by operation
+  const groupByLayer = getProperty('lightburn0500Grouping') == GROUPING_BY_LAYER ||
+  getProperty('lightburn0500Grouping') == GROUPING_BY_LAYER_FILE;
+
+  // build up the project layers
+  project.layers = [];
+    if (groupByLayer) {
+      for (let layerIndex = 0; layerIndex < project.cutSettings.length; ++layerIndex) {
+        const cutSetting = project.cutSettings[layerIndex];
+
+        project.layers.push({ name: cutSetting.name, index: layerIndex, operationSets: []});
+    }
+  } else 
+    project.layers.push({ name: localize("All layers"), index: -1, operationSets: [] });
+}
+
+/**
+ * Processes all groups and populates the layers with the operations and shapes for each layer (or if
+ * layers are not being grouped, populates them all into the shared top-level layer)
+ */
+function populateProjectLayers() {
+  // loop through all top-level layers
+  for (let layerIndex = 0; layerIndex < project.layers.length; ++layerIndex) {
+    const layer = project.layers[layerIndex];
+
+    // loop through all groups
+    for (let groupIndex = 0; groupIndex < groups.length; ++groupIndex) {
+      let projOpSet = undefined;
+      const group = groups[groupIndex];
+
+      // loop through all operations on this group
+      for (
+        let operationIndex = 0;
+        operationIndex < group.operations.length;
+        ++operationIndex
+      ) {
+        const groupOperation = group.operations[operationIndex];
+  
+        // if no points, skip this one
+        if (groupOperation.paths.length == 0) continue;
+
+        // is this operation to be included in our layer?
+        if (layer.index !== -1 && layer.index != groupOperation.index)
+          continue; 
+  
+        // set up our operation set if not already done for this group
+        if (projOpSet === undefined) {
+          // create a new operation set in the layer to collect all the operations together
+          // that share the same group name
+          layer.operationSets.push({
+            groupName: group.groupName,
+            operations: [],
+          });
+          projOpSet = layer.operationSets[layer.operationSets.length - 1];
+        }
+
+        // set up a operation inside the layer (each operation is grouped to make managing them easier)
+        const index = projOpSet.operations.push({
+          shapeSets: [],
+          operationName: groupOperation.operationName,
+        });
+        const projOperation = projOpSet.operations[index - 1];
+  
+        // convert the group (paths) into segments (groups of shapes)
+        const segments = identifySegments(groupOperation);
+  
+        // build out shapes for each segments
+        generateShapesFromSegments(
+          groupOperation,
+          segments,
+          projOperation
+        );
+      }
+    }
+  }
 }
 
 /**
@@ -314,13 +397,11 @@ function scanSegmentForClosure(startIndex, endIndex, operation) {
  *
  * @param operation The CAM operation, where the path metrics can be found
  * @param segments The segmentation index of each shape (which references operation for the metrics)
- * @param cutSetting The cutSettings (aka LightBurn layer) that will be used for these shapes
  * @param projOperation The project operation object, where the resolved shapes are added for grouping
  */
 function generateShapesFromSegments(
   operation,
   segments,
-  cutSetting,
   projOperation
 ) {
   // process all segments and convert them into shapes (vectors and primities), including conversion of
@@ -330,7 +411,7 @@ function generateShapesFromSegments(
 
     // create a new shape in our shape set for this operation (to organize the shapes together by operation)
     projOperation.shapeSets.push({
-      cutSetting: cutSetting,
+      cutSetting: project.cutSettings[operation.index]
     });
     const shape = projOperation.shapeSets[projOperation.shapeSets.length - 1];
 

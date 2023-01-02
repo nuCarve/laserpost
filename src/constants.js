@@ -13,6 +13,11 @@ const INCLUDE_COMMENTS_DETAILED = 'detail';
 const INCLUDE_COMMENTS_DEBUG = 'debug';
 const INCLUDE_COMMENTS_INSANE = 'insane';
 
+// operation/layer grouping
+const GROUPING_BY_OPERATION = 'group-operation';
+const GROUPING_BY_LAYER = 'group-layer';
+const GROUPING_BY_LAYER_FILE = 'file-layer';
+
 // define enum for notes include level
 const INCLUDE_NOTES_NONE = 'none';
 const INCLUDE_NOTES_HIDDEN = 'hidden';

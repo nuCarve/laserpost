@@ -69,84 +69,103 @@ function writeHeader() {
  * Writes the shapes (<Shape>) to the SVG file, including grouping as necessary
  */
 function writeShapes() {
-  // process all operation groups.  These are groups of operations and generate a grouping for
-  // LightBurn when there is more than one operation in the group (when the group name property has
-  // been used by the user)
-  for (let setIndex = 0; setIndex < project.operationSets.length; ++setIndex) {
-    const opGroup = project.operationSets[setIndex];
+  // process all layers, potentially breaking them out into different files
+  for (let projLayerIndex = 0; projLayerIndex < project.layers.length; ++projLayerIndex) {
+    const projLayer = project.layers[projLayerIndex];
 
-    // do we have more than one operation in this group?  If so, and enabled, go ahead and group it
-    if (
-      opGroup.operations.length > 1 &&
-      getProperty('lightburn0500GroupOperations')
-    ) {
-      writeComment(localize('Group: "{name}"'), { group: opGroup.groupName });
+    // create a group if there is more than one item in the layer and we are grouping by layer
+    if (projLayer.operationSets.length > 1 && projLayer.index != -1) {
+      writeComment(localize('Layer group: "{name}"'), { name: projLayer.name });
 
-      writeXML('g', { id: opGroup.groupName }, true);
+      writeXML('g', { id: projLayer.name }, true);
       writeXML('desc', {
-        content: localize('Group: "{name}", { group: opGroup.groupName '),
+        content: format(localize('Layer group: "{name}"'), { name: projLayer.name })
       });
-    }
+    }    
 
-    // process all operations within the group
-    for (
-      let operationIndex = 0;
-      operationIndex < opGroup.operations.length;
-      ++operationIndex
-    ) {
-      const operation = opGroup.operations[operationIndex];
+    // process all operation groups.  These are groups of operations and generate a grouping for
+    // LightBurn when there is more than one operation in the group (when the group name property has
+    // been used by the user)
+    for (let setIndex = 0; setIndex < projLayer.operationSets.length; ++setIndex) {
+      const opGroup = projLayer.operationSets[setIndex];
 
-      writeComment(localize('Operation: {name}'), {
-        name: operation.operationName,
-      });
-
-      // do we need to group shapes within our operation?
+      // do we have more than one operation in this group?  If so, and enabled, go ahead and group it
       if (
-        operation.shapeSets.length > 1 &&
-        getProperty('lightburn0600GroupShapes')
+        opGroup.operations.length > 1
       ) {
-        writeXML('g', { id: operation.operationName }, true);
+        writeComment(localize('Operation group: "{name}"'), { name: opGroup.groupName });
+
+        writeXML('g', { id: opGroup.groupName }, true);
         writeXML('desc', {
-          content: format(localize('Operation: {name}'), {
-            name: operation.operationName,
-          }),
+          content: format(localize('Operation group: "{name}")', { name: opGroup.groupName })),
         });
       }
 
-      // loop through all shapes within this operation
+      // process all operations within the group
       for (
-        let shapeSetsIndex = 0;
-        shapeSetsIndex < operation.shapeSets.length;
-        ++shapeSetsIndex
+        let operationIndex = 0;
+        operationIndex < opGroup.operations.length;
+        ++operationIndex
       ) {
-        const shape = operation.shapeSets[shapeSetsIndex];
+        const operation = opGroup.operations[operationIndex];
 
-        // set the name and id for the path
-        activePath.name = operation.operationName;
-        activePath.id = 1;
+        writeComment(localize('Operation: {name}'), {
+          name: operation.operationName,
+        });
 
-        // write the shape, based on it's type
-        if (shape.type == SHAPE_TYPE_ELLIPSE) writeShapeEllipse(shape);
-        else writeShapePath(shape);
+        // do we need to group shapes within our operation?
+        if (
+          operation.shapeSets.length > 1 &&
+          getProperty('lightburn0600GroupShapes')
+        ) {
+          writeXML('g', { id: operation.operationName }, true);
+          writeXML('desc', {
+            content: format(localize('Operation: {name}'), {
+              name: operation.operationName,
+            }),
+          });
+        }
+
+        // loop through all shapes within this operation
+        for (
+          let shapeSetsIndex = 0;
+          shapeSetsIndex < operation.shapeSets.length;
+          ++shapeSetsIndex
+        ) {
+          const shape = operation.shapeSets[shapeSetsIndex];
+
+          // set the name and id for the path
+          activePath.name = operation.operationName;
+          activePath.id = 1;
+
+          // write the shape, based on it's type
+          if (shape.type == SHAPE_TYPE_ELLIPSE) writeShapeEllipse(shape);
+          else writeShapePath(shape);
+        }
+        closeShapePath();
+
+        // if we grouped the shapes, close the group
+        if (
+          operation.shapeSets.length > 1 &&
+          getProperty('lightburn0600GroupShapes')
+        ) {
+          writeXMLClose();
+        }
       }
-      closeShapePath();
 
-      // if we grouped the shapes, close the group
+      // if we grouped these operations, close the group now
       if (
-        operation.shapeSets.length > 1 &&
-        getProperty('lightburn0600GroupShapes')
+        opGroup.operations.length > 1 &&
+        getProperty('lightburn0500GroupOperations')
       ) {
         writeXMLClose();
       }
     }
-
-    // if we grouped these operations, close the group now
-    if (
-      opGroup.operations.length > 1 &&
-      getProperty('lightburn0500GroupOperations')
-    ) {
+    // close the layer group if created
+    if (projLayer.operationSets.length > 1 && projLayer.index != -1) {
       writeXMLClose();
     }
+    
   }
 }
 

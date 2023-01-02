@@ -110,12 +110,12 @@ function dumpGroups() {
 }
 
 /**
- * Dump the contents of the project (LightBurn style shapes) to comments in the file.
+ * Dump the contents of the project to comments in the file.
  */
 function dumpProject() {
   writeComment(
-    'Dump: Project ({groupCount} operation groups):',
-    { groupCount: project.operationSets.length },
+    'Project organization:',
+    { },
     COMMENT_DEBUG
   );
   writeComment('  Cut settings:', {}, COMMENT_DEBUG);
@@ -149,77 +149,91 @@ function dumpProject() {
       );
   }
 
-  for (let operationSetsIndex = 0; operationSetsIndex < project.operationSets.length; ++operationSetsIndex) {
-    writeComment('  Operation group #{id}:', { id: operationSetsIndex }, COMMENT_DEBUG);
-    for (let operationIndex = 0; operationIndex < project.operationSets[operationSetsIndex].operations.length; ++operationIndex) {
-      writeComment('    Operation #{id}:', { id: operationIndex }, COMMENT_DEBUG);
-      writeComment('      Shape groups:', {}, COMMENT_DEBUG);
-      for (
-        let shapeSetIndex = 0;
-        shapeSetIndex < project.operationSets[operationSetsIndex].operations[operationIndex].shapeSets.length;
-        ++shapeSetIndex
-      ) {
-        const shape = project.operationSets[operationSetsIndex].operations[operationIndex].shapeSets[shapeSetIndex];
+  // process all layers
+  for (let projLayerIndex = 0; projLayerIndex < project.layers.length; ++projLayerIndex) {
+    const projLayer = project.layers[projLayerIndex];
 
-        // dump the shape into insane comments
-        writeComment(
-          '        Shape (type={type}, layer={cutIndex}, powerScale={powerScale})',
-          {
-            type: shape.type,
-            cutIndex: shape.cutSetting.index,
-            powerScale: shape.powerScale,
-          },
-          COMMENT_DEBUG
-        );
-        if (shape.type == SHAPE_TYPE_ELLIPSE) {
+    writeComment('  Layer #{id}: "{name}" ({count} operation sets):',
+      {
+        id: projLayerIndex,
+        name: projLayer.name,
+        count: projLayer.operationSets.length
+      },
+      COMMENT_DEBUG);
+
+    // process all operation groups within the layer
+    for (let operationSetsIndex = 0; operationSetsIndex < projLayer.operationSets.length; ++operationSetsIndex) {
+      writeComment('    Operation group #{id}:', { id: operationSetsIndex }, COMMENT_DEBUG);
+      for (let operationIndex = 0; operationIndex < projLayer.operationSets[operationSetsIndex].operations.length; ++operationIndex) {
+        writeComment('      Operation #{id}:', { id: operationIndex }, COMMENT_DEBUG);
+        writeComment('        Shape groups:', {}, COMMENT_DEBUG);
+        for (
+          let shapeSetIndex = 0;
+          shapeSetIndex < projLayer.operationSets[operationSetsIndex].operations[operationIndex].shapeSets.length;
+          ++shapeSetIndex
+        ) {
+          const shape = projLayer.operationSets[operationSetsIndex].operations[operationIndex].shapeSets[shapeSetIndex];
+
+          // dump the shape into insane comments
           writeComment(
-            '          Circle center=[{centerX}, {centerY}], radius={radius}',
+            '          Shape (type={type}, layer={cutIndex}, powerScale={powerScale})',
             {
-              centerX: formatPosition.format(shape.centerX),
-              centerY: formatPosition.format(shape.centerY),
-              radius: formatRadius.format(shape.radius),
+              type: shape.type,
+              cutIndex: shape.cutSetting.index,
+              powerScale: shape.powerScale,
             },
-            COMMENT_INSANE
+            COMMENT_DEBUG
           );
-        } else {
-          writeComment('        Vector list:', {}, COMMENT_INSANE);
-          for (let shapeVectorIndex = 0; shapeVectorIndex < shape.vectors.length; ++shapeVectorIndex)
+          if (shape.type == SHAPE_TYPE_ELLIPSE) {
             writeComment(
-              '        Vector #{id}: point=[{x}, {y}]{c0}{c1}',
+              '            Circle center=[{centerX}, {centerY}], radius={radius}',
               {
-                id: shapeVectorIndex,
-                x: formatPosition.format(shape.vectors[shapeVectorIndex].x),
-                y: formatPosition.format(shape.vectors[shapeVectorIndex].y),
-                c0:
-                  shape.vectors[shapeVectorIndex].c0x !== undefined
-                    ? format(' c0=[{x}, {y}]', {
-                        x: formatPosition.format(shape.vectors[shapeVectorIndex].c0x),
-                        y: formatPosition.format(shape.vectors[shapeVectorIndex].c0y),
-                      })
-                    : ' c0=n/a',
-                c1:
-                  shape.vectors[shapeVectorIndex].c1x !== undefined
-                    ? format(', c1=[{x}, {y}]', {
-                        x: formatPosition.format(shape.vectors[shapeVectorIndex].c1x),
-                        y: formatPosition.format(shape.vectors[shapeVectorIndex].c1y),
-                      })
-                    : ' c1=n/a',
+                centerX: formatPosition.format(shape.centerX),
+                centerY: formatPosition.format(shape.centerY),
+                radius: formatRadius.format(shape.radius),
               },
               COMMENT_INSANE
             );
+          } else {
+            writeComment('          Vector list:', {}, COMMENT_INSANE);
+            for (let shapeVectorIndex = 0; shapeVectorIndex < shape.vectors.length; ++shapeVectorIndex)
+              writeComment(
+                '          Vector #{id}: point=[{x}, {y}]{c0}{c1}',
+                {
+                  id: shapeVectorIndex,
+                  x: formatPosition.format(shape.vectors[shapeVectorIndex].x),
+                  y: formatPosition.format(shape.vectors[shapeVectorIndex].y),
+                  c0:
+                    shape.vectors[shapeVectorIndex].c0x !== undefined
+                      ? format(' c0=[{x}, {y}]', {
+                          x: formatPosition.format(shape.vectors[shapeVectorIndex].c0x),
+                          y: formatPosition.format(shape.vectors[shapeVectorIndex].c0y),
+                        })
+                      : ' c0=n/a',
+                  c1:
+                    shape.vectors[shapeVectorIndex].c1x !== undefined
+                      ? format(', c1=[{x}, {y}]', {
+                          x: formatPosition.format(shape.vectors[shapeVectorIndex].c1x),
+                          y: formatPosition.format(shape.vectors[shapeVectorIndex].c1y),
+                        })
+                      : ' c1=n/a',
+                },
+                COMMENT_INSANE
+              );
 
-          writeComment('        Primitive list:', {}, COMMENT_INSANE);
-          for (let shapePrimitiveIndex = 0; shapePrimitiveIndex < shape.primitives.length; ++shapePrimitiveIndex)
-            writeComment(
-              '          Primitive #{id}: type={type}, start={start}, end={end}',
-              {
-                id: shapePrimitiveIndex,
-                type: shape.primitives[shapePrimitiveIndex].type,
-                start: shape.primitives[shapePrimitiveIndex].start,
-                end: shape.primitives[shapePrimitiveIndex].end,
-              },
-              COMMENT_INSANE
-            );
+            writeComment('          Primitive list:', {}, COMMENT_INSANE);
+            for (let shapePrimitiveIndex = 0; shapePrimitiveIndex < shape.primitives.length; ++shapePrimitiveIndex)
+              writeComment(
+                '            Primitive #{id}: type={type}, start={start}, end={end}',
+                {
+                  id: shapePrimitiveIndex,
+                  type: shape.primitives[shapePrimitiveIndex].type,
+                  start: shape.primitives[shapePrimitiveIndex].start,
+                  end: shape.primitives[shapePrimitiveIndex].end,
+                },
+                COMMENT_INSANE
+              );
+          }
         }
       }
     }

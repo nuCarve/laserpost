@@ -79,14 +79,19 @@ properties = {
     value: INCLUDE_COMMENTS_NORMAL,
     scope: 'post',
   },
-  lightburn0500GroupOperations: {
-    title: localize('Group operations'),
+  lightburn0500Grouping: {
+    title: localize('Grouping'),
     description: localize(
-      'Set if a group should be created around all operations that share the same layer.  Groups are only created if there is more than one operation in the layer.'
+      'Determines if shapes be grouped by operation (when group naming used) in one file, by layer in one file, or by layer with a unique file per layer.'
     ),
     group: 'groupLightBurn',
-    type: 'boolean',
-    value: true,
+    type: 'enum',
+    values: [
+      { title: localize("Group by operation"), id: GROUPING_BY_OPERATION },
+      { title: localize("Group by layer"), id: GROUPING_BY_LAYER },
+      { title: localize("File per layer"), id: GROUPING_BY_LAYER_FILE },
+    ],
+    value: GROUPING_BY_OPERATION,
     scope: 'post',
   },
   lightburn0600GroupShapes: {
