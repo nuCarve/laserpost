@@ -7,8 +7,6 @@
  *************************************************************************************/
 
 let xmlStack = []; // stack containing all currently open (nested) XML tags in output generation
-let includeComments = INCLUDE_COMMENTS_NORMAL; // comment level to include in lbrn file - set from preferences
-let includeNotes = INCLUDE_NOTES_SHOW_IMPORTANT; // notes level to include in lbrn file - set from preferences
 let notes = ''; // notes to add to the file when the trailer is written
 let notesImportant = false; // true when notes contain something "important" (such as update is available)
 let currentGroup = undefined; // tracks the current group in use, set in `onSection`.

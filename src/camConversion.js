@@ -78,6 +78,7 @@ function groupsToProject() {
         passes: groupOperation.passes,
         zStep: groupOperation.zStep,
         kerf: groupOperation.kerf,
+        powerScale: groupOperation.powerScale,
         customCutSettingXML: groupOperation.customCutSettingXML,
         customCutSetting: groupOperation.customCutSetting,
       });
@@ -777,11 +778,14 @@ function getCutSetting(cutSettingSpecs) {
 
     // look to see if we already have a matching cutsetting, based on the custom XML if provided,
     // otherwise the properties of the setting
-    if (cutSettingSpecs.customCutSettingXML)
+    if (cutSettingSpecs.customCutSettingXML && cutSettingsSpecs.laserEnable !== LASER_ENABLE_OFF)
       // if custom cut is used, we expect a perfect string match.  This might someday be
       // improved with a deep object comparison (preceeded by filtering out unwanted fields)
       matchFound =
         cutSetting.customCutSettingXML == cutSettingSpecs.customCutSettingXML;
+    else if (cutSettingSpecs.laserEnable == LASER_ENABLE_OFF && cutSetting.laserEnable == LASER_ENABLE_OFF) 
+      // disabled lasers always match
+      matchFound = true;
     else {
       // standard properties - see if we match
       matchFound =
@@ -797,6 +801,7 @@ function getCutSetting(cutSettingSpecs) {
         cutSetting.zStep == cutSettingSpecs.zStep &&
         cutSetting.customCutSetting == undefined;
     }
+
 
     // do we have a match?
     if (matchFound) {
@@ -868,6 +873,7 @@ function traceStockOutline() {
     powerSource: localize('stock dimensions'),
     customCutSettingXML: '',
     kerf: 0.1,
+    powerScale: 100,
     paths: paths,
   });
 
@@ -929,7 +935,7 @@ function writeComment(template, parameters, level) {
   text = text.replace(/[ \n]+$/, '');
 
   if (level === undefined) level = COMMENT_NORMAL;
-  switch (includeComments) {
+  switch (getProperty('lightburn0200IncludeComments')) {
     case INCLUDE_COMMENTS_NONE:
       return;
     case INCLUDE_COMMENTS_NORMAL:

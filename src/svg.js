@@ -83,7 +83,9 @@ function writeShapes() {
       writeComment(localize('Group: "{name}"'), { group: opGroup.groupName });
 
       writeXML('g', { id: opGroup.groupName }, true);
-      writeXML('desc', { content: localize('Group: "{name}", { group: opGroup.groupName ')});
+      writeXML('desc', {
+        content: localize('Group: "{name}", { group: opGroup.groupName '),
+      });
     }
 
     // process all operations within the group
@@ -104,9 +106,11 @@ function writeShapes() {
         getProperty('lightburn0600GroupShapes')
       ) {
         writeXML('g', { id: operation.operationName }, true);
-        writeXML('desc', { content: format(localize('Operation: {name}'), {
-          name: operation.operationName,
-        })});
+        writeXML('desc', {
+          content: format(localize('Operation: {name}'), {
+            name: operation.operationName,
+          }),
+        });
       }
 
       // loop through all shapes within this operation
@@ -153,6 +157,7 @@ function writeShapes() {
  * Notes are injected (if requested in post preferences by the user) using the `notes` variable.
  */
 function writeTrailer() {
+  const includeNotes = getProperty('machine0200IncludeNotes');
   if (includeNotes != INCLUDE_NOTES_NONE && notes != '') {
     // determine if we should tell the user via a warning dialog that the notes are available
     let showNotesWarning = false;
@@ -169,18 +174,29 @@ function writeTrailer() {
     // todo: Consider changing default for show to always for svg only
     // todo: Move show notes out of machine and onto post
     // todo: See if we can get tool and cut setting name for improved description ("MDF 3mm cut")
-    var path = FileSystem.getCombinedPath(FileSystem.getFolderPath(getOutputPath()), programName + "-notes.txt");
+    var path = FileSystem.getCombinedPath(
+      FileSystem.getFolderPath(getOutputPath()),
+      programName + '-notes.txt'
+    );
     redirectToFile(path);
     writeln(notes);
     closeRedirection();
 
     // tell the user if they requested it
-    if (showNotesWarning)
-      if (notesImportant)
-        showWarning(localize("There are important notes available from the post, please see:\n\n{path}"), { path: path });
-      else
-        showWarning(localize("Layer setup notes have been generated in the file:\n\n{path}"), { path: path });
-
+    if (notesImportant)
+      showWarning(
+        localize(
+          'There are important notes available from the post, please see:\n\n{path}'
+        ),
+        { path: path }
+      );
+    else if (showNotesWarning)
+      showWarning(
+        localize(
+          'Layer setup notes have been generated in the file:\n\n{path}'
+        ),
+        { path: path }
+      );
   }
 
   // writeXMLClose();
@@ -264,45 +280,71 @@ function writeCutSettings() {
       laserNames[LASER_ENABLE_2] = localize('laser 2');
       laserNames[LASER_ENABLE_BOTH] = localize('lasers 1 and 2');
 
+      let layerMode;
+      switch (cutSetting.layerMode) {
+        case LAYER_MODE_LINE:
+          layerMode = localize('CUT');
+          break;
+        case LAYER_MODE_FILL:
+          layerMode = localize('FILL');
+          break;
+        case LAYER_MODE_OFFSET_FILL:
+          layerMode = localize('OUTLINE FILL');
+          break;
+      }
+
       if (cutSetting.laserEnable !== LASER_ENABLE_OFF) {
         writeNote(
           '    ' +
             localize(
-              'Power {min}-{max}% at {speed} using {lasers} (air {air}, Z offset {zOffset}, passes {passes}, z-step {zStep})'
+              '{mode} running {min}% min / {max}% max (scale {scale}%) at {speed} using {lasers} (air {air}, Z offset {zOffset}, passes {passes}, z-step {zStep})'
             ),
           {
             min: cutSetting.minPower,
             max: cutSetting.maxPower,
+            speed: speedToUnits(cutSetting.speed),
+            lasers: cutSetting.laserEnable, //laserNames[cutSetting.laserEnable],
+            air: cutSetting.useAir ? localize('on') : localize('off'),
+            zOffset: cutSetting.zOffset,
+            passes: cutSetting.passes,
+            zStep: cutSetting.zStep,
+            scale: cutSetting.powerScale,
+            mode: layerMode,
+          }
+        );
+        // format for comments
+        writeComment(
+          'Layer {id} ({color}): {mode} running {min}-{max}% (scale {scale}%) at {speed} using {lasers} (air {air}, Z offset {zOffset}, passes {passes}, z step {zStep}) [inherited from {source}]',
+          {
+            id: cutSetting.index,
+            color: cutIndexToColorName(cutSetting.index),
+            min: cutSetting.minPower,
+            max: cutSetting.maxPower,
+            source: cutSetting.powerSource,
             speed: speedToUnits(cutSetting.speed),
             lasers: laserNames[cutSetting.laserEnable],
             air: cutSetting.useAir ? localize('on') : localize('off'),
             zOffset: cutSetting.zOffset,
             passes: cutSetting.passes,
             zStep: cutSetting.zStep,
-          }
+            scale: cutSetting.powerScale,
+            mode: layerMode,
+          },
+          COMMENT_DETAIL
         );
       } else {
         // laser is off
-        writeNote('    ' + localize('Output turned off'));
+        writeNote('    ' + localize('Laser turned off'));
+        // format for comments
+        writeComment(
+          'Layer {id} ({color}): Laser turned off',
+          {
+            id: cutSetting.index,
+            color: cutIndexToColorName(cutSetting.index),
+          },
+          COMMENT_DETAIL
+        );
       }
-      // format for comments
-      writeComment(
-        'Layer {id} ({color}): power {min}-{max}% at {speed} using {lasers} (air {air}, Z offset {zOffset}, passes {passes}, z step {zStep}) [inherited from {source}]',
-        {
-          id: cutSetting.index,
-          color: cutIndexToColorName(cutSetting.index),
-          min: cutSetting.minPower,
-          max: cutSetting.maxPower,
-          source: cutSetting.powerSource,
-          speed: speedToUnits(cutSetting.speed),
-          lasers: laserNames[cutSetting.laserEnable],
-          air: cutSetting.useAir ? localize('on') : localize('off'),
-          zOffset: cutSetting.zOffset,
-          passes: cutSetting.passes,
-          zStep: cutSetting.zStep,
-        },
-        COMMENT_DETAIL
-      );
     }
   }
 }
@@ -471,7 +513,10 @@ function closeShapePath() {
       writeXML('path', {
         id: activePath.name + '-' + activePath.id,
         d: activePath.path,
-        stroke: cutSetting.layerMode == LAYER_MODE_FILL ? 'none' : cutIndexToRGBColor(activePath.cutIndex),
+        stroke:
+          cutSetting.layerMode == LAYER_MODE_FILL
+            ? 'none'
+            : cutIndexToRGBColor(activePath.cutIndex),
         fill: cutIndexToRGBColor(activePath.cutIndex),
         fill$mode: 'evenodd',
       });
@@ -484,23 +529,27 @@ function closeShapePath() {
 /**
  * Converts a cut index (layer number) to an RGB color string, such as '#123456'.  If the cut index exceeds the
  * total number of known colors, the last color is reused.
- * 
+ *
  * @param cutIndex Cut index (layer number) to convert to an RGB color
  * @returns RGB color including '#' prefix (such as '#123456')
  */
 function cutIndexToRGBColor(cutIndex) {
-  return '#' + layerColorMap[layerColors[Math.min(cutIndex, layerColors.length - 1)]].hex;
+  return (
+    '#' +
+    layerColorMap[layerColors[Math.min(cutIndex, layerColors.length - 1)]].hex
+  );
 }
 
 /**
  * Converts a cut index (layer number) to the color name, such as 'orange'.  If the cut index exceeds the
  * total number of known colors, the last color is reused.
- * 
+ *
  * @param cutIndex Cut index (layer number) to convert to a color name
  * @returns Name of the color for the layer (localized)
  */
 function cutIndexToColorName(cutIndex) {
-  return layerColorMap[layerColors[Math.min(cutIndex, layerColors.length - 1)]].name;
+  return layerColorMap[layerColors[Math.min(cutIndex, layerColors.length - 1)]]
+    .name;
 }
 
 /**

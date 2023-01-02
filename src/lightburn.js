@@ -15,8 +15,10 @@ function writeFileHeader() {
   // locate the first section and extract the stock origin information to define the LightBurn mirror X/Y header
   const section = getSection(0);
   const mirror = {
-    x: section.modelPlane.getElement(0, 0) != section.workPlane.getElement(0, 0),
-    y: section.modelPlane.getElement(1, 1) != section.workPlane.getElement(1, 1)
+    x:
+      section.modelPlane.getElement(0, 0) != section.workPlane.getElement(0, 0),
+    y:
+      section.modelPlane.getElement(1, 1) != section.workPlane.getElement(1, 1),
   };
 
   writeln('<?xml version="1.0" encoding="UTF-8"?>');
@@ -33,14 +35,13 @@ function writeFileHeader() {
   );
 
   writeXML('Thumbnail', {
-    Source: lightburnThumbnail()
+    Source: lightburnThumbnail(),
   });
 
   writeln('');
   writeCommentAndNote(generatedBy);
   writeCommentAndNote('');
 }
-
 
 /**
  * Writes the LightBurn (.lbrn) header information
@@ -97,7 +98,11 @@ function writeShapes() {
     }
 
     // process all operations within the group
-    for (let operationIndex = 0; operationIndex < opGroup.operations.length; ++operationIndex) {
+    for (
+      let operationIndex = 0;
+      operationIndex < opGroup.operations.length;
+      ++operationIndex
+    ) {
       const operation = opGroup.operations[operationIndex];
 
       writeComment(localize('Operation: {name}'), {
@@ -115,7 +120,11 @@ function writeShapes() {
       }
 
       // loop through all shapes within this operation
-      for (let shapeSetsIndex = 0; shapeSetsIndex < operation.shapeSets.length; ++shapeSetsIndex) {
+      for (
+        let shapeSetsIndex = 0;
+        shapeSetsIndex < operation.shapeSets.length;
+        ++shapeSetsIndex
+      ) {
         const shape = operation.shapeSets[shapeSetsIndex];
 
         // write the shape, based on it's type
@@ -144,8 +153,6 @@ function writeShapes() {
   }
 }
 
-
-
 /**
  * Writes the LightBurn (.lbrn) trailer information, including optionally adding notes and
  * closing off the LightBurnProject section opened in `writeHeader`.
@@ -153,6 +160,7 @@ function writeShapes() {
  * Notes are injected (if requested in post preferences by the user) using the `notes` variable.
  */
 function writeTrailer() {
+  const includeNotes = getProperty('machine0200IncludeNotes');
   if (includeNotes != INCLUDE_NOTES_NONE && notes != '') {
     // determine if we cause LightBurn to show notes on file load
     let showOnLoad = false;
@@ -201,10 +209,8 @@ function writeCommentAndNote(template, parameters) {
  * @param text Message to write to the XML file as a comment (or blank line if empty or blank)
  */
 function writeCommentLine(text) {
-
   if (text == '\n' || text == '') writeln('');
-  else
-    writeBlock('<!-- ' + text + ' -->');
+  else writeBlock('<!-- ' + text + ' -->');
 }
 
 /**
@@ -215,7 +221,11 @@ function writeCutSettings() {
   writeNote('');
   writeNote('Layers:', false);
 
-  for (let cutSettingsIndex = 0; cutSettingsIndex < project.cutSettings.length; ++cutSettingsIndex) {
+  for (
+    let cutSettingsIndex = 0;
+    cutSettingsIndex < project.cutSettings.length;
+    ++cutSettingsIndex
+  ) {
     const cutSetting = project.cutSettings[cutSettingsIndex];
 
     writeNote('  ' + localize('{layer}: {name}'), {
@@ -243,11 +253,24 @@ function writeCutSettings() {
       laserNames[LASER_ENABLE_2] = localize('laser 2');
       laserNames[LASER_ENABLE_BOTH] = localize('lasers 1 and 2');
 
+      let layerMode;
+      switch (cutSetting.layerMode) {
+        case LAYER_MODE_LINE:
+          layerMode = localize('LINE');
+          break;
+        case LAYER_MODE_FILL:
+          layerMode = localize('FILL');
+          break;
+        case LAYER_MODE_OFFSET_FILL:
+          layerMode = localize('OFFSET FILL');
+          break;
+      }
+
       if (cutSetting.laserEnable !== LASER_ENABLE_OFF) {
         writeNote(
           '    ' +
             localize(
-              'Power {min}-{max}% at {speed} using {lasers} (air {air}, Z offset {zOffset}, passes {passes}, z-step {zStep})'
+              '{mode} running {min}-{max}% (scale {scale}%) at {speed} using {lasers} (air {air}, Z offset {zOffset}, passes {passes}, z-step {zStep})'
             ),
           {
             min: cutSetting.minPower,
@@ -258,29 +281,42 @@ function writeCutSettings() {
             zOffset: cutSetting.zOffset,
             passes: cutSetting.passes,
             zStep: cutSetting.zStep,
+            scale: cutSetting.powerScale,
+            mode: layerMode,
           }
+        );
+        // format for comments
+        writeComment(
+          'CutSetting (layer) {id}: {mode} running {min}-{max}% (scale {scale}%) at {speed} using {lasers} (air {air}, Z offset {zOffset}, passes {passes}, z step {zStep}) [inherited from {source}]',
+          {
+            id: formatLeadingZero.format(cutSetting.index),
+            min: cutSetting.minPower,
+            max: cutSetting.maxPower,
+            source: cutSetting.powerSource,
+            speed: speedToUnits(cutSetting.speed),
+            lasers: laserNames[cutSetting.laserEnable],
+            air: cutSetting.useAir ? localize('on') : localize('off'),
+            zOffset: cutSetting.zOffset,
+            passes: cutSetting.passes,
+            zStep: cutSetting.zStep,
+            scale: cutSetting.powerScale,
+            mode: layerMode,
+          },
+          COMMENT_DETAIL
         );
       } else {
         // laser is off
         writeNote('    ' + localize('Output turned off'));
+        // format for comments
+        writeComment(
+          'Layer {id} ({color}): Output turned off',
+          {
+            id: cutSetting.index,
+            color: cutIndexToColorName(cutSetting.index),
+          },
+          COMMENT_DETAIL
+        );
       }
-      // format for comments
-      writeComment(
-        'CutSetting (layer) {id}: power {min}-{max}% at {speed} using {lasers} (air {air}, Z offset {zOffset}, passes {passes}, z step {zStep}) [inherited from {source}]',
-        {
-          id: formatLeadingZero.format(cutSetting.index),
-          min: cutSetting.minPower,
-          max: cutSetting.maxPower,
-          source: cutSetting.powerSource,
-          speed: speedToUnits(cutSetting.speed),
-          lasers: laserNames[cutSetting.laserEnable],
-          air: cutSetting.useAir ? localize('on') : localize('off'),
-          zOffset: cutSetting.zOffset,
-          passes: cutSetting.passes,
-          zStep: cutSetting.zStep,
-        },
-        COMMENT_DETAIL
-      );
     }
 
     // if not custom, generate the cut setting
@@ -376,15 +412,26 @@ function writeShapePath(shape) {
   // fixes this)
   let commentOutShape = false;
   if (shape.cutSetting.layerMode != LAYER_MODE_LINE && !shape.closed) {
-    writeComment('Removing shape as LightBurn generates warnings and removes unclosed fill shapes');
+    writeComment(
+      'Removing shape as LightBurn generates warnings and removes unclosed fill shapes'
+    );
     commentOutShape = true;
   }
 
-  writeXML('Shape', { Type: 'Path', CutIndex: shape.cutSetting.index }, true, commentOutShape);
+  writeXML(
+    'Shape',
+    { Type: 'Path', CutIndex: shape.cutSetting.index },
+    true,
+    commentOutShape
+  );
   writeXML('XForm', { content: '1 0 0 1 0 0' });
 
   // output the vectors
-  for (let shapeVectorIndex = 0; shapeVectorIndex < shape.vectors.length; ++shapeVectorIndex) {
+  for (
+    let shapeVectorIndex = 0;
+    shapeVectorIndex < shape.vectors.length;
+    ++shapeVectorIndex
+  ) {
     const vector = shape.vectors[shapeVectorIndex];
     writeXML('V', {
       vx: formatPosition.format(vector.x),
@@ -403,7 +450,11 @@ function writeShapePath(shape) {
   }
 
   // output the primitives
-  for (let shapePrimitiveIndex = 0; shapePrimitiveIndex < shape.primitives.length; ++shapePrimitiveIndex) {
+  for (
+    let shapePrimitiveIndex = 0;
+    shapePrimitiveIndex < shape.primitives.length;
+    ++shapePrimitiveIndex
+  ) {
     const primitive = shape.primitives[shapePrimitiveIndex];
 
     writeXML('P', {
@@ -418,8 +469,8 @@ function writeShapePath(shape) {
 }
 
 /**
- * Gets an encoded string for the Lightburn thumbnail image.  
- * 
+ * Gets an encoded string for the Lightburn thumbnail image.
+ *
  * @returns String containing the encoded lightburn thumbnail image
  */
 function lightburnThumbnail() {

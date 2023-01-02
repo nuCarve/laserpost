@@ -17,8 +17,6 @@ function onOpen() {
   checkUpdateAvailability();
 
   // capture and save the preferences that affect file generation
-  includeComments = getProperty('lightburn0200IncludeComments');
-  includeNotes = getProperty('machine0200IncludeNotes');
   workspaceOffsets = {
     x: getProperty('work0200OffsetX'),
     y: getProperty('work0300OffsetX'),
@@ -113,10 +111,12 @@ function onOpen() {
     writeComment(localize('Tools'));
     for (var toolIndex = 0; toolIndex < tools.getNumberOfTools(); ++toolIndex) {
       var tool = tools.getTool(toolIndex);
+      const useAir = tool.assistGas.toLowerCase() != localize('none') && tool.assistGas.toLowerCase() != localize('off') && tool.assistGas != '';
+      
       writeComment(
         '  ' +
           localize(
-            'Tool #{num}: {desc} [{type}], min power (pierce)={pierce}%, max power (cut)={cut}%, kerf width={kerf}mm'
+            'Tool #{num}: {desc} [{type}], min power (pierce)={pierce}%, max power (cut)={cut}%, {air}, kerf width={kerf}mm'
           ),
         {
           num: tool.number,
@@ -125,6 +125,7 @@ function onOpen() {
           pierce: tool.piercePower,
           cut: tool.cutPower,
           kerf: tool.getKerfWidth(),
+          air: useAir ? localize('air on') : localize('air off')
         }
       );
     }
@@ -228,10 +229,35 @@ function onSection() {
   const customCutSettingXML = currentSection.getProperty(
     'op0900CustomCutSettingXML'
   );
-  const laserEnable = currentSection.getProperty('op0700LaserEnable');
+  let laserEnable = currentSection.getProperty('op0700LaserEnable');
   const zOffset = currentSection.getProperty('op0300ZOffset');
   const passes = currentSection.getProperty('op0400Passes');
   const zStep = currentSection.getProperty('op0500ZStep');
+
+  // if laser enable set to inherit from tool, get value from the tool's pierce time
+  if (laserEnable == LASER_ENABLE_TOOL) {
+    switch (tool.getPierceTime()) {
+      case 1:
+        laserEnable = LASER_ENABLE_1;
+        break;
+      case 2:
+        laserEnable = LASER_ENABLE_2
+        break;
+      case 3:
+        laserEnable = LASER_ENABLE_BOTH;
+        break;
+      case 99:
+        laserEnable = LASER_ENABLE_OFF;
+        break;
+      default:
+        writeNote('', {}, true);
+        writeCommentAndNote('WARNING: Operation "{name}" has Laser Enable set to "Use tool setting" but tool Pierce Time ({value}) is invalid.',
+        { name: operationName, value: tool.getPierceTime() });
+        writeCommentAndNote("         For safety, setting layer to laser off.");
+        laserEnable = LASER_ENABLE_OFF;
+        break;
+    }
+  }
 
   // if custom XML is used, decode it
   let parsedXML = undefined;

@@ -254,7 +254,7 @@ properties = {
     values: [
       { title: localize('Off'), id: USE_AIR_OFF },
       { title: localize('On'), id: USE_AIR_ON },
-      { title: localize('Tool Assist Gas'), id: USE_AIR_ASSIST_GAS },
+      { title: localize('Use tool setting'), id: USE_AIR_ASSIST_GAS },
     ],
     value: USE_AIR_ASSIST_GAS,
     scope: 'operation',
@@ -320,6 +320,7 @@ properties = {
     ),
     type: 'enum',
     values: [
+      { title: localize('Use tool setting'), id: LASER_ENABLE_TOOL },
       { title: localize('Disable output'), id: LASER_ENABLE_OFF },
       { title: localize('Laser 1'), id: LASER_ENABLE_1 },
       { title: localize('Laser 2'), id: LASER_ENABLE_2 },

@@ -58,6 +58,7 @@ const LASER_ENABLE_OFF = 'off';
 const LASER_ENABLE_1 = 'laser1';
 const LASER_ENABLE_2 = 'laser2';
 const LASER_ENABLE_BOTH = 'both';
+const LASER_ENABLE_TOOL = 'tool';
 
 // enum for use air
 const USE_AIR_OFF = 'off';
