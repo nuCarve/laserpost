@@ -160,7 +160,7 @@ function writeShapes() {
  * Notes are injected (if requested in post preferences by the user) using the `notes` variable.
  */
 function writeTrailer() {
-  const includeNotes = getProperty('machine0200IncludeNotes');
+  const includeNotes = getProperty('lightburn0100IncludeNotes');
   if (includeNotes != INCLUDE_NOTES_NONE && notes != '') {
     // determine if we cause LightBurn to show notes on file load
     let showOnLoad = false;

@@ -41,6 +41,27 @@ properties = {
   //
   // Group: groupLightBurn
   //
+  lightburn0100IncludeNotes: {
+    title: localize('Notes'),
+    description: localize(
+      'Detail level of generated setup notes.'
+    ),
+    group: 'groupLightBurn',
+    type: 'enum',
+    values: [
+      { title: localize('Disable'), id: INCLUDE_NOTES_NONE },
+      // #if SVG
+      { title: localize('Hidden'), id: INCLUDE_NOTES_HIDDEN },
+      // #endif
+      {
+        title: localize('Show when important'),
+        id: INCLUDE_NOTES_SHOW_IMPORTANT,
+      },
+      { title: localize('Always show'), id: INCLUDE_NOTES_SHOW },
+    ],
+    value: INCLUDE_NOTES_SHOW_IMPORTANT,
+    scope: 'post',
+  },
   lightburn0200IncludeComments: {
     title: localize('Comments'),
     description: localize(
@@ -186,7 +207,7 @@ properties = {
   machine0100SpeedUnits: {
     title: localize('Speed units'),
     description: localize(
-      'Speed units to use in comments and file notes (does not affect the actual file as LightBurn always uses mm/sec).'
+      'Speed units to use in comments and setup notes (used in comments only, does not change operational behavior).'
     ),
     type: 'enum',
     values: [
@@ -194,24 +215,6 @@ properties = {
       { title: localize('mm/min'), id: SPEED_UNITS_MMPM },
     ],
     value: SPEED_UNITS_MMPS,
-    scope: 'machine',
-  },
-  machine0200IncludeNotes: {
-    title: localize('Notes'),
-    description: localize(
-      'Detail level of Notes in the generated ".lbrn" file.'
-    ),
-    type: 'enum',
-    values: [
-      { title: localize('Disable'), id: INCLUDE_NOTES_NONE },
-      { title: localize('Hidden'), id: INCLUDE_NOTES_HIDDEN },
-      {
-        title: localize('Show when important'),
-        id: INCLUDE_NOTES_SHOW_IMPORTANT,
-      },
-      { title: localize('Show'), id: INCLUDE_NOTES_SHOW },
-    ],
-    value: INCLUDE_NOTES_SHOW_IMPORTANT,
     scope: 'machine',
   },
   machine0300AutomaticUpdate: {
