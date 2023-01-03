@@ -9,7 +9,6 @@
 // define enum for comment detail levels
 const INCLUDE_COMMENTS_NONE = 'none';
 const INCLUDE_COMMENTS_NORMAL = 'normal';
-const INCLUDE_COMMENTS_DETAILED = 'detail';
 const INCLUDE_COMMENTS_DEBUG = 'debug';
 const INCLUDE_COMMENTS_INSANE = 'insane';
 
@@ -24,9 +23,8 @@ const INCLUDE_NOTES_HIDDEN = 'hidden';
 const INCLUDE_NOTES_SHOW_IMPORTANT = 'important';
 const INCLUDE_NOTES_SHOW = 'show';
 
-// define logging levels for comments (see writeComment)
+// define logging levels for comments (see debugLog)
 const COMMENT_NORMAL = 0;
-const COMMENT_DETAIL = 1;
 const COMMENT_DEBUG = 2;
 const COMMENT_INSANE = 3;
 

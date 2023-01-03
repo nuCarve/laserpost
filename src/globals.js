@@ -7,7 +7,7 @@
  *************************************************************************************/
 
 let xmlStack = []; // stack containing all currently open (nested) XML tags in output generation
-let notes = ''; // notes to add to the file when the trailer is written
+let notes = []; // notes to add to the file when the trailer is written
 let notesImportant = false; // true when notes contain something "important" (such as update is available)
 let currentGroup = undefined; // tracks the current group in use, set in `onSection`.
 let currentPower = undefined; // track if the laser is powered on, used to understand CAM movements vs. cuts

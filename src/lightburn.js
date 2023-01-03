@@ -37,16 +37,17 @@ function writeFileHeader() {
   writeXML('Thumbnail', {
     Source: lightburnThumbnail(),
   });
-
-  writeln('');
-  writeCommentAndNote(generatedBy);
-  writeCommentAndNote('');
 }
 
 /**
  * Writes the LightBurn (.lbrn) header information
  */
 function writeHeader() {
+  // output notes, including layer notes, to the header
+  const headerNotes = notes.concat(generateLayerNotes());
+  for (let noteIndex = 0; noteIndex < headerNotes.length; ++noteIndex)
+    writeCommentLine(headerNotes[noteIndex]);
+
   writeXML('VariableText', {}, true);
   writeXML('Start', { Value: '0' });
   writeXML('End', { Value: '999' });
@@ -77,106 +78,117 @@ function writeHeader() {
 
 /**
  * Writes the shapes (<Shape>) to the LightBurn file, including grouping as necessary
+ * 
+ * @param layer Layer ID to generate
+ * @param redirect Boolean indicates if we are using file redirection or not (per layer redirection)
  */
-function writeShapes() {
-  // process all layers, potentially breaking them out into different files
-  for (let projLayerIndex = 0; projLayerIndex < project.layers.length; ++projLayerIndex) {
-    const projLayer = project.layers[projLayerIndex];
+function writeShapes(layer, redirect) {
+  const projLayer = project.layers[layer];
 
-    // create a group if there is more than one item in the layer and we are grouping by layer
-    if (projLayer.operationSets.length > 1 && projLayer.index != -1) {
-      writeComment(localize('Layer group: "{name}"'), { name: projLayer.name });
+  // create a group if there is more than one item in the layer, we are grouping by layer and
+  // we are not redirecting
+  if (
+    projLayer.operationSets.length > 1 &&
+    projLayer.index != -1 &&
+    !redirect
+  ) {
+    writeCommentLine(localize('Layer group: "{name}"'), { name: projLayer.name });
+
+    writeXML('Shape', { Type: 'Group' }, true);
+    writeXML('XForm', { content: '1 0 0 1 0 0' });
+    writeXML('Children', {}, true);
+  }
+
+  // process all operation groups.  These are groups of operations and generate a grouping for
+  // LightBurn when there is more than one operation in the group (when the group name property has
+  // been used by the user)
+  for (
+    let setIndex = 0;
+    setIndex < projLayer.operationSets.length;
+    ++setIndex
+  ) {
+    const opGroup = projLayer.operationSets[setIndex];
+
+    // do we have more than one operation in this group?  If so, and enabled, go ahead and group it
+    if (opGroup.operations.length > 1) {
+      writeCommentLine(localize('Operation group: "{name}"'), {
+        name: opGroup.groupName,
+      });
 
       writeXML('Shape', { Type: 'Group' }, true);
       writeXML('XForm', { content: '1 0 0 1 0 0' });
       writeXML('Children', {}, true);
     }
 
-    // process all operation groups.  These are groups of operations and generate a grouping for
-    // LightBurn when there is more than one operation in the group (when the group name property has
-    // been used by the user)
-    for (let setIndex = 0; setIndex < projLayer.operationSets.length; ++setIndex) {
-      const opGroup = projLayer.operationSets[setIndex];
+    // process all operations within the group
+    for (
+      let operationIndex = 0;
+      operationIndex < opGroup.operations.length;
+      ++operationIndex
+    ) {
+      const operation = opGroup.operations[operationIndex];
 
-      // do we have more than one operation in this group?  If so, and enabled, go ahead and group it
+      writeCommentLine(localize('Operation: {name}'), {
+        name: operation.operationName,
+      });
+
+      // do we need to group shapes within our operation?
       if (
-        opGroup.operations.length > 1
+        operation.shapeSets.length > 1 &&
+        getProperty('lightburn0600GroupShapes')
       ) {
-        writeComment(localize('Operation group: "{name}"'), { name: opGroup.groupName });
-
         writeXML('Shape', { Type: 'Group' }, true);
         writeXML('XForm', { content: '1 0 0 1 0 0' });
         writeXML('Children', {}, true);
       }
 
-      // process all operations within the group
+      // loop through all shapes within this operation
       for (
-        let operationIndex = 0;
-        operationIndex < opGroup.operations.length;
-        ++operationIndex
+        let shapeSetsIndex = 0;
+        shapeSetsIndex < operation.shapeSets.length;
+        ++shapeSetsIndex
       ) {
-        const operation = opGroup.operations[operationIndex];
+        const shape = operation.shapeSets[shapeSetsIndex];
 
-        writeComment(localize('Operation: {name}'), {
-          name: operation.operationName,
-        });
-
-        // do we need to group shapes within our operation?
-        if (
-          operation.shapeSets.length > 1 &&
-          getProperty('lightburn0600GroupShapes')
-        ) {
-          writeXML('Shape', { Type: 'Group' }, true);
-          writeXML('XForm', { content: '1 0 0 1 0 0' });
-          writeXML('Children', {}, true);
-        }
-
-        // loop through all shapes within this operation
-        for (
-          let shapeSetsIndex = 0;
-          shapeSetsIndex < operation.shapeSets.length;
-          ++shapeSetsIndex
-        ) {
-          const shape = operation.shapeSets[shapeSetsIndex];
-
-          // write the shape, based on it's type
-          if (shape.type == SHAPE_TYPE_ELLIPSE) writeShapeEllipse(shape);
-          else writeShapePath(shape);
-        }
-
-        // if we grouped the shapes, close the group
-        if (
-          operation.shapeSets.length > 1 &&
-          getProperty('lightburn0600GroupShapes')
-        ) {
-          writeXMLClose();
-          writeXMLClose();
-        }
+        // write the shape, based on it's type
+        if (shape.type == SHAPE_TYPE_ELLIPSE) writeShapeEllipse(shape);
+        else writeShapePath(shape);
       }
 
-      // if we grouped these operations, close the group now
+      // if we grouped the shapes, close the group
       if (
-        opGroup.operations.length > 1 &&
-        getProperty('lightburn0500GroupOperations')
+        operation.shapeSets.length > 1 &&
+        getProperty('lightburn0600GroupShapes')
       ) {
         writeXMLClose();
         writeXMLClose();
       }
     }
 
-    // close the layer group if created
-    if (projLayer.operationSets.length > 1 && projLayer.index != -1) {
+    // if we grouped these operations, close the group now
+    if (
+      opGroup.operations.length > 1 &&
+      getProperty('lightburn0500GroupOperations')
+    ) {
       writeXMLClose();
       writeXMLClose();
     }
+  }
+
+  // close the layer group if created
+  if (
+    projLayer.operationSets.length > 1 &&
+    projLayer.index != -1 &&
+    !redirect
+  ) {
+    writeXMLClose();
+    writeXMLClose();
   }
 }
 
 /**
  * Writes the LightBurn (.lbrn) trailer information, including optionally adding notes and
  * closing off the LightBurnProject section opened in `writeHeader`.
- *
- * Notes are injected (if requested in post preferences by the user) using the `notes` variable.
  */
 function writeTrailer() {
   const includeNotes = getProperty('lightburn0100IncludeNotes');
@@ -187,9 +199,10 @@ function writeTrailer() {
       showOnLoad = notesImportant;
     else if (includeNotes == INCLUDE_NOTES_SHOW) showOnLoad = true;
 
+    const setupNotes = notes.concat(generateLayerNotes());
     writeXML('Notes', {
       ShowOnLoad: showOnLoad ? 1 : 0,
-      Notes: notes,
+      Notes: notes + setupNotes.join("\n"),
     });
   }
 
@@ -197,38 +210,17 @@ function writeTrailer() {
 }
 
 /**
- * Add a line to the LightBurn notes field.
+ * Write a comment formatted for XML to the file including a newine at the end.  Supports template 
+ * strings (see `format`)
  *
- * @param template Template comment to format and write to the notes field
- * @param parameters Optional key/value dictionary with parameters from template (such as {name})
- * @param important If the note is "important" (show notes in LightBurn when INCLUDE_NOTES_SHOW_IMPORTANT); optional, default `false`
- */
-function writeNote(template, parameters, important) {
-  if (important === true) notesImportant = true;
-  const text = format(template, parameters);
-  notes += text + '\n';
-}
-
-/**
- * Write a line to the comments as well as add it to LightBurn file notes
- *
- * @param template Template comment to format and write to the comments and notes field
+ * @param template Message to write to the XML file as a comment (or blank line if empty or blank)
  * @param parameters Optional key/value dictionary with parameters from template (such as {name})
  */
-function writeCommentAndNote(template, parameters) {
+function writeCommentLine(template, parameters) {
   const text = format(template, parameters);
-  writeComment(text);
-  writeNote(text);
-}
+  text = text.replace(/[ \n]+$/, '');
 
-/**
- * Write a comment formatted for XML to the file including a newine at the end.  User preferences
- * determines the detail level of comments.  Supports template strings (see `format`)
- *
- * @param text Message to write to the XML file as a comment (or blank line if empty or blank)
- */
-function writeCommentLine(text) {
-  if (text == '\n' || text == '') writeln('');
+  if (text == '') writeln('');
   else writeBlock('<!-- ' + text + ' -->');
 }
 
@@ -236,9 +228,10 @@ function writeCommentLine(text) {
  * Adds the <CutSetting> tags for all LightBurn layers as well as update notes to describe
  * the layers
  */
-function writeCutSettings() {
-  writeNote('');
-  writeNote('Layers:', false);
+function generateLayerNotes() {
+  const result = [];
+
+  result.push('Layers:');
 
   for (
     let cutSettingsIndex = 0;
@@ -247,24 +240,15 @@ function writeCutSettings() {
   ) {
     const cutSetting = project.cutSettings[cutSettingsIndex];
 
-    writeNote('  ' + localize('{layer}: {name}'), {
+    result.push(format('  ' + localize('{layer}: {name}'), {
       layer: formatLeadingZero.format(cutSetting.index),
       name: cutSetting.name,
-    });
+    }));
 
     if (cutSetting.customCutSetting) {
-      writeNote(
+      result.push(format(
         '    ' + localize('Settings overridden with custom CutSetting property')
-      );
-      writeComment(
-        localize(
-          'CutSetting {layer}: Settings overridden with custom CutSetting property'
-        ),
-        {
-          layer: formatLeadingZero.format(cutSetting.index),
-        },
-        COMMENT_DETAIL
-      );
+      ));
     } else {
       const laserNames = {};
       laserNames[LASER_ENABLE_OFF] = localize('lasers off');
@@ -286,7 +270,7 @@ function writeCutSettings() {
       }
 
       if (cutSetting.laserEnable !== LASER_ENABLE_OFF) {
-        writeNote(
+        result.push(format(
           '    ' +
             localize(
               '{mode} running {min}-{max}% (scale {scale}%) at {speed} using {lasers} (air {air}, Z offset {zOffset}, passes {passes}, z-step {zStep})'
@@ -303,39 +287,27 @@ function writeCutSettings() {
             scale: cutSetting.powerScale,
             mode: layerMode,
           }
-        );
-        // format for comments
-        writeComment(
-          'CutSetting (layer) {id}: {mode} running {min}-{max}% (scale {scale}%) at {speed} using {lasers} (air {air}, Z offset {zOffset}, passes {passes}, z step {zStep}) [inherited from {source}]',
-          {
-            id: formatLeadingZero.format(cutSetting.index),
-            min: cutSetting.minPower,
-            max: cutSetting.maxPower,
-            source: cutSetting.powerSource,
-            speed: speedToUnits(cutSetting.speed),
-            lasers: laserNames[cutSetting.laserEnable],
-            air: cutSetting.useAir ? localize('on') : localize('off'),
-            zOffset: cutSetting.zOffset,
-            passes: cutSetting.passes,
-            zStep: cutSetting.zStep,
-            scale: cutSetting.powerScale,
-            mode: layerMode,
-          },
-          COMMENT_DETAIL
-        );
+        ));
       } else {
         // laser is off
-        writeNote('    ' + localize('Output turned off'));
-        // format for comments
-        writeComment(
-          'Layer {id}: Output turned off',
-          {
-            id: cutSetting.index,
-          },
-          COMMENT_DETAIL
-        );
+        result.push(format('    ' + localize('Output turned off')));
       }
     }
+  }
+  return result;
+}
+
+/**
+ * Adds the <CutSetting> tags for all LightBurn layers as well as update notes to describe
+ * the layers
+ */
+function writeCutSettings() {
+  for (
+    let cutSettingsIndex = 0;
+    cutSettingsIndex < project.cutSettings.length;
+    ++cutSettingsIndex
+  ) {
+    const cutSetting = project.cutSettings[cutSettingsIndex];
 
     // if not custom, generate the cut setting
     if (!cutSetting.customCutSetting) {
@@ -430,7 +402,7 @@ function writeShapePath(shape) {
   // fixes this)
   let commentOutShape = false;
   if (shape.cutSetting.layerMode != LAYER_MODE_LINE && !shape.closed) {
-    writeComment(
+    writeCommentLine(
       'Removing shape as LightBurn generates warnings and removes unclosed fill shapes'
     );
     commentOutShape = true;

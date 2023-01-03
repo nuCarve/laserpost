@@ -58,6 +58,7 @@ const sourceFiles = [
   { file: 'xml.js', macro: undefined },
   { file: 'xmlState.js', macro: undefined },
   { file: 'debug.js', macro: undefined },
+  { file: 'utilities.js', macro: undefined },
   { file: 'arcToBezier.js', macro: undefined },
 ];
 

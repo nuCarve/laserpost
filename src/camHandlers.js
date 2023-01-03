@@ -22,33 +22,44 @@ function onOpen() {
     y: getProperty('work0300OffsetX'),
   };
 
-  // emit the the required file header
+  // emit the the required file header (for LightBurn, we must do this early to avoid generating too
+  // many comments before the LightBurn thumbnail, which causes LightBurn to crash)
   writeFileHeader();
 
+  // build up project notes
+   generateProjectNotes();
+}
+
+
+/**
+ * Generate notes that describe the project setup
+ */
+function generateProjectNotes() {
   // if we have a program name/comment, add it to the file as comments and in notes
   if (programName || programComment) {
-    writeCommentAndNote(localize('Program'));
+    appendNote(localize('Program'));
     if (programName)
-      writeCommentAndNote('  ' + localize('Name') + ': ' + programName);
+      appendNote('  ' + localize('Name') + ': ' + programName)
     if (programComment)
-      writeCommentAndNote('  ' + localize('Comment') + ': ' + programComment);
+      appendNote('  ' + localize('Comment') + ': ' + programComment)
   }
 
   // dump machine configuration
   var vendor = machineConfiguration.getVendor();
   var model = machineConfiguration.getModel();
-  var description = machineConfiguration.getDescription();
 
-  writeCommentAndNote(localize('Machine'));
+  appendNote(localize('Machine'));
   if (vendor) {
-    writeCommentAndNote('  ' + localize('Vendor') + ': ' + vendor);
+    appendNote('  ' + localize('Vendor') + ': ' + vendor);
   }
   if (model) {
-    writeCommentAndNote('  ' + localize('Model') + ': ' + model);
+    appendNote('  ' + localize('Model') + ': ' + model);
   }
-  if (description) {
-    writeCommentAndNote('  ' + localize('Description') + ': ' + description);
-  }
+
+  appendNote('')
+  appendNote(generatedBy);
+  appendNote(codeMoreInformation);
+  appendNote('')
 
   // if the user did any laser overrides, include those in the comments
   let laserPowerEtchMin = getProperty('laserPower0100EtchMin');
@@ -63,10 +74,9 @@ function onOpen() {
     laserPowerThroughMax != 0 ||
     laserPowerVaporizeMax != 0
   ) {
-    writeCommentAndNote(localize('Laser power overrides'));
+    appendNote('Laser power overrides');
     if (laserPowerEtchMax != 0)
-      writeCommentAndNote(
-        '  ' +
+      appendNote('  ' +
           localize('Etch power') +
           ': ' +
           laserPowerEtchMin +
@@ -75,11 +85,9 @@ function onOpen() {
           ' - ' +
           laserPowerEtchMax +
           '% ' +
-          localize('(max)')
-      );
+          localize('(max)'));
     if (laserPowerVaporizeMax != 0)
-      writeCommentAndNote(
-        '  ' +
+      appendNote('  ' +
           localize('Vaporize power') +
           ': ' +
           laserPowerVaporizeMin +
@@ -88,10 +96,9 @@ function onOpen() {
           ' - ' +
           laserPowerVaporizeMax +
           '% ' +
-          localize('(max)')
-      );
+          localize('(max)'));
     if (laserPowerThroughMax != 0)
-      writeCommentAndNote(
+      appendNote( 
         '  ' +
           localize('Through power') +
           ': ' +
@@ -101,34 +108,7 @@ function onOpen() {
           ' - ' +
           laserPowerThroughMax +
           '% ' +
-          localize('(max)')
-      );
-  }
-
-  // add comments for tool information
-  var tools = getToolTable();
-  if (tools.getNumberOfTools() > 0) {
-    writeComment(localize('Tools'));
-    for (var toolIndex = 0; toolIndex < tools.getNumberOfTools(); ++toolIndex) {
-      var tool = tools.getTool(toolIndex);
-      const useAir = tool.assistGas.toLowerCase() != localize('none') && tool.assistGas.toLowerCase() != localize('off') && tool.assistGas != '';
-      
-      writeComment(
-        '  ' +
-          localize(
-            'Tool #{num}: {desc} [{type}], min power (pierce)={pierce}%, max power (cut)={cut}%, {air}, kerf width={kerf}mm'
-          ),
-        {
-          num: tool.number,
-          desc: tool.getDescription(),
-          type: getToolTypeName(tool.type),
-          pierce: tool.piercePower,
-          cut: tool.cutPower,
-          kerf: tool.getKerfWidth(),
-          air: useAir ? localize('air on') : localize('air off')
-        }
-      );
-    }
+          localize('(max)'));
   }
 }
 
@@ -138,7 +118,7 @@ function onOpen() {
  * @param message Comment to add to the file.
  */
 function onComment(message) {
-  writeComment(message);
+  debugLog(message);
 }
 
 /**
@@ -210,7 +190,10 @@ function onSection() {
       useAir = true;
       break;
     case USE_AIR_ASSIST_GAS:
-      useAir = tool.assistGas.toLowerCase() != localize('none') && tool.assistGas.toLowerCase() != localize('off') && tool.assistGas != '';
+      useAir =
+        tool.assistGas.toLowerCase() != localize('none') &&
+        tool.assistGas.toLowerCase() != localize('off') &&
+        tool.assistGas != '';
       break;
   }
 
@@ -241,7 +224,7 @@ function onSection() {
         laserEnable = LASER_ENABLE_1;
         break;
       case 2:
-        laserEnable = LASER_ENABLE_2
+        laserEnable = LASER_ENABLE_2;
         break;
       case 3:
         laserEnable = LASER_ENABLE_BOTH;
@@ -250,10 +233,12 @@ function onSection() {
         laserEnable = LASER_ENABLE_OFF;
         break;
       default:
-        writeNote('', {}, true);
-        writeCommentAndNote('WARNING: Operation "{name}" has Laser Enable set to "Use tool setting" but tool Pierce Time ({value}) is invalid.',
-        { name: operationName, value: tool.getPierceTime() });
-        writeCommentAndNote("         For safety, setting layer to laser off.");
+        appendNote('', {}, true);
+        appendNote(
+          'WARNING: Operation "{name}" has Laser Enable set to "Use tool setting" but tool Pierce Time ({value}) is invalid.',
+          { name: operationName, value: tool.getPierceTime() }
+        );
+        appendNote('         For safety, setting layer to laser off.');
         laserEnable = LASER_ENABLE_OFF;
         break;
     }
@@ -322,7 +307,7 @@ function onSection() {
   }
 
   // include comments about the group and power being used
-  writeComment(
+  debugLog(
     'Operation: "{name}" using group "{group}"',
     {
       name: operationName,
@@ -332,13 +317,13 @@ function onSection() {
   );
 
   if (customCutSettingXML)
-    writeComment(
+    debugLog(
       'Settings: Custom CutSetting XML:\n${xml}',
       { xml: customCutSettingXML },
       COMMENT_DEBUG
     );
   else
-    writeComment(
+    debugLog(
       'Settings: {min}-{max}% ({source}), layer mode: {mode}, laser enable: {enable}, power scale: {scale}, air: {air}, z-offset: {zOffset}, passes: {passes}, z-step: {zStep}',
       {
         min: minPower,
@@ -374,7 +359,7 @@ function onLinear(x, y, z, feed) {
 
   // is laser currently on?  If not, we ignore this request (other than debugging logic)
   if (currentPower) {
-    writeComment(
+    debugLog(
       'onLinear LASER: [{x}, {y}] at {feed} mm/min',
       {
         x: formatPosition.format(x),
@@ -392,12 +377,12 @@ function onLinear(x, y, z, feed) {
       feed: feed,
     });
   } else {
-    writeComment(
+    debugLog(
       'onLinear MOVE: [{x}, {y}] at {feed} mm/min',
       {
         x: formatPosition.format(x),
         y: formatPosition.format(y),
-        feed: formatSpeed.format(feed)
+        feed: formatSpeed.format(feed),
       },
       COMMENT_INSANE
     );
@@ -450,7 +435,7 @@ function onCircular(clockwise, cx, cy, cz, x, y, z, feed) {
   x += workspaceOffsets.x;
   y += workspaceOffsets.y;
 
-  writeComment(
+  debugLog(
     'onCircular: {clockwise} {fullSemi} [{ex}, {ey}] center [{cx}, {cy}], feed={feed} mm/min',
     {
       clockwise: clockwise ? 'CW' : 'CCW',
@@ -484,7 +469,7 @@ function onCircular(clockwise, cx, cy, cz, x, y, z, feed) {
  * @param command Command to process, such as COMMAND_STOP
  */
 function onCommand(command) {
-  writeComment(
+  debugLog(
     'onCommand: {id} ({command})',
     {
       command: command,
@@ -509,7 +494,7 @@ function onCommand(command) {
  * onSectionEnd is called by CAM when the current operation is done.
  */
 function onSectionEnd() {
-  writeComment('onSectionEnd', {}, COMMENT_DEBUG);
+  debugLog('onSectionEnd', {}, COMMENT_DEBUG);
 }
 
 /**
@@ -518,7 +503,7 @@ function onSectionEnd() {
  */
 function onClose() {
   // include some debugging information
-  writeComment('onClose', {}, COMMENT_DEBUG);
+  debugLog('onClose', {}, COMMENT_DEBUG);
 
   // trace the stock outline
   if (getProperty('work0100TraceStock')) traceStockOutline();
@@ -528,9 +513,38 @@ function onClose() {
   // process all groups, converting from CAM coordinates to LightBurn
   groupsToProject();
 
-  // render the file
+  // determine if we are doing file redirection
+  const redirect =
+    getProperty('lightburn0500Grouping') == GROUPING_BY_LAYER_FILE;
+
+  // write the file header (this goes into the first file, if multiple files are used)
   writeHeader();
-  writeShapes();
+
+  // process all layers, potentially breaking them out into different files
+  for (let layer = 0; layer < project.layers.length; ++layer) {
+    // redirect if after the first layer and using redirection
+    if (layer > 0 && redirect) {
+      const path = FileSystem.getCombinedPath(
+        FileSystem.getFolderPath(getOutputPath()),
+        programName + '-' + layer + '.' + extension
+      );
+      redirectToFile(path);
+      writeFileHeader();
+      writeHeader();
+    }
+
+    // render the layer
+    writeShapes(layer, redirect);
+
+    // todo: issue: notes on SVG does another redirect, breaking our redirection
+    // close file redirect if used
+    if (layer > 0 && redirect) {
+      writeTrailer();
+      closeRedirection();
+    }
+  }
+
+  // write the trailer (if multi-file, this will end up in the original, first file)
   writeTrailer();
 
   // save our state to the persistent state file (if changed)

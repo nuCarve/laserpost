@@ -257,7 +257,7 @@ function identifySegments(operation) {
           type: SEGMENT_TYPE_CIRCLE,
         });
 
-        writeComment(
+        debugLog(
           'identifySegments: Breaking off closed segment (circle): {start} to {end}',
           {
             start: opSegmentIndex - 1,
@@ -274,7 +274,7 @@ function identifySegments(operation) {
   }
 
   // dump the segments into insane comments
-  writeComment('identifySegments: Segmentation list:', {}, COMMENT_INSANE);
+  debugLog('identifySegments: Segmentation list:', {}, COMMENT_INSANE);
   for (let segmentIndex = 0; segmentIndex < segments.length; ++segmentIndex) {
     let type;
     switch (segments[segmentIndex].type) {
@@ -290,7 +290,7 @@ function identifySegments(operation) {
         });
         break;
     }
-    writeComment(
+    debugLog(
       '  #{num}: {type} {start} to {end} ({openClosed})',
       {
         num: segmentIndex,
@@ -348,7 +348,7 @@ function scanSegmentForClosure(startIndex, endIndex, operation) {
             end: startScanIndex,
             closed: false,
           });
-          writeComment(
+          debugLog(
             'scanSegmentForClosure: Break off open segment (before closure): {start} to {end}',
             { start: startIndex, end: startScanIndex },
             COMMENT_INSANE
@@ -357,7 +357,7 @@ function scanSegmentForClosure(startIndex, endIndex, operation) {
 
         // break off this closed segment
         result.push({ start: startScanIndex, end: endScanIndex, closed: true });
-        writeComment(
+        debugLog(
           'scanSegmentForClosure: Break off closed segment: {start} to {end}',
           { start: startScanIndex, end: endScanIndex },
           COMMENT_INSANE
@@ -370,7 +370,7 @@ function scanSegmentForClosure(startIndex, endIndex, operation) {
             end: endIndex,
             closed: false,
           });
-          writeComment(
+          debugLog(
             'scanSegmentForClosure: Break off open segment (after closure): {start} to {end}',
             { start: endScanIndex, end: endIndex },
             COMMENT_INSANE
@@ -381,7 +381,7 @@ function scanSegmentForClosure(startIndex, endIndex, operation) {
     }
   }
   // none found
-  writeComment(
+  debugLog(
     'scanSegmentForClosure: Fully open segment: {start} to {end}',
     { start: startIndex, end: endIndex },
     COMMENT_INSANE
@@ -484,7 +484,7 @@ function generateEllipseShape(
   shape.closed = true;
 
   // debug info
-  writeComment(
+  debugLog(
     'generateEllipseShape: converting to circle on segments {segmentStart}-{segmentEnd}: [{startX}, {startY}] center [{centerX}, {centerY}] with radius {radius}',
     {
       startX: formatPosition.format(start.x),
@@ -528,7 +528,7 @@ function generatePathShape(
   shape.closed = segmentClosed;
 
   // debug info
-  writeComment(
+  debugLog(
     'generatePathShape: converting to paths on segments {segmentStart}-{segmentEnd}',
     {
       segmentStart: segmentStart,
@@ -560,7 +560,7 @@ function generatePathShape(
       case PATH_TYPE_MOVE:
         break;
       case PATH_TYPE_LINEAR:
-        writeComment(
+        debugLog(
           'LINEAR Vector push: [{x}, {y}]',
           {
             x: formatPosition.format(position.x),
@@ -577,7 +577,7 @@ function generatePathShape(
 
         // add a primitive connecting the vectors, except if we are on the first one (we don't have a line yet)
         if (!firstSegment) {
-          writeComment(
+          debugLog(
             'LINEAR Primitive push: {start}-{end}',
             {
               start: formatPosition.format(shape.vectors.length - 2),
@@ -596,7 +596,7 @@ function generatePathShape(
 
         break;
       case PATH_TYPE_SEMICIRCLE:
-        writeComment(
+        debugLog(
           'Semicircle, start {clockwise} [{startX},{startY}], end [{x}, {y}], center [{centerX}, {centerY}]',
           {
             startX: formatPosition.format(position.x),
@@ -618,7 +618,7 @@ function generatePathShape(
         );
 
         // debug info
-        writeComment(
+        debugLog(
           'generatePathShape: converting to bezier [{startX}, {startY}] to [{x}, {y}] center [{centerX}, {centerY}]',
           {
             startX: formatPosition.format(position.x),
@@ -643,7 +643,7 @@ function generatePathShape(
           let c0 = { x: curves[curveIndex].x1, y: curves[curveIndex].y1 };
 
           // push this vector into the list
-          writeComment(
+          debugLog(
             'CURVE Vector push: [{x}, {y}]',
             {
               x: formatPosition.format(curvePosition.x),
@@ -662,7 +662,7 @@ function generatePathShape(
 
           // add a primitive to connect them, except if we are on the first one (we don't have a line yet)
           if (!firstSegment) {
-            writeComment(
+            debugLog(
               'CURVE Primitive push: {start}-{end}',
               {
                 start: formatPosition.format(shape.vectors.length - 2),
@@ -694,7 +694,7 @@ function generatePathShape(
   // segment, add the final vector and primitive to connect them.
   if (segmentClosed) {
     // closed - so connect primitive to start vector as our ending point
-    writeComment(
+    debugLog(
       'CLOSE Primitive push: {start}-{end}',
       { start: formatPosition.format(shape.vectors.length - 1), end: 0 },
       COMMENT_INSANE
@@ -769,7 +769,7 @@ function circularToBezier(startPoint, endPoint, centerPoint, clockwise) {
   const ccwLargeArc = angleStartCenterEnd > Math.PI;
   const largeArcFlag = clockwise ? !ccwLargeArc : ccwLargeArc;
 
-  writeComment(
+  debugLog(
     'circularToBezier: [{px}, {py}]-[{cx},{cy}], {largeArcFlag} arc',
     {
       px: formatPosition.format(startPoint.x),
@@ -824,7 +824,7 @@ function getGroupByName(groupName, defaults) {
       }
     }
   if (!group) {
-    writeComment(
+    debugLog(
       'getGroupByName: Create new group "{group}"',
       { group: groupName },
       COMMENT_DEBUG
@@ -832,7 +832,7 @@ function getGroupByName(groupName, defaults) {
     groups.push(defaults);
     group = groups[groups.length - 1];
   } else
-    writeComment(
+    debugLog(
       'getGroupByName: Join existing group "{group}"',
       { group: groupName },
       COMMENT_DEBUG
@@ -989,69 +989,4 @@ function traceStockOutline() {
     y: stock.minY + workspaceOffsets.y,
     feed: STOCK_FEED_RATE,
   });
-}
-
-/**
- * Compare two numbers to see if they are nearly equal, based on the accuracy defined by `accuracyInMM`
- *
- * @param a First numeric value to compare
- * @param b Second numeric value to compare
- * @returns `true` if they are the same, within the accuracy defined by the global constant `accuracyInMM`
- */
-function closeEquals(a, b) {
-  return Math.abs(a - b) <= accuracyInMM;
-  // return Math.round(a / accuracyInMM) == Math.round(b / accuracyInMM);
-}
-
-/**
- * Write a comment formatted for XML to the file including a newine at the end.  User preferences
- * determines the detail level of comments.  Supports template strings (see `format`)
- *
- * @param template Template comment to format and write to the file
- * @param parameters Optional key/value dictionary with parameters from template (such as {name})
- * @param level Optional level of the comment (COMMENT_NORMAL, COMMENT_DETAIL, COMMENT_DEBUG, COMMENT_INSANE); defaults to COMMENT_NORMAL
- */
-function writeComment(template, parameters, level) {
-  const text = format(template, parameters);
-  text = text.replace(/[ \n]+$/, '');
-
-  if (level === undefined) level = COMMENT_NORMAL;
-  switch (getProperty('lightburn0200IncludeComments')) {
-    case INCLUDE_COMMENTS_NONE:
-      return;
-    case INCLUDE_COMMENTS_NORMAL:
-      if (level > COMMENT_NORMAL) return;
-      break;
-    case INCLUDE_COMMENTS_DETAILED:
-      if (level > COMMENT_DETAIL) return;
-      break;
-    case INCLUDE_COMMENTS_DEBUG:
-      if (level > COMMENT_DEBUG) return;
-      break;
-    case INCLUDE_COMMENTS_INSANE:
-      break;
-  }
-
-  if (text == '\n' || text == '') writeCommentLine('');
-  else {
-    var commentPrefix = '';
-    if (level == COMMENT_DEBUG) commentPrefix = '+ ';
-    else if (level == COMMENT_INSANE) commentPrefix = '! ';
-    writeCommentLine(commentPrefix + text);
-  }
-}
-
-/**
- * Converts a speed (in mm/min) to a string used for comments and notes according to the user
- * selected preference.
- *
- * @param speed Speed (already in the correct units)
- * @returns String with "### mm/min" or "### mm/sec"
- */
-function speedToUnits(speedInMMPM) {
-  const speedUnits = getProperty('machine0100SpeedUnits');
-  if (speedUnits == SPEED_UNITS_MMPM)
-    return formatSpeed.format(speedInMMPM) + ' ' + localize('mm/min');
-
-  return formatSpeed.format(speedInMMPM) + ' ' + localize('mm/sec');
 }

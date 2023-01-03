@@ -72,7 +72,6 @@ properties = {
     values: [
       { title: localize('Disable'), id: INCLUDE_COMMENTS_NONE },
       { title: localize('Normal'), id: INCLUDE_COMMENTS_NORMAL },
-      { title: localize('Detailed'), id: INCLUDE_COMMENTS_DETAILED },
       { title: localize('Debug'), id: INCLUDE_COMMENTS_DEBUG },
       { title: localize('Insane'), id: INCLUDE_COMMENTS_INSANE },
     ],
