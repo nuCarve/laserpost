@@ -43,14 +43,12 @@ properties = {
   //
   laserpost0100IncludeNotes: {
     title: localize('Notes'),
-    description: localize(
-      'Detail level of generated setup notes.'
-    ),
+    description: localize('Detail level of generated setup notes.'),
     group: 'groupLaserPost',
     type: 'enum',
     values: [
       { title: localize('Disable'), id: INCLUDE_NOTES_NONE },
-      // #if SVG
+      // #if LBRN
       { title: localize('Hidden'), id: INCLUDE_NOTES_HIDDEN },
       // #endif
       {
@@ -59,7 +57,12 @@ properties = {
       },
       { title: localize('Always show'), id: INCLUDE_NOTES_SHOW },
     ],
-    value: INCLUDE_NOTES_SHOW_IMPORTANT,
+    value:
+      // # if LBRN
+      INCLUDE_NOTES_SHOW_IMPORTANT,
+    // #else
+    INCLUDE_NOTES_SHOW,
+    // #endif
     scope: 'post',
   },
   laserpost0200IncludeComments: {
@@ -86,9 +89,9 @@ properties = {
     group: 'groupLaserPost',
     type: 'enum',
     values: [
-      { title: localize("Group by operation"), id: GROUPING_BY_OPERATION },
-      { title: localize("Group by layer"), id: GROUPING_BY_LAYER },
-      { title: localize("File per layer"), id: GROUPING_BY_LAYER_FILE },
+      { title: localize('Group by operation'), id: GROUPING_BY_OPERATION },
+      { title: localize('Group by layer'), id: GROUPING_BY_LAYER },
+      { title: localize('File per layer'), id: GROUPING_BY_LAYER_FILE },
     ],
     value: GROUPING_BY_OPERATION,
     scope: 'post',

@@ -201,8 +201,6 @@ function onProjectComplete(redirect) {
 
     // write notes to the <programName>-notes.txt file (we could write to svg using <text>, but
     // many laser programs either render these poorly or fail to load them at all)
-    // todo: adjusting "show on load" (etc) naming, and remove "hidden" (for SVG)
-    // todo: Consider changing default for show to always for svg only
     const path = FileSystem.getCombinedPath(
       FileSystem.getFolderPath(getOutputPath()),
       programName + '-notes.txt'
