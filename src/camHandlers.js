@@ -24,7 +24,7 @@ function onOpen() {
 
   // emit the the required file header (for LightBurn, we must do this early to avoid generating too
   // many comments before the LightBurn thumbnail, which causes LightBurn to crash)
-  writeFileHeader();
+  onFileCreate();
 
   // build up project notes
    generateProjectNotes();
@@ -518,7 +518,7 @@ function onClose() {
     getProperty('lightburn0500Grouping') == GROUPING_BY_LAYER_FILE;
 
   // write the file header (this goes into the first file, if multiple files are used)
-  writeHeader();
+  onWriteHeader();
 
   // process all layers, potentially breaking them out into different files
   for (let layer = 0; layer < project.layers.length; ++layer) {
@@ -529,23 +529,26 @@ function onClose() {
         programName + '-' + layer + '.' + extension
       );
       redirectToFile(path);
-      writeFileHeader();
-      writeHeader();
+      onFileCreate();
+      onWriteHeader();
     }
 
     // render the layer
-    writeShapes(layer, redirect);
+    onWriteShapes(layer, redirect);
 
     // todo: issue: notes on SVG does another redirect, breaking our redirection
     // close file redirect if used
     if (layer > 0 && redirect) {
-      writeTrailer();
+      onWriteTrailer();
       closeRedirection();
     }
   }
 
   // write the trailer (if multi-file, this will end up in the original, first file)
-  writeTrailer();
+  onWriteTrailer();
+
+  // project complete
+  onProjectComplete();
 
   // save our state to the persistent state file (if changed)
   stateSave();

@@ -12,14 +12,14 @@ let activePath;
 /**
  * Write the generic SVG file header
  */
-function writeFileHeader() {
+function onFileCreate() {
   writeln('<?xml version="1.0" encoding="utf-8"?>');
 }
 
 /**
  * Writes the SVG (.svg) header information
  */
-function writeHeader() {
+function onWriteHeader() {
   // let minX = getGlobalParameter('stock-lower-x');
   // let minY = getGlobalParameter('stock-lower-y');
   let maxX = getGlobalParameter('stock-upper-x');
@@ -50,11 +50,11 @@ function writeHeader() {
 
 /**
  * Writes the shapes (<Shape>) to the SVG file, including grouping as necessary
- * 
+ *
  * @param layer Layer ID to generate
  * @param redirect Boolean indicates if we are using file redirection or not (per layer redirection)
  */
-function writeShapes(layer, redirect) {
+function onWriteShapes(layer, redirect) {
   const projLayer = project.layers[layer];
 
   // create a group if there is more than one item in the layer, we are grouping by layer and
@@ -64,7 +64,9 @@ function writeShapes(layer, redirect) {
     projLayer.index != -1 &&
     !redirect
   ) {
-    writeCommentLine(localize('Layer group: "{name}"'), { name: projLayer.name });
+    writeCommentLine(localize('Layer group: "{name}"'), {
+      name: projLayer.name,
+    });
 
     writeXML('g', { id: projLayer.name }, true);
     writeXML('desc', {
@@ -168,12 +170,17 @@ function writeShapes(layer, redirect) {
 }
 
 /**
- * Writes the SVG trailer information, including optionally adding notes and
- * closing off the XML opened in `writeHeader`.
- *
- * Notes are injected (if requested in post preferences by the user) using the `notes` variable.
+ * Writes the SVG trailer information by closing off the XML opened in `onWriteHeader`.
  */
-function writeTrailer() {
+function onWriteTrailer() {
+  writeXMLClose();
+}
+
+/**
+ * Project complete (all files written) - use this event to write the final setup notes file
+ */
+function onProjectComplete() {
+  // determine if we include the setup notes file
   const includeNotes = getProperty('lightburn0100IncludeNotes');
   if (includeNotes != INCLUDE_NOTES_NONE && notes != '') {
     // determine if we should tell the user via a warning dialog that the notes are available
@@ -182,12 +189,6 @@ function writeTrailer() {
       showNotesWarning = notesImportant;
     else if (includeNotes == INCLUDE_NOTES_SHOW) showNotesWarning = true;
 
-  // writeXMLClose();
-  writeXMLClose();
-}
-
-// todo
-function SOMETING() {
     // write notes to the <programName>-notes.txt file (we could write to svg using <text>, but
     // many laser programs either render these poorly or fail to load them at all)
     // todo: adjusting "show on load" (etc) naming, and remove "hidden" (for SVG)
@@ -212,16 +213,14 @@ function SOMETING() {
       );
     else if (showNotesWarning)
       showWarning(
-        localize(
-          'Layer setup notes have been generated in the file:\n\n{path}'
-        ),
+        localize('Layer setup notes have been generated in the file:\n\n{path}'),
         { path: path }
       );
   }
 }
 
 /**
- * Write a comment formatted for XML to the file including a newine at the end.  Supports template 
+ * Write a comment formatted for XML to the file including a newine at the end.  Supports template
  * strings (see `format`)
  *
  * @param template Message to write to the XML file as a comment (or blank line if empty or blank)
@@ -237,7 +236,7 @@ function writeCommentLine(template, parameters) {
 
 /**
  * Generates a string array with notes about the layer setup
- * 
+ *
  * @returns String array with layer notes
  */
 function generateLayerNotes() {
@@ -252,11 +251,13 @@ function generateLayerNotes() {
   ) {
     const cutSetting = project.cutSettings[cutSettingsIndex];
 
-    result.push(format('  ' + localize('Layer {layer} ({color}): {name}'), {
-      layer: cutSetting.index,
-      color: cutIndexToColorName(cutSetting.index),
-      name: cutSetting.name,
-    }));
+    result.push(
+      format('  ' + localize('Layer {layer} ({color}): {name}'), {
+        layer: cutSetting.index,
+        color: cutIndexToColorName(cutSetting.index),
+        name: cutSetting.name,
+      })
+    );
 
     const laserNames = {};
     laserNames[LASER_ENABLE_OFF] = localize('lasers off');
@@ -278,24 +279,26 @@ function generateLayerNotes() {
     }
 
     if (cutSetting.laserEnable !== LASER_ENABLE_OFF) {
-      result.push(format(
-        '    ' +
-          localize(
-            '{mode} running {min}% min / {max}% max (scale {scale}%) at {speed} using {lasers} (air {air}, Z offset {zOffset}, passes {passes}, z-step {zStep})'
-          ),
-        {
-          min: cutSetting.minPower,
-          max: cutSetting.maxPower,
-          speed: speedToUnits(cutSetting.speed),
-          lasers: cutSetting.laserEnable, //laserNames[cutSetting.laserEnable],
-          air: cutSetting.useAir ? localize('on') : localize('off'),
-          zOffset: cutSetting.zOffset,
-          passes: cutSetting.passes,
-          zStep: cutSetting.zStep,
-          scale: cutSetting.powerScale,
-          mode: layerMode,
-        }
-      ));
+      result.push(
+        format(
+          '    ' +
+            localize(
+              '{mode} running {min}% min / {max}% max (scale {scale}%) at {speed} using {lasers} (air {air}, Z offset {zOffset}, passes {passes}, z-step {zStep})'
+            ),
+          {
+            min: cutSetting.minPower,
+            max: cutSetting.maxPower,
+            speed: speedToUnits(cutSetting.speed),
+            lasers: cutSetting.laserEnable, //laserNames[cutSetting.laserEnable],
+            air: cutSetting.useAir ? localize('on') : localize('off'),
+            zOffset: cutSetting.zOffset,
+            passes: cutSetting.passes,
+            zStep: cutSetting.zStep,
+            scale: cutSetting.powerScale,
+            mode: layerMode,
+          }
+        )
+      );
     } else {
       // laser is off
       result.push(format('    ' + localize('Laser turned off')));

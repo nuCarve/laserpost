@@ -11,7 +11,7 @@
  * comments due to a bug in LightBurn that causes it to corrupt if the thumbnail is
  * not near the top of the file.
  */
-function writeFileHeader() {
+function onFileCreate() {
   // locate the first section and extract the stock origin information to define the LightBurn mirror X/Y header
   const section = getSection(0);
   const mirror = {
@@ -42,7 +42,7 @@ function writeFileHeader() {
 /**
  * Writes the LightBurn (.lbrn) header information
  */
-function writeHeader() {
+function onWriteHeader() {
   // output notes, including layer notes, to the header
   const headerNotes = notes.concat(generateLayerNotes());
   for (let noteIndex = 0; noteIndex < headerNotes.length; ++noteIndex)
@@ -82,7 +82,7 @@ function writeHeader() {
  * @param layer Layer ID to generate
  * @param redirect Boolean indicates if we are using file redirection or not (per layer redirection)
  */
-function writeShapes(layer, redirect) {
+function onWriteShapes(layer, redirect) {
   const projLayer = project.layers[layer];
 
   // create a group if there is more than one item in the layer, we are grouping by layer and
@@ -188,9 +188,9 @@ function writeShapes(layer, redirect) {
 
 /**
  * Writes the LightBurn (.lbrn) trailer information, including optionally adding notes and
- * closing off the LightBurnProject section opened in `writeHeader`.
+ * closing off the LightBurnProject section opened in `onWriteHeader`.
  */
-function writeTrailer() {
+function onWriteTrailer() {
   const includeNotes = getProperty('lightburn0100IncludeNotes');
   if (includeNotes != INCLUDE_NOTES_NONE && notes != '') {
     // determine if we cause LightBurn to show notes on file load
