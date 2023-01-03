@@ -307,16 +307,16 @@ properties = {
   op0600LayerMode: {
     title: localize('Layer mode'),
     description: localize(
-      'Selects the layer mode for the layer (Line, Fill or Offset Fill).  If a complex layer setup is needed, including for sub-layers (Multi), see the ' +
-        'property "Custom CutSetting XML".'
+      'Selects the layer mode for the layer (Use cutting mode, Line, Fill or Offset Fill).  Use cutting mode will set to Line for Through, and Fill for etch.'
     ),
     type: 'enum',
     values: [
+      { title: localize('Use cutting mode'), id: LAYER_MODE_INHERIT },
       { title: localize('Line'), id: LAYER_MODE_LINE },
       { title: localize('Fill'), id: LAYER_MODE_FILL },
       { title: localize('Offset Fill'), id: LAYER_MODE_OFFSET_FILL },
     ],
-    value: LAYER_MODE_LINE,
+    value: LAYER_MODE_INHERIT,
     scope: 'operation',
     enabled: 'cutting',
   },

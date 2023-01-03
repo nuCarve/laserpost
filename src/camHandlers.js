@@ -216,7 +216,14 @@ function onSection() {
 
   // collect settings from the user via operation properties
   const powerScale = currentSection.getProperty('op0200PowerScale');
-  const opLayerMode = currentSection.getProperty('op0600LayerMode');
+  let opLayerMode = currentSection.getProperty('op0600LayerMode');
+  if (opLayerMode == LAYER_MODE_INHERIT) {
+    // select fill based on the cutting mode
+    if (currentSection.getJetMode() == JET_MODE_ETCHING)
+      opLayerMode = LAYER_MODE_FILL;
+    else
+      opLayerMode = LAYER_MODE_LINE;
+  }
   const customCutSettingXML = currentSection.getProperty(
     'op0900CustomCutSettingXML'
   );

@@ -39,6 +39,7 @@ const SEGMENT_TYPE_CIRCLE = 'shape-circle';
 const SEGMENT_TYPE_PATH = 'shape-path';
 
 // define enum for layer modes
+const LAYER_MODE_INHERIT = 'inherit';
 const LAYER_MODE_LINE = 'line';
 const LAYER_MODE_FILL = 'fill';
 const LAYER_MODE_OFFSET_FILL = 'offsetFill';
