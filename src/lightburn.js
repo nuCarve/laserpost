@@ -39,6 +39,8 @@ function onFileCreate(layer) {
   writeXML('Thumbnail', {
     Source: lightburnThumbnail(),
   });
+
+  writeln('');
 }
 
 /**
@@ -51,6 +53,7 @@ function onWriteHeader(layer) {
   const headerNotes = notes.concat(generateLayerNotes(layer));
   for (let noteIndex = 0; noteIndex < headerNotes.length; ++noteIndex)
     writeCommentLine(headerNotes[noteIndex]);
+  writeln('');
 
   writeXML('VariableText', {}, true);
   writeXML('Start', { Value: '0' });
@@ -270,13 +273,13 @@ function generateLayerNotes(layer) {
       let layerMode;
       switch (cutSetting.layerMode) {
         case LAYER_MODE_LINE:
-          layerMode = localize('LINE');
+          layerMode = localize('line');
           break;
         case LAYER_MODE_FILL:
-          layerMode = localize('FILL');
+          layerMode = localize('fill');
           break;
         case LAYER_MODE_OFFSET_FILL:
-          layerMode = localize('OFFSET FILL');
+          layerMode = localize('offset fill');
           break;
       }
 
@@ -284,7 +287,7 @@ function generateLayerNotes(layer) {
         result.push(format(
           '    ' +
             localize(
-              '{mode} running {min}-{max}% (scale {scale}%) at {speed} using {lasers} (air {air}, Z offset {zOffset}, passes {passes}, z-step {zStep})'
+              'Fill "{mode}" at power {min}-{max}% (scale {scale}%) and {speed} using {lasers} (air {air}, Z offset {zOffset}, passes {passes}, z-step {zStep})'
             ),
           {
             min: cutSetting.minPower,

@@ -11,7 +11,7 @@ let activePath;
 
 /**
  * Write the generic SVG file header
- * 
+ *
  * @param layer Layer (cutSetting) being generated (-1 for all layers)
  */
 function onFileCreate(layer) {
@@ -22,7 +22,7 @@ function onFileCreate(layer) {
  * Writes the SVG (.svg) header information
  *
  * @param layer Layer (cutSetting) being generated (-1 for all layers)
-*/
+ */
 function onWriteHeader(layer) {
   // let minX = getGlobalParameter('stock-lower-x');
   // let minY = getGlobalParameter('stock-lower-y');
@@ -30,9 +30,11 @@ function onWriteHeader(layer) {
   let maxY = getGlobalParameter('stock-upper-y');
 
   // output notes, including layer notes, to the header
-  const headerNotes = notes.concat(generateLayerNotes(layer));
+  const headerNotes = notes.concat(generateLayerNotes(layer, false));
+  writeln('');
   for (let noteIndex = 0; noteIndex < headerNotes.length; ++noteIndex)
     writeCommentLine(headerNotes[noteIndex]);
+  writeln('');
 
   writeXML(
     'svg',
@@ -175,7 +177,7 @@ function onWriteShapes(layer, redirect) {
 
 /**
  * Writes the SVG trailer information by closing off the XML opened in `onWriteHeader`.
- * 
+ *
  * @param layer Layer (cutSetting) being generated (-1 for all layers)
  */
 function onWriteTrailer(layer) {
@@ -185,9 +187,9 @@ function onWriteTrailer(layer) {
 /**
  * Project complete (all files written) - use this event to write the final setup notes file
  * 
- * @param layer Layer (cutSetting) being generated (-1 for all layers)
+ * @param redirect `true` if redirecting for layer-per-file, `false` if one file holds everything
  */
-function onProjectComplete(layer) {
+function onProjectComplete(redirect) {
   // determine if we include the setup notes file
   const includeNotes = getProperty('lightburn0100IncludeNotes');
   if (includeNotes != INCLUDE_NOTES_NONE && notes != '') {
@@ -206,7 +208,7 @@ function onProjectComplete(layer) {
       programName + '-notes.txt'
     );
     redirectToFile(path);
-    const setupNotes = notes.concat(generateLayerNotes(-1));
+    const setupNotes = notes.concat(generateLayerNotes(-1, redirect));
     for (let noteIndex = 0; noteIndex < setupNotes.length; ++noteIndex)
       writeln(setupNotes[noteIndex]);
     closeRedirection();
@@ -221,7 +223,9 @@ function onProjectComplete(layer) {
       );
     else if (showNotesWarning)
       showWarning(
-        localize('Layer setup notes have been generated in the file:\n\n{path}'),
+        localize(
+          'Layer setup notes have been generated in the file:\n\n{path}'
+        ),
         { path: path }
       );
   }
@@ -246,13 +250,15 @@ function writeCommentLine(template, parameters) {
  * Generates a string array with notes about the layer setup
  *
  * @param layer Layer (cutSetting) being generated (-1 for all layers)
+ * @param showFilename `true` to show filename with layers, `false` to show colors
  * @returns String array with layer notes
  */
-function generateLayerNotes(layer) {
+function generateLayerNotes(layer, showFilename) {
   const result = [];
 
   // get access to the cutSettings based on the layer
-  const cutSettings = (layer == -1) ? project.cutSettings : project.layers[layer].cutSettings;
+  const cutSettings =
+    layer == -1 ? project.cutSettings : project.layers[layer].cutSettings;
 
   result.push('Layers:');
 
@@ -265,14 +271,26 @@ function generateLayerNotes(layer) {
   ) {
     const cutSetting = cutSettings[cutSettingsIndex];
 
-    // todo: Need to add the target filename when multi-file
-    result.push(
-      format('  ' + localize('Layer {layer} ({color}): {name}'), {
-        layer: cutSettingsIndex,
-        color: cutIndexToColorName(cutSetting.index),
-        name: cutSetting.name,
-      })
-    );
+    // determine if we are doing file redirection
+    const redirect =
+      getProperty('lightburn0500Grouping') == GROUPING_BY_LAYER_FILE;
+
+    // include layer details, changing to layer numbers or file names depending on if multiple files are used
+    if (!showFilename)
+      result.push(
+        format('  ' + localize('Layer {layer} ({color}): {name}'), {
+          layer: cutSettingsIndex,
+          color: cutIndexToColorName(cutSetting.index),
+          name: cutSetting.name,
+        })
+      );
+    else
+      result.push(
+        format('  ' + localize('Layer {file}: {name}'), {
+          file: project.layers[cutSettingsIndex].filename,
+          name: cutSetting.name,
+        })
+      );
 
     const laserNames = {};
     laserNames[LASER_ENABLE_OFF] = localize('lasers off');
@@ -283,13 +301,13 @@ function generateLayerNotes(layer) {
     let layerMode;
     switch (cutSetting.layerMode) {
       case LAYER_MODE_LINE:
-        layerMode = localize('CUT');
+        layerMode = localize('cut');
         break;
       case LAYER_MODE_FILL:
-        layerMode = localize('FILL');
+        layerMode = localize('fill');
         break;
       case LAYER_MODE_OFFSET_FILL:
-        layerMode = localize('OUTLINE FILL');
+        layerMode = localize('outline fill');
         break;
     }
 
@@ -298,13 +316,13 @@ function generateLayerNotes(layer) {
         format(
           '    ' +
             localize(
-              '{mode} running {min}% min / {max}% max (scale {scale}%) at {speed} using {lasers} (air {air}, Z offset {zOffset}, passes {passes}, z-step {zStep})'
+              'Fill "{mode}" at power {min}-{max}% (scale {scale}%) and {speed} using {lasers} (air {air}, Z offset {zOffset}, passes {passes}, z-step {zStep})'
             ),
           {
             min: cutSetting.minPower,
             max: cutSetting.maxPower,
             speed: speedToUnits(cutSetting.speed),
-            lasers: cutSetting.laserEnable, //laserNames[cutSetting.laserEnable],
+            lasers: laserNames[cutSetting.laserEnable],
             air: cutSetting.useAir ? localize('on') : localize('off'),
             zOffset: cutSetting.zOffset,
             passes: cutSetting.passes,

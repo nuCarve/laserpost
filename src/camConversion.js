@@ -35,70 +35,89 @@ function groupsToProject() {
   // add operations to the top-level layer grouping
   populateProjectLayers();
 
+  // add filenames and paths for single or multi-file
+  populateFilesAndPath();
+
   // dump the project to comments to assist with debugging problems
   dumpProject();
 }
 
 /**
- * Scan all groups and build out the list of unique layers in use, including setting the index for the 
+ * Scan all groups and build out the list of unique layers in use, including setting the index for the
  * layer (cutSetting) on the operations in the project.
  */
 function createLayers() {
-    // loop through all groups
-    for (let groupIndex = 0; groupIndex < groups.length; ++groupIndex) {
-      const group = groups[groupIndex];
-      // loop through all operations on this group
+  // loop through all groups
+  for (let groupIndex = 0; groupIndex < groups.length; ++groupIndex) {
+    const group = groups[groupIndex];
+    // loop through all operations on this group
+    for (
+      let operationIndex = 0;
+      operationIndex < group.operations.length;
+      ++operationIndex
+    ) {
+      const groupOperation = group.operations[operationIndex];
+      // if no points, skip this one
+      if (groupOperation.paths.length == 0) continue;
+
+      // determine the feedrate to use.  CAM specifies feedrate at the operation level, but only delivers it
+      // during individual movements.  Technically three feedrates are available - cutting, lead-in and lead-out.
+      // Eventually we may build out a unique layer for each speed, but for now we just use the cutting speed.
+      // To find the cutting speed, we pull the value from the interior of the path, as lead-in and lead-out are
+      // always out the "outside" edges. We also scan until we find a value as we may have a MOVE path type which
+      // might not have a feedrate
+      let feedrate = 0;
       for (
-        let operationIndex = 0;
-        operationIndex < group.operations.length;
-        ++operationIndex
+        pathIndex = Math.floor(groupOperation.paths.length / 2);
+        pathIndex < groupOperation.paths.length;
+        ++pathIndex
       ) {
-        const groupOperation = group.operations[operationIndex];
-        // if no points, skip this one
-        if (groupOperation.paths.length == 0) continue;
-
-        // determine the feedrate to use.  CAM specifies feedrate at the operation level, but only delivers it
-        // during individual movements.  Technically three feedrates are available - cutting, lead-in and lead-out.
-        // Eventually we may build out a unique layer for each speed, but for now we just use the cutting speed.
-        // To find the cutting speed, we pull the value from the interior of the path, as lead-in and lead-out are
-        // always out the "outside" edges. We also scan until we find a value as we may have a MOVE path type which
-        // might not have a feedrate
-        let feedrate = 0;
-        for (
-          pathIndex = Math.floor(groupOperation.paths.length / 2);
-          pathIndex < groupOperation.paths.length;
-          ++pathIndex
-        ) {
-          if (groupOperation.paths[pathIndex].feed > 0) {
-            feedrate = groupOperation.paths[pathIndex].feed;
-            break;
-          }
+        if (groupOperation.paths[pathIndex].feed > 0) {
+          feedrate = groupOperation.paths[pathIndex].feed;
+          break;
         }
-
-        // find (or create) a layer (<CutSetting>) for this operation (all shapes within
-        // a CAM operation share the same cut setting)
-        const cutSetting = getCutSetting({
-          name: groupOperation.operationName,
-          minPower: groupOperation.minPower,
-          maxPower: groupOperation.maxPower,
-          speed: feedrate / 60, // LightBurn is mm/sec, CAM is mm/min
-          layerMode: groupOperation.layerMode,
-          laserEnable: groupOperation.laserEnable,
-          powerSource: groupOperation.powerSource,
-          useAir: groupOperation.useAir,
-          zOffset: groupOperation.zOffset,
-          passes: groupOperation.passes,
-          zStep: groupOperation.zStep,
-          kerf: groupOperation.kerf,
-          powerScale: groupOperation.powerScale,
-          customCutSettingXML: groupOperation.customCutSettingXML,
-          customCutSetting: groupOperation.customCutSetting,
-        });
-
-        // add the reference to this cutSetting layer to the operation
-        groupOperation.index = cutSetting.index;
       }
-    }  
+
+      // find (or create) a layer (<CutSetting>) for this operation (all shapes within
+      // a CAM operation share the same cut setting)
+      const cutSetting = getCutSetting({
+        name: groupOperation.operationName,
+        minPower: groupOperation.minPower,
+        maxPower: groupOperation.maxPower,
+        speed: feedrate / 60, // LightBurn is mm/sec, CAM is mm/min
+        layerMode: groupOperation.layerMode,
+        laserEnable: groupOperation.laserEnable,
+        powerSource: groupOperation.powerSource,
+        useAir: groupOperation.useAir,
+        zOffset: groupOperation.zOffset,
+        passes: groupOperation.passes,
+        zStep: groupOperation.zStep,
+        kerf: groupOperation.kerf,
+        powerScale: groupOperation.powerScale,
+        customCutSettingXML: groupOperation.customCutSettingXML,
+        customCutSetting: groupOperation.customCutSetting,
+      });
+
+      // add the reference to this cutSetting layer to the operation
+      groupOperation.cutSetting = cutSetting;
+    }
+  }
+
+  // now go back and loop through everything again, this time adjusting
+  // the index to cutSetting (as the layer order may have changed as
+  // common layers were merged)
+  for (let groupIndex = 0; groupIndex < groups.length; ++groupIndex) {
+    const group2 = groups[groupIndex];
+    // loop through all operations on this group
+    for (
+      let operationIndex = 0;
+      operationIndex < group2.operations.length;
+      ++operationIndex
+    ) {
+      const groupOperation2 = group2.operations[operationIndex];
+      groupOperation2.index = groupOperation2.cutSetting.index;
+    }
+  }
 }
 
 /**
@@ -107,19 +126,34 @@ function createLayers() {
  */
 function createProjectLayers() {
   // determine if we are grouping by layer or by operation
-  const groupByLayer = getProperty('lightburn0500Grouping') == GROUPING_BY_LAYER ||
-  getProperty('lightburn0500Grouping') == GROUPING_BY_LAYER_FILE;
+  const groupByLayer =
+    getProperty('lightburn0500Grouping') == GROUPING_BY_LAYER ||
+    getProperty('lightburn0500Grouping') == GROUPING_BY_LAYER_FILE;
 
   // build up the project layers
   project.layers = [];
-    if (groupByLayer) {
-      for (let layerIndex = 0; layerIndex < project.cutSettings.length; ++layerIndex) {
-        const cutSetting = project.cutSettings[layerIndex];
+  if (groupByLayer) {
+    for (
+      let layerIndex = 0;
+      layerIndex < project.cutSettings.length;
+      ++layerIndex
+    ) {
+      const cutSetting = project.cutSettings[layerIndex];
 
-        project.layers.push({ name: cutSetting.name, index: layerIndex, cutSettings: [], operationSets: []});
+      project.layers.push({
+        name: cutSetting.name,
+        index: layerIndex,
+        cutSettings: [],
+        operationSets: [],
+      });
     }
-  } else 
-    project.layers.push({ name: localize("All layers"), index: -1, cutSettings: project.cutSettings, operationSets: [] });
+  } else
+    project.layers.push({
+      name: localize('All layers'),
+      index: -1,
+      cutSettings: project.cutSettings,
+      operationSets: [],
+    });
 }
 
 /**
@@ -143,13 +177,12 @@ function populateProjectLayers() {
         ++operationIndex
       ) {
         const groupOperation = group.operations[operationIndex];
-  
+
         // if no points, skip this one
         if (groupOperation.paths.length == 0) continue;
 
         // is this operation to be included in our layer?
-        if (layer.index !== -1 && layer.index != groupOperation.index)
-          continue; 
+        if (layer.index !== -1 && layer.index != groupOperation.index) continue;
 
         // set up our operation set if not already done for this group
         if (projOpSet === undefined) {
@@ -160,15 +193,16 @@ function populateProjectLayers() {
             operations: [],
           });
           projOpSet = layer.operationSets[layer.operationSets.length - 1];
+        }
 
-          // if a single layer per file, add our cut settings to this layer and remap all layer index
-          // to use layer 0 (since there is only one layer per file)
-          if (layer.index !== -1) {
-            const originalIndex = groupOperation.index;
-            project.cutSettings[originalIndex].index = 0;
-            groupOperation.index = 0;
+        // if a single layer per file, add our cut settings to this layer and remap all layer index
+        // to use layer 0 (since there is only one layer per file)
+        if (getProperty('lightburn0500Grouping') == GROUPING_BY_LAYER_FILE) {
+          const originalIndex = groupOperation.index;
+          project.cutSettings[originalIndex].index = 0;
+          groupOperation.index = 0;
+          if (layer.cutSettings.length == 0)
             layer.cutSettings.push(project.cutSettings[originalIndex]);
-          }
         }
 
         // set up a operation inside the layer (each operation is grouped to make managing them easier)
@@ -177,19 +211,44 @@ function populateProjectLayers() {
           operationName: groupOperation.operationName,
         });
         const projOperation = projOpSet.operations[index - 1];
-  
+
         // convert the group (paths) into segments (groups of shapes)
         const segments = identifySegments(groupOperation);
-  
+
         // build out shapes for each segments
-        generateShapesFromSegments(
-          groupOperation,
-          segments,
-          projOperation
-        );
+        generateShapesFromSegments(groupOperation, segments, projOperation);
       }
     }
   }
+}
+
+/**
+ * Populates the filename and path properties of each layer, based on if grouping
+ * is set to by layer or all are in one file.
+ */
+function populateFilesAndPath() {
+  // determine if we are doing file redirection
+  const redirect =
+    getProperty('lightburn0500Grouping') == GROUPING_BY_LAYER_FILE;
+
+  // process all layers
+  for (let layerIndex = 0; layerIndex < project.layers.length; ++layerIndex) {
+    const layer = project.layers[layerIndex];
+
+    // set the filename for this layer
+    if (layerIndex > 0 && redirect)
+      // different file per layer
+      layer.filename = programName + '-' + layerIndex + '.' + extension;
+    else
+      // shared file across all layers (or first layer when separate files per layer)
+      layer.filename = programName + '.' + extension;
+
+    // set the path based on the determined filename
+    layer.path = FileSystem.getCombinedPath(
+      FileSystem.getFolderPath(getOutputPath()),
+      layer.filename
+    );
+}
 }
 
 /**
@@ -246,7 +305,11 @@ function identifySegments(operation) {
           operation
         );
 
-        for (let indSegIndex = 0; indSegIndex < independentSegments.length; ++indSegIndex) {
+        for (
+          let indSegIndex = 0;
+          indSegIndex < independentSegments.length;
+          ++indSegIndex
+        ) {
           const nextSegment = independentSegments[indSegIndex];
           segments.push({
             start: nextSegment.start,
@@ -274,7 +337,6 @@ function identifySegments(operation) {
           },
           COMMENT_INSANE
         );
-
       }
 
       // set segment start to this segment
@@ -315,13 +377,12 @@ function identifySegments(operation) {
   return segments;
 }
 
-
 /**
  * Scans a segment (of paths) to find the largest closure (if any).  Returns an array of segmentations, which
  * may be a single element array if no closures found (or a single perfect closure), and could contain as much
  * as three elements - one for a non-closed starting segment, one for a closed segment, and one for the non-closed
  * ending segment.
- * 
+ *
  * @param startIndex Starting index within the operation to scan
  * @param endIndex Ending index within the operation to scan
  * @param operation Operation entry with all paths
@@ -408,11 +469,7 @@ function scanSegmentForClosure(startIndex, endIndex, operation) {
  * @param segments The segmentation index of each shape (which references operation for the metrics)
  * @param projOperation The project operation object, where the resolved shapes are added for grouping
  */
-function generateShapesFromSegments(
-  operation,
-  segments,
-  projOperation
-) {
+function generateShapesFromSegments(operation, segments, projOperation) {
   // process all segments and convert them into shapes (vectors and primities), including conversion of
   // non-linear paths from circular (start/end/center points) to bezier (center point, with two control points)
   for (let segmentIndex = 0; segmentIndex < segments.length; ++segmentIndex) {
@@ -420,7 +477,7 @@ function generateShapesFromSegments(
 
     // create a new shape in our shape set for this operation (to organize the shapes together by operation)
     projOperation.shapeSets.push({
-      cutSetting: project.cutSettings[operation.index]
+      cutSetting: project.cutSettings[operation.index],
     });
     const shape = projOperation.shapeSets[projOperation.shapeSets.length - 1];
 
@@ -868,12 +925,18 @@ function getCutSetting(cutSettingSpecs) {
 
     // look to see if we already have a matching cutsetting, based on the custom XML if provided,
     // otherwise the properties of the setting
-    if (cutSettingSpecs.customCutSettingXML && cutSettingsSpecs.laserEnable !== LASER_ENABLE_OFF)
+    if (
+      cutSettingSpecs.customCutSettingXML &&
+      cutSettingsSpecs.laserEnable !== LASER_ENABLE_OFF
+    )
       // if custom cut is used, we expect a perfect string match.  This might someday be
       // improved with a deep object comparison (preceeded by filtering out unwanted fields)
       matchFound =
         cutSetting.customCutSettingXML == cutSettingSpecs.customCutSettingXML;
-    else if (cutSettingSpecs.laserEnable == LASER_ENABLE_OFF && cutSetting.laserEnable == LASER_ENABLE_OFF) 
+    else if (
+      cutSettingSpecs.laserEnable == LASER_ENABLE_OFF &&
+      cutSetting.laserEnable == LASER_ENABLE_OFF
+    )
       // disabled lasers always match
       matchFound = true;
     else {
@@ -891,7 +954,6 @@ function getCutSetting(cutSettingSpecs) {
         cutSetting.zStep == cutSettingSpecs.zStep &&
         cutSetting.customCutSetting == undefined;
     }
-
 
     // do we have a match?
     if (matchFound) {

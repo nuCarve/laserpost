@@ -25,23 +25,47 @@ function onOpen() {
   // emit the the required file header (for LightBurn, we must do this early to avoid generating too
   // many comments before the LightBurn thumbnail, which causes LightBurn to crash)
   onFileCreate();
-
-  // build up project notes
-   generateProjectNotes();
 }
-
 
 /**
  * Generate notes that describe the project setup
+ *
+ * @param layerIndex Layer number being generated (-1 when single file for all layers)
  */
-function generateProjectNotes() {
+function generateProjectNotes(layerIndex) {
+  // clear any existing notes
+  notes = [];
+
+  // include info about LaserPost
+  appendNote(generatedBy);
+  appendNote(codeMoreInformation);
+  appendNote('');
+
+  // include the layer file details
+  if (layerIndex != -1)
+    appendNote('File: {file} ({index} of {total})', {
+      file: project.layers[layerIndex].filename,
+      index: layerIndex + 1,
+      total: project.layers.length,
+    });
+  else
+    appendNote('File: {file}', {
+      file: project.layers[0].filename,
+    });
+
+  // include timestamp
+  appendNote(localize('Generated at: {date}'), { date: new Date().toString() });
+  appendNote('');
+
   // if we have a program name/comment, add it to the file as comments and in notes
   if (programName || programComment) {
     appendNote(localize('Program'));
     if (programName)
-      appendNote('  ' + localize('Name') + ': ' + programName)
+      appendNote('  ' + localize('Name: {program}'), { program: programName });
     if (programComment)
-      appendNote('  ' + localize('Comment') + ': ' + programComment)
+      appendNote('  ' + localize('Comment: {comment}'), {
+        comment: programComment,
+      });
   }
 
   // dump machine configuration
@@ -50,16 +74,13 @@ function generateProjectNotes() {
 
   appendNote(localize('Machine'));
   if (vendor) {
-    appendNote('  ' + localize('Vendor') + ': ' + vendor);
+    appendNote('  ' + localize('Vendor: {vendor}'), { vendor: vendor });
   }
   if (model) {
-    appendNote('  ' + localize('Model') + ': ' + model);
+    appendNote('  ' + localize('Model: {model}'), { model: model });
   }
 
-  appendNote('')
-  appendNote(generatedBy);
-  appendNote(codeMoreInformation);
-  appendNote('')
+  appendNote('');
 
   // if the user did any laser overrides, include those in the comments
   let laserPowerEtchMin = getProperty('laserPower0100EtchMin');
@@ -76,39 +97,26 @@ function generateProjectNotes() {
   ) {
     appendNote('Laser power overrides');
     if (laserPowerEtchMax != 0)
-      appendNote('  ' +
-          localize('Etch power') +
-          ': ' +
-          laserPowerEtchMin +
-          '% ' +
-          localize('(min)') +
-          ' - ' +
-          laserPowerEtchMax +
-          '% ' +
-          localize('(max)'));
+      appendNote('  ' + localize('Etch power: {min}% (min) - {max}% (max)'), {
+        min: laserPowerEtchMin,
+        max: laserPowerEtchMax,
+      });
     if (laserPowerVaporizeMax != 0)
-      appendNote('  ' +
-          localize('Vaporize power') +
-          ': ' +
-          laserPowerVaporizeMin +
-          '% ' +
-          localize('(min)') +
-          ' - ' +
-          laserPowerVaporizeMax +
-          '% ' +
-          localize('(max)'));
+      appendNote(
+        '  ' + localize('Vaporize power: {min}% (min) - {max}% (max)'),
+        {
+          min: laserPowerVaporizeMin,
+          max: laserPowerVaporizeMax,
+        }
+      );
     if (laserPowerThroughMax != 0)
-      appendNote( 
-        '  ' +
-          localize('Through power') +
-          ': ' +
-          laserPowerThroughMin +
-          '% ' +
-          localize('(min)') +
-          ' - ' +
-          laserPowerThroughMax +
-          '% ' +
-          localize('(max)'));
+      appendNote(
+        '  ' + localize('Through power: {min}% (min) - {max}% (max)'),
+        {
+          min: laserPowerThroughMin,
+          max: laserPowerThroughMax,
+        }
+      );
   }
 }
 
@@ -508,6 +516,7 @@ function onClose() {
   // trace the stock outline
   if (getProperty('work0100TraceStock')) traceStockOutline();
 
+  // debugging info if requested
   dumpGroups();
 
   // process all groups, converting from CAM coordinates to LightBurn
@@ -517,38 +526,43 @@ function onClose() {
   const redirect =
     getProperty('lightburn0500Grouping') == GROUPING_BY_LAYER_FILE;
 
+  // build up project notes
+  generateProjectNotes(redirect ? 0 : -1);
+
   // write the file header (this goes into the first file, if multiple files are used)
   onWriteHeader(redirect ? 0 : -1);
 
   // process all layers, potentially breaking them out into different files
-  for (let layer = 0; layer < project.layers.length; ++layer) {
+  for (let layerIndex = 0; layerIndex < project.layers.length; ++layerIndex) {
+    const layer = project.layers[layerIndex];
+
     // redirect if after the first layer and using redirection
-    if (layer > 0 && redirect) {
-      const path = FileSystem.getCombinedPath(
-        FileSystem.getFolderPath(getOutputPath()),
-        programName + '-' + layer + '.' + extension
-      );
-      redirectToFile(path);
-      onFileCreate(layer);
-      onWriteHeader(layer);
+    if (layerIndex > 0 && redirect) {
+      redirectToFile(layer.path);
+      generateProjectNotes(layerIndex);
+      onFileCreate(layerIndex);
+      onWriteHeader(layerIndex);
     }
 
     // render the layer
-    onWriteShapes(layer, redirect);
+    onWriteShapes(layerIndex, redirect);
 
     // close file redirect if used
-    if (layer > 0 && redirect) {
-      onWriteTrailer(layer);
+    if (layerIndex > 0 && redirect) {
+      onWriteTrailer(layerIndex);
       closeRedirection();
     }
   }
 
   // write the trailer (if multi-file, this will end up in the original, first file)
+  generateProjectNotes(redirect ? 0 : -1);
   onWriteTrailer(redirect ? 0 : -1);
 
   // project complete
-  if (typeof onProjectComplete === 'function')
-    onProjectComplete();
+  if (typeof onProjectComplete === 'function') {
+    generateProjectNotes(-1);
+    onProjectComplete(redirect);
+  }
 
   // save our state to the persistent state file (if changed)
   stateSave();
