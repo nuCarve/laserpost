@@ -10,8 +10,10 @@
  * LightBurn file headers and thumbnail.  These must be written before any extensive
  * comments due to a bug in LightBurn that causes it to corrupt if the thumbnail is
  * not near the top of the file.
+ * 
+ * @param layer Layer (cutSetting) being generated (-1 for all layers)
  */
-function onFileCreate() {
+function onFileCreate(layer) {
   // locate the first section and extract the stock origin information to define the LightBurn mirror X/Y header
   const section = getSection(0);
   const mirror = {
@@ -41,10 +43,12 @@ function onFileCreate() {
 
 /**
  * Writes the LightBurn (.lbrn) header information
+ * 
+ * @param layer Layer (cutSetting) being generated (-1 for all layers)
  */
-function onWriteHeader() {
+function onWriteHeader(layer) {
   // output notes, including layer notes, to the header
-  const headerNotes = notes.concat(generateLayerNotes());
+  const headerNotes = notes.concat(generateLayerNotes(layer));
   for (let noteIndex = 0; noteIndex < headerNotes.length; ++noteIndex)
     writeCommentLine(headerNotes[noteIndex]);
 
@@ -73,13 +77,13 @@ function onWriteHeader() {
   writeXMLClose();
 
   // add LightBurn CutSettings
-  writeCutSettings();
+  writeCutSettings(layer);
 }
 
 /**
  * Writes the shapes (<Shape>) to the LightBurn file, including grouping as necessary
  * 
- * @param layer Layer ID to generate
+ * @param layer Layer (cutSetting) being generated
  * @param redirect Boolean indicates if we are using file redirection or not (per layer redirection)
  */
 function onWriteShapes(layer, redirect) {
@@ -189,8 +193,10 @@ function onWriteShapes(layer, redirect) {
 /**
  * Writes the LightBurn (.lbrn) trailer information, including optionally adding notes and
  * closing off the LightBurnProject section opened in `onWriteHeader`.
+ * 
+ * @param layer Layer (cutSetting) being generated (-1 for all layers)
  */
-function onWriteTrailer() {
+function onWriteTrailer(layer) {
   const includeNotes = getProperty('lightburn0100IncludeNotes');
   if (includeNotes != INCLUDE_NOTES_NONE && notes != '') {
     // determine if we cause LightBurn to show notes on file load
@@ -199,10 +205,10 @@ function onWriteTrailer() {
       showOnLoad = notesImportant;
     else if (includeNotes == INCLUDE_NOTES_SHOW) showOnLoad = true;
 
-    const setupNotes = notes.concat(generateLayerNotes());
+    const setupNotes = notes.concat(generateLayerNotes(layer));
     writeXML('Notes', {
       ShowOnLoad: showOnLoad ? 1 : 0,
-      Notes: notes + setupNotes.join("\n"),
+      Notes: setupNotes.join("\n"),
     });
   }
 
@@ -226,19 +232,24 @@ function writeCommentLine(template, parameters) {
 
 /**
  * Adds the <CutSetting> tags for all LightBurn layers as well as update notes to describe
- * the layers
+ * the 
+ * 
+ * @param layer Layer (cutSetting) being generated (-1 for all layers)
  */
-function generateLayerNotes() {
+function generateLayerNotes(layer) {
   const result = [];
+
+  // get access to the cutSettings based on the layer
+  const cutSettings = (layer == -1) ? project.cutSettings : project.layers[layer].cutSettings;
 
   result.push('Layers:');
 
   for (
     let cutSettingsIndex = 0;
-    cutSettingsIndex < project.cutSettings.length;
+    cutSettingsIndex < cutSettings.length;
     ++cutSettingsIndex
   ) {
-    const cutSetting = project.cutSettings[cutSettingsIndex];
+    const cutSetting = cutSettings[cutSettingsIndex];
 
     result.push(format('  ' + localize('{layer}: {name}'), {
       layer: formatLeadingZero.format(cutSetting.index),
@@ -300,14 +311,19 @@ function generateLayerNotes() {
 /**
  * Adds the <CutSetting> tags for all LightBurn layers as well as update notes to describe
  * the layers
+ * 
+ * @param layer Layer (cutSetting) being generated (-1 for all layers)
  */
-function writeCutSettings() {
+function writeCutSettings(layer) {
+  // get access to the cutSettings based on the layer
+  const cutSettings = (layer == -1) ? project.cutSettings : project.layers[layer].cutSettings;
+
   for (
     let cutSettingsIndex = 0;
-    cutSettingsIndex < project.cutSettings.length;
+    cutSettingsIndex < cutSettings.length;
     ++cutSettingsIndex
   ) {
-    const cutSetting = project.cutSettings[cutSettingsIndex];
+    const cutSetting = cutSettings[cutSettingsIndex];
 
     // if not custom, generate the cut setting
     if (!cutSetting.customCutSetting) {

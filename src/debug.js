@@ -42,7 +42,11 @@ function dumpGroups() {
       },
       COMMENT_DEBUG
     );
-    for (let groupOperationsIndex = 0; groupOperationsIndex < group.operations.length; ++groupOperationsIndex) {
+    for (
+      let groupOperationsIndex = 0;
+      groupOperationsIndex < group.operations.length;
+      ++groupOperationsIndex
+    ) {
       const operation = group.operations[groupOperationsIndex];
 
       debugLog(
@@ -113,19 +117,20 @@ function dumpGroups() {
  * Dump the contents of the project to comments in the file.
  */
 function dumpProject() {
-  debugLog(
-    'Project organization:',
-    { },
-    COMMENT_DEBUG
-  );
+  debugLog('Project organization:', {}, COMMENT_DEBUG);
   debugLog('  Cut settings:', {}, COMMENT_DEBUG);
-  for (let cutSettingsIndex = 0; cutSettingsIndex < project.cutSettings.length; ++cutSettingsIndex) {
+  for (
+    let cutSettingsIndex = 0;
+    cutSettingsIndex < project.cutSettings.length;
+    ++cutSettingsIndex
+  ) {
     const cutSetting = project.cutSettings[cutSettingsIndex];
     if (cutSetting.customCutSettingXML)
       debugLog(
-        '    #{id}: index={index}, priority={priority}, customCutSettingXML:\n{xml}',
+        '    #{id}: "{name}" index={index}, priority={priority}, customCutSettingXML:\n{xml}',
         {
           id: cutSettingsIndex,
+          name: cutSetting.name,
           index: cutSetting.index,
           priority: cutSetting.priority,
           xml: cutSetting.customCutSettingXML,
@@ -134,9 +139,10 @@ function dumpProject() {
       );
     else
       debugLog(
-        '    #{id}: {minPower}-{maxPower}% power at {speed} mm/min, index={index}, priority={priority}, layerMode={layerMode}, laserEnable={laserEnable}',
+        '    #{id}: "{name}" {minPower}-{maxPower}% power at {speed} mm/min, index={index}, priority={priority}, layerMode={layerMode}, laserEnable={laserEnable}',
         {
           id: cutSettingsIndex,
+          name: cutSetting.name,
           index: cutSetting.index,
           priority: cutSetting.priority,
           minPower: cutSetting.minPower,
@@ -150,41 +156,70 @@ function dumpProject() {
   }
 
   // process all layers
-  for (let projLayerIndex = 0; projLayerIndex < project.layers.length; ++projLayerIndex) {
+  for (
+    let projLayerIndex = 0;
+    projLayerIndex < project.layers.length;
+    ++projLayerIndex
+  ) {
     const projLayer = project.layers[projLayerIndex];
 
-    debugLog('  Layer #{id}: "{name}" ({count} operation sets):',
+    debugLog(
+      '  Layer #{id}: "{name}" ({count} operation sets):',
       {
         id: projLayerIndex,
         name: projLayer.name,
-        count: projLayer.operationSets.length
+        count: projLayer.operationSets.length,
       },
-      COMMENT_DEBUG);
+      COMMENT_DEBUG
+    );
 
     // process all operation groups within the layer
-    for (let operationSetsIndex = 0; operationSetsIndex < projLayer.operationSets.length; ++operationSetsIndex) {
-      debugLog('    Operation group #{id}:', { id: operationSetsIndex }, COMMENT_DEBUG);
-      for (let operationIndex = 0; operationIndex < projLayer.operationSets[operationSetsIndex].operations.length; ++operationIndex) {
-        debugLog('      Operation #{id}:', { id: operationIndex }, COMMENT_DEBUG);
+    for (
+      let operationSetsIndex = 0;
+      operationSetsIndex < projLayer.operationSets.length;
+      ++operationSetsIndex
+    ) {
+      debugLog(
+        '    Operation group #{id}:',
+        { id: operationSetsIndex },
+        COMMENT_DEBUG
+      );
+      for (
+        let operationIndex = 0;
+        operationIndex <
+        projLayer.operationSets[operationSetsIndex].operations.length;
+        ++operationIndex
+      ) {
+        debugLog(
+          '      Operation #{id}: "{name}"',
+          { id: operationIndex,
+            name: projLayer.operationSets[operationSetsIndex].operations[operationIndex].operationName,
+          },
+          COMMENT_DEBUG
+        );
         debugLog('        Shape groups:', {}, COMMENT_DEBUG);
         for (
           let shapeSetIndex = 0;
-          shapeSetIndex < projLayer.operationSets[operationSetsIndex].operations[operationIndex].shapeSets.length;
+          shapeSetIndex <
+          projLayer.operationSets[operationSetsIndex].operations[operationIndex]
+            .shapeSets.length;
           ++shapeSetIndex
         ) {
-          const shape = projLayer.operationSets[operationSetsIndex].operations[operationIndex].shapeSets[shapeSetIndex];
+          const shape =
+            projLayer.operationSets[operationSetsIndex].operations[
+              operationIndex
+            ].shapeSets[shapeSetIndex];
 
-          // dump the shape into insane comments
-          debugLog(
-            '          Shape (type={type}, layer={cutIndex}, powerScale={powerScale})',
-            {
-              type: shape.type,
-              cutIndex: shape.cutSetting.index,
-              powerScale: shape.powerScale,
-            },
-            COMMENT_DEBUG
-          );
           if (shape.type == SHAPE_TYPE_ELLIPSE) {
+            debugLog(
+              '          Shape (type={type}, layer={cutIndex}, powerScale={powerScale})',
+              {
+                type: shape.type,
+                cutIndex: shape.cutSetting.index,
+                powerScale: shape.powerScale,
+              },
+              COMMENT_DEBUG
+            );
             debugLog(
               '            Circle center=[{centerX}, {centerY}], radius={radius}',
               {
@@ -195,8 +230,22 @@ function dumpProject() {
               COMMENT_INSANE
             );
           } else {
+            debugLog(
+              '          Shape (type={type}, layer={cutIndex}, powerScale={powerScale}, vectors={vectors})',
+              {
+                type: shape.type,
+                cutIndex: shape.cutSetting.index,
+                powerScale: shape.powerScale,
+                vectors: shape.vectors.length
+              },
+              COMMENT_DEBUG
+            );
             debugLog('          Vector list:', {}, COMMENT_INSANE);
-            for (let shapeVectorIndex = 0; shapeVectorIndex < shape.vectors.length; ++shapeVectorIndex)
+            for (
+              let shapeVectorIndex = 0;
+              shapeVectorIndex < shape.vectors.length;
+              ++shapeVectorIndex
+            )
               debugLog(
                 '          Vector #{id}: point=[{x}, {y}]{c0}{c1}',
                 {
@@ -206,15 +255,23 @@ function dumpProject() {
                   c0:
                     shape.vectors[shapeVectorIndex].c0x !== undefined
                       ? format(' c0=[{x}, {y}]', {
-                          x: formatPosition.format(shape.vectors[shapeVectorIndex].c0x),
-                          y: formatPosition.format(shape.vectors[shapeVectorIndex].c0y),
+                          x: formatPosition.format(
+                            shape.vectors[shapeVectorIndex].c0x
+                          ),
+                          y: formatPosition.format(
+                            shape.vectors[shapeVectorIndex].c0y
+                          ),
                         })
                       : ' c0=n/a',
                   c1:
                     shape.vectors[shapeVectorIndex].c1x !== undefined
                       ? format(', c1=[{x}, {y}]', {
-                          x: formatPosition.format(shape.vectors[shapeVectorIndex].c1x),
-                          y: formatPosition.format(shape.vectors[shapeVectorIndex].c1y),
+                          x: formatPosition.format(
+                            shape.vectors[shapeVectorIndex].c1x
+                          ),
+                          y: formatPosition.format(
+                            shape.vectors[shapeVectorIndex].c1y
+                          ),
                         })
                       : ' c1=n/a',
                 },
@@ -222,7 +279,11 @@ function dumpProject() {
               );
 
             debugLog('          Primitive list:', {}, COMMENT_INSANE);
-            for (let shapePrimitiveIndex = 0; shapePrimitiveIndex < shape.primitives.length; ++shapePrimitiveIndex)
+            for (
+              let shapePrimitiveIndex = 0;
+              shapePrimitiveIndex < shape.primitives.length;
+              ++shapePrimitiveIndex
+            )
               debugLog(
                 '            Primitive #{id}: type={type}, start={start}, end={end}',
                 {
@@ -272,5 +333,4 @@ function dumpToolTable() {
       );
     }
   }
-  
 }

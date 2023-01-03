@@ -116,10 +116,10 @@ function createProjectLayers() {
       for (let layerIndex = 0; layerIndex < project.cutSettings.length; ++layerIndex) {
         const cutSetting = project.cutSettings[layerIndex];
 
-        project.layers.push({ name: cutSetting.name, index: layerIndex, operationSets: []});
+        project.layers.push({ name: cutSetting.name, index: layerIndex, cutSettings: [], operationSets: []});
     }
   } else 
-    project.layers.push({ name: localize("All layers"), index: -1, operationSets: [] });
+    project.layers.push({ name: localize("All layers"), index: -1, cutSettings: project.cutSettings, operationSets: [] });
 }
 
 /**
@@ -150,7 +150,7 @@ function populateProjectLayers() {
         // is this operation to be included in our layer?
         if (layer.index !== -1 && layer.index != groupOperation.index)
           continue; 
-  
+
         // set up our operation set if not already done for this group
         if (projOpSet === undefined) {
           // create a new operation set in the layer to collect all the operations together
@@ -160,6 +160,15 @@ function populateProjectLayers() {
             operations: [],
           });
           projOpSet = layer.operationSets[layer.operationSets.length - 1];
+
+          // if a single layer per file, add our cut settings to this layer and remap all layer index
+          // to use layer 0 (since there is only one layer per file)
+          if (layer.index !== -1) {
+            const originalIndex = groupOperation.index;
+            project.cutSettings[originalIndex].index = 0;
+            groupOperation.index = 0;
+            layer.cutSettings.push(project.cutSettings[originalIndex]);
+          }
         }
 
         // set up a operation inside the layer (each operation is grouped to make managing them easier)
@@ -827,7 +836,7 @@ function getGroupByName(groupName, defaults) {
     debugLog(
       'getGroupByName: Create new group "{group}"',
       { group: groupName },
-      COMMENT_DEBUG
+      COMMENT_INSANE
     );
     groups.push(defaults);
     group = groups[groups.length - 1];
@@ -835,7 +844,7 @@ function getGroupByName(groupName, defaults) {
     debugLog(
       'getGroupByName: Join existing group "{group}"',
       { group: groupName },
-      COMMENT_DEBUG
+      COMMENT_INSANE
     );
   return group;
 }

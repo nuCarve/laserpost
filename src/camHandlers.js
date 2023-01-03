@@ -366,7 +366,7 @@ function onLinear(x, y, z, feed) {
         y: formatPosition.format(y),
         feed: formatSpeed.format(feed),
       },
-      COMMENT_DEBUG
+      COMMENT_INSANE
     );
 
     // add this path segment
@@ -447,7 +447,7 @@ function onCircular(clockwise, cx, cy, cz, x, y, z, feed) {
       ey: formatPosition.format(y),
       feed: formatSpeed.format(feed),
     },
-    COMMENT_DEBUG
+    COMMENT_INSANE
   );
 
   // add this path segment
@@ -475,7 +475,7 @@ function onCommand(command) {
       command: command,
       id: getCommandStringId(command),
     },
-    COMMENT_DEBUG
+    COMMENT_INSANE
   );
 
   switch (command) {
@@ -494,7 +494,7 @@ function onCommand(command) {
  * onSectionEnd is called by CAM when the current operation is done.
  */
 function onSectionEnd() {
-  debugLog('onSectionEnd', {}, COMMENT_DEBUG);
+  debugLog('onSectionEnd', {}, COMMENT_INSANE);
 }
 
 /**
@@ -503,7 +503,7 @@ function onSectionEnd() {
  */
 function onClose() {
   // include some debugging information
-  debugLog('onClose', {}, COMMENT_DEBUG);
+  debugLog('onClose', {}, COMMENT_INSANE);
 
   // trace the stock outline
   if (getProperty('work0100TraceStock')) traceStockOutline();
@@ -518,7 +518,7 @@ function onClose() {
     getProperty('lightburn0500Grouping') == GROUPING_BY_LAYER_FILE;
 
   // write the file header (this goes into the first file, if multiple files are used)
-  onWriteHeader();
+  onWriteHeader(redirect ? 0 : -1);
 
   // process all layers, potentially breaking them out into different files
   for (let layer = 0; layer < project.layers.length; ++layer) {
@@ -529,26 +529,26 @@ function onClose() {
         programName + '-' + layer + '.' + extension
       );
       redirectToFile(path);
-      onFileCreate();
-      onWriteHeader();
+      onFileCreate(layer);
+      onWriteHeader(layer);
     }
 
     // render the layer
     onWriteShapes(layer, redirect);
 
-    // todo: issue: notes on SVG does another redirect, breaking our redirection
     // close file redirect if used
     if (layer > 0 && redirect) {
-      onWriteTrailer();
+      onWriteTrailer(layer);
       closeRedirection();
     }
   }
 
   // write the trailer (if multi-file, this will end up in the original, first file)
-  onWriteTrailer();
+  onWriteTrailer(redirect ? 0 : -1);
 
   // project complete
-  onProjectComplete();
+  if (typeof onProjectComplete === 'function')
+    onProjectComplete();
 
   // save our state to the persistent state file (if changed)
   stateSave();

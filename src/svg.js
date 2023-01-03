@@ -11,22 +11,26 @@ let activePath;
 
 /**
  * Write the generic SVG file header
+ * 
+ * @param layer Layer (cutSetting) being generated (-1 for all layers)
  */
-function onFileCreate() {
+function onFileCreate(layer) {
   writeln('<?xml version="1.0" encoding="utf-8"?>');
 }
 
 /**
  * Writes the SVG (.svg) header information
- */
-function onWriteHeader() {
+ *
+ * @param layer Layer (cutSetting) being generated (-1 for all layers)
+*/
+function onWriteHeader(layer) {
   // let minX = getGlobalParameter('stock-lower-x');
   // let minY = getGlobalParameter('stock-lower-y');
   let maxX = getGlobalParameter('stock-upper-x');
   let maxY = getGlobalParameter('stock-upper-y');
 
   // output notes, including layer notes, to the header
-  const headerNotes = notes.concat(generateLayerNotes());
+  const headerNotes = notes.concat(generateLayerNotes(layer));
   for (let noteIndex = 0; noteIndex < headerNotes.length; ++noteIndex)
     writeCommentLine(headerNotes[noteIndex]);
 
@@ -51,7 +55,7 @@ function onWriteHeader() {
 /**
  * Writes the shapes (<Shape>) to the SVG file, including grouping as necessary
  *
- * @param layer Layer ID to generate
+ * @param layer Layer (cutSetting) being generated
  * @param redirect Boolean indicates if we are using file redirection or not (per layer redirection)
  */
 function onWriteShapes(layer, redirect) {
@@ -171,15 +175,19 @@ function onWriteShapes(layer, redirect) {
 
 /**
  * Writes the SVG trailer information by closing off the XML opened in `onWriteHeader`.
+ * 
+ * @param layer Layer (cutSetting) being generated (-1 for all layers)
  */
-function onWriteTrailer() {
+function onWriteTrailer(layer) {
   writeXMLClose();
 }
 
 /**
  * Project complete (all files written) - use this event to write the final setup notes file
+ * 
+ * @param layer Layer (cutSetting) being generated (-1 for all layers)
  */
-function onProjectComplete() {
+function onProjectComplete(layer) {
   // determine if we include the setup notes file
   const includeNotes = getProperty('lightburn0100IncludeNotes');
   if (includeNotes != INCLUDE_NOTES_NONE && notes != '') {
@@ -198,7 +206,7 @@ function onProjectComplete() {
       programName + '-notes.txt'
     );
     redirectToFile(path);
-    const setupNotes = notes.concat(generateLayerNotes());
+    const setupNotes = notes.concat(generateLayerNotes(-1));
     for (let noteIndex = 0; noteIndex < setupNotes.length; ++noteIndex)
       writeln(setupNotes[noteIndex]);
     closeRedirection();
@@ -237,23 +245,30 @@ function writeCommentLine(template, parameters) {
 /**
  * Generates a string array with notes about the layer setup
  *
+ * @param layer Layer (cutSetting) being generated (-1 for all layers)
  * @returns String array with layer notes
  */
-function generateLayerNotes() {
+function generateLayerNotes(layer) {
   const result = [];
+
+  // get access to the cutSettings based on the layer
+  const cutSettings = (layer == -1) ? project.cutSettings : project.layers[layer].cutSettings;
 
   result.push('Layers:');
 
+  // scan the top-level cutSettings (on project) as this contains all layers and not the per-layer settings
+  // (since this file is shared across all generated files)
   for (
     let cutSettingsIndex = 0;
-    cutSettingsIndex < project.cutSettings.length;
+    cutSettingsIndex < cutSettings.length;
     ++cutSettingsIndex
   ) {
-    const cutSetting = project.cutSettings[cutSettingsIndex];
+    const cutSetting = cutSettings[cutSettingsIndex];
 
+    // todo: Need to add the target filename when multi-file
     result.push(
       format('  ' + localize('Layer {layer} ({color}): {name}'), {
-        layer: cutSetting.index,
+        layer: cutSettingsIndex,
         color: cutIndexToColorName(cutSetting.index),
         name: cutSetting.name,
       })
