@@ -1,5 +1,5 @@
 /**
- * LaserPost: Copyright (C) 2022 nuCarve
+ * LaserPost: Copyright (C) 2023 nuCarve
  *
  * A CAM post processor for emitting vector files (such as LightBurn and SVG) for laser (jet) operations.
  *
@@ -60,7 +60,7 @@ generatedBy = localize(
 );
 // #endif
 
-legal = 'Copyright (C) 2022 by nuCarve';
+legal = 'Copyright (C) 2023 by nuCarve';
 certificationLevel = 2;
 minimumRevision = 45845;
 
