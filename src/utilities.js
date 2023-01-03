@@ -44,7 +44,7 @@ function debugLog(template, parameters, level) {
   text = text.replace(/[ \n]+$/, '');
 
   if (level === undefined) level = COMMENT_NORMAL;
-  switch (getProperty('lightburn0200IncludeComments')) {
+  switch (getProperty('laserpost0200IncludeComments')) {
     case INCLUDE_COMMENTS_NONE:
       return;
     case INCLUDE_COMMENTS_NORMAL:

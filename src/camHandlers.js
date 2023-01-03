@@ -529,7 +529,7 @@ function onClose() {
 
   // determine if we are doing file redirection
   const redirect =
-    getProperty('lightburn0500Grouping') == GROUPING_BY_LAYER_FILE;
+    getProperty('laserpost0300Grouping') == GROUPING_BY_LAYER_FILE;
 
   // build up project notes
   generateProjectNotes(redirect ? 0 : -1);

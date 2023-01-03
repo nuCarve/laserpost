@@ -121,7 +121,7 @@ function onWriteShapes(layer, redirect) {
       // do we need to group shapes within our operation?
       if (
         operation.shapeSets.length > 1 &&
-        getProperty('lightburn0600GroupShapes')
+        getProperty('laserpost0400GroupShapes')
       ) {
         writeXML('g', { id: operation.operationName }, true);
         writeXML('desc', {
@@ -152,7 +152,7 @@ function onWriteShapes(layer, redirect) {
       // if we grouped the shapes, close the group
       if (
         operation.shapeSets.length > 1 &&
-        getProperty('lightburn0600GroupShapes')
+        getProperty('laserpost0400GroupShapes')
       )
         writeXMLClose();
     }
@@ -191,7 +191,7 @@ function onWriteTrailer(layer) {
  */
 function onProjectComplete(redirect) {
   // determine if we include the setup notes file
-  const includeNotes = getProperty('lightburn0100IncludeNotes');
+  const includeNotes = getProperty('laserpost0100IncludeNotes');
   if (includeNotes != INCLUDE_NOTES_NONE && notes != '') {
     // determine if we should tell the user via a warning dialog that the notes are available
     let showNotesWarning = false;
@@ -273,7 +273,7 @@ function generateLayerNotes(layer, showFilename) {
 
     // determine if we are doing file redirection
     const redirect =
-      getProperty('lightburn0500Grouping') == GROUPING_BY_LAYER_FILE;
+      getProperty('laserpost0300Grouping') == GROUPING_BY_LAYER_FILE;
 
     // include layer details, changing to layer numbers or file names depending on if multiple files are used
     if (!showFilename)
