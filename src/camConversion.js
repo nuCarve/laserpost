@@ -15,17 +15,6 @@
  * in the `project` array.
  */
 function groupsToProject() {
-  /*
-    todo: New strategy:
-    - if group-by-layers, create top level layers for each layer
-    - if not group-by-layers, create single layer with index of -1
-    - [layer top has link to the CutSetting object, or cut index?]
-    - Loop all top level layers, call layerToProject(index...)
-    - Port the code below to layerToProject and test on index -1=all, else must match
-    - Change generation and debug code to handle new top-level layers
-    - Figure out how to handle comments and notes based on these new layer-based rules
-  */
-
   // process all groups and build out the unique layers that are used
   createLayers();
 

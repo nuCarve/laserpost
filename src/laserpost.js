@@ -44,7 +44,7 @@ description = localize(
 // #endif
 vendor = 'nuCarve';
 vendorUrl = 'https://nucarve.com/laserpost';
-let semVer = '0.0.0-version';
+let semVer = 'VERSION_NUMBER';
 
 let codeMoreInformation = localize(
   'Visit https://nucarve.com/laserpost for software, instructions and instructional videos.'

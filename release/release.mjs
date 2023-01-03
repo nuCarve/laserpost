@@ -71,7 +71,7 @@ const releaseFilePath = path.resolve(distPath, 'laserpost.cps');
 // path to a JSON file that contains the version number to substitute when the version tag (VERSION_TAG) is found
 const versionFile = path.resolve(releasePath, 'version.json');
 // unique tag in files to substitute with the version number
-const VERSION_TAG = /0.0.0-version/g;
+const VERSION_TAG = "VERSION_NUMBER";
 
 /**
  * Searches all macros for a specified named macro.

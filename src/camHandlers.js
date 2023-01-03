@@ -457,7 +457,6 @@ function onCircular(clockwise, cx, cy, cz, x, y, z, feed) {
       fullSemi: isFullCircle() ? 'circle' : 'semicircle',
       cx: formatPosition.format(cx),
       cy: formatPosition.format(cy),
-      // todo: rename ex/ey
       ex: formatPosition.format(x),
       ey: formatPosition.format(y),
       feed: formatSpeed.format(feed),
@@ -470,7 +469,6 @@ function onCircular(clockwise, cx, cy, cz, x, y, z, feed) {
     type: isFullCircle() ? PATH_TYPE_CIRCLE : PATH_TYPE_SEMICIRCLE,
     centerX: cx,
     centerY: cy,
-    // todo: rename x/y
     x: x,
     y: y,
     clockwise: clockwise,
