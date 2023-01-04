@@ -190,7 +190,7 @@ function onSection() {
 
   // determine the air setting.
   let useAir = true;
-  switch (getProperty('op0100UseAir')) {
+  switch (getProperty('op0200UseAir')) {
     case USE_AIR_OFF:
       useAir = false;
       break;
@@ -215,8 +215,8 @@ function onSection() {
   });
 
   // collect settings from the user via operation properties
-  const powerScale = currentSection.getProperty('op0200PowerScale');
-  let opLayerMode = currentSection.getProperty('op0600LayerMode');
+  const powerScale = currentSection.getProperty('op0400PowerScale');
+  let opLayerMode = currentSection.getProperty('op0100LayerMode');
   if (opLayerMode == LAYER_MODE_INHERIT) {
     // select fill based on the cutting mode
     if (currentSection.getJetMode() == JET_MODE_ETCHING)
@@ -227,10 +227,10 @@ function onSection() {
   const customCutSettingXML = currentSection.getProperty(
     'op0900CustomCutSettingXML'
   );
-  let laserEnable = currentSection.getProperty('op0700LaserEnable');
-  const zOffset = currentSection.getProperty('op0300ZOffset');
-  const passes = currentSection.getProperty('op0400Passes');
-  const zStep = currentSection.getProperty('op0500ZStep');
+  let laserEnable = currentSection.getProperty('op0300LaserEnable');
+  const zOffset = currentSection.getProperty('op0500ZOffset');
+  const passes = currentSection.getProperty('op0600Passes');
+  const zStep = currentSection.getProperty('op0700ZStep');
 
   // if laser enable set to inherit from tool, get value from the tool's pierce time
   if (laserEnable == LASER_ENABLE_TOOL) {

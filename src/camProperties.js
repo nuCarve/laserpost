@@ -83,7 +83,7 @@ properties = {
       { title: localize('Always show'), id: INCLUDE_NOTES_SHOW },
     ],
     value:
-      // # if LBRN
+      // #if LBRN
       INCLUDE_NOTES_SHOW_IMPORTANT,
     // #else
     INCLUDE_NOTES_SHOW,
@@ -244,7 +244,7 @@ properties = {
   machine0400UpdateAllowBeta: {
     title: localize('Beta releases'),
     description: localize(
-      'Enable to allow beta releases, disable for stable releases only.'
+      'Enable to allow for checking if beta release updates are available, disable for stable releases only.'
     ),
     type: 'boolean',
     value: false,
@@ -254,60 +254,7 @@ properties = {
   //
   // operation: cutting
   //
-  op0100UseAir: {
-    title: localize('Air assist'),
-    description: localize(
-      'Sets if the layer uses air.  "Off" / "On" always set the air to the specified state, "Tool Assist Gas" will set the air off when ' +
-        'the tools "Cutting Data" (section "Process inputs") property "Assist gas" is "None" (or "off" or blank) and turn the air on for any other value.'
-    ),
-    type: 'enum',
-    values: [
-      { title: localize('Off'), id: USE_AIR_OFF },
-      { title: localize('On'), id: USE_AIR_ON },
-      { title: localize('Use tool setting'), id: USE_AIR_ASSIST_GAS },
-    ],
-    value: USE_AIR_ASSIST_GAS,
-    scope: 'operation',
-    enabled: 'cutting',
-  },
-  op0200PowerScale: {
-    title: localize('Power scale (%)'),
-    description: localize(
-      'LightBurn power scale (0-100%) for the shapes in the operation.'
-    ),
-    type: 'number',
-    value: 100,
-    range: [0, 100],
-    scope: 'operation',
-    enabled: 'cutting',
-  },
-  op0300ZOffset: {
-    title: localize('Z-offset (mm)'),
-    description: localize(
-      'Amount to offset Z into the material (or out of it) at the start of cutting.  Useful for deep cutting or defocusing.'
-    ),
-    type: 'number',
-    value: 0,
-    scope: 'operation',
-    enabled: 'cutting',
-  },
-  op0400Passes: {
-    title: localize('Pass count'),
-    description: localize('Number of times to repeat the cut.'),
-    type: 'number',
-    value: 1,
-    scope: 'operation',
-    enabled: 'cutting',
-  },
-  op0500ZStep: {
-    title: localize('Z-step per pass (mm)'),
-    description: localize('Amount of raise or lower Z for each cut pass.'),
-    type: 'number',
-    value: 0,
-    scope: 'operation',
-    enabled: 'cutting',
-  },
-  op0600LayerMode: {
+  op0100LayerMode: {
     title: localize('Layer mode'),
     description: localize(
       'Selects the layer mode for the layer (Use cutting mode, Line, Fill or Offset Fill).  Use cutting mode will set to Line for Through, and Fill for etch.'
@@ -323,7 +270,23 @@ properties = {
     scope: 'operation',
     enabled: 'cutting',
   },
-  op0700LaserEnable: {
+  op0200UseAir: {
+    title: localize('Air assist'),
+    description: localize(
+      'Sets if the layer uses air.  "Off" / "On" always set the air to the specified state, "Tool Assist Gas" will set the air off when ' +
+        'the tools "Cutting Data" (section "Process inputs") property "Assist gas" is "None" (or "off" or blank) and turn the air on for any other value.'
+    ),
+    type: 'enum',
+    values: [
+      { title: localize('Off'), id: USE_AIR_OFF },
+      { title: localize('On'), id: USE_AIR_ON },
+      { title: localize('Use tool setting'), id: USE_AIR_ASSIST_GAS },
+    ],
+    value: USE_AIR_ASSIST_GAS,
+    scope: 'operation',
+    enabled: 'cutting',
+  },
+  op0300LaserEnable: {
     title: localize('Laser enable'),
     description: localize(
       'Controls if the layer should be enabled and using which laser(s) (for dual laser machines).'
@@ -337,6 +300,43 @@ properties = {
       { title: localize('Both lasers'), id: LASER_ENABLE_BOTH },
     ],
     value: LASER_ENABLE_1,
+    scope: 'operation',
+    enabled: 'cutting',
+  },
+  op0400PowerScale: {
+    title: localize('Power scale (%)'),
+    description: localize(
+      'LightBurn power scale (0-100%) for the shapes in the operation.'
+    ),
+    type: 'number',
+    value: 100,
+    range: [0, 100],
+    scope: 'operation',
+    enabled: 'cutting',
+  },
+  op0500ZOffset: {
+    title: localize('Z-offset (mm)'),
+    description: localize(
+      'Amount to offset Z into the material (or out of it) at the start of cutting.  Useful for deep cutting or defocusing.'
+    ),
+    type: 'number',
+    value: 0,
+    scope: 'operation',
+    enabled: 'cutting',
+  },
+  op0600Passes: {
+    title: localize('Pass count'),
+    description: localize('Number of times to repeat the cut.'),
+    type: 'number',
+    value: 1,
+    scope: 'operation',
+    enabled: 'cutting',
+  },
+  op0700ZStep: {
+    title: localize('Z-step per pass (mm)'),
+    description: localize('Amount of raise or lower Z for each cut pass.'),
+    type: 'number',
+    value: 0,
     scope: 'operation',
     enabled: 'cutting',
   },
