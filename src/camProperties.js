@@ -93,7 +93,7 @@ properties = {
   laserpost0400IncludeComments: {
     title: localize('Comments'),
     description: localize(
-      'Detail level of XML comments in the generated files.'
+      'Detail level of comments in the generated files.'
     ),
     group: 'groupLaserPost',
     type: 'enum',
@@ -145,7 +145,7 @@ properties = {
   laserPower0100EtchMin: {
     title: localize('Etch power (min, %)'),
     description: localize(
-      'Sets the mininum laser power used for etching (ignored if etch max power is 0).'
+      'Overrides the mininum laser power used on etching cutting mode operations (ignored if etch max power is 0).'
     ),
     group: 'groupLaserPower',
     type: 'number',
@@ -156,7 +156,7 @@ properties = {
   laserPower0200EtchMax: {
     title: localize('Etch power (max, %)'),
     description: localize(
-      "Sets the maximum laser power used for etching ('0' to use power specified on the tool)."
+      "Overrides the maximum laser power used on etching cutting mode operations ('0' to use power specified on the tool)."
     ),
     group: 'groupLaserPower',
     type: 'number',
@@ -167,7 +167,7 @@ properties = {
   laserPower0300VaporizeMin: {
     title: localize('Vaporize power (min, %)'),
     description: localize(
-      'Sets the minimum laser power used for vaporize (ignored if vaporize max power is 0).'
+      'Overrides the minimum laser power used on vaporize cutting mode operations (ignored if vaporize max power is 0).'
     ),
     group: 'groupLaserPower',
     type: 'number',
@@ -178,7 +178,7 @@ properties = {
   laserPower0400VaporizeMax: {
     title: localize('Vaporize power (max, %)'),
     description: localize(
-      "Sets the maximum laser power used for vaporize ('0' to use power specified on the tool)."
+      "Overrides the maximum laser power used on vaporize cutting mode operations ('0' to use power specified on the tool)."
     ),
     group: 'groupLaserPower',
     type: 'number',
@@ -189,7 +189,7 @@ properties = {
   laserPower0500ThroughMin: {
     title: localize('Through power (min, %)'),
     description: localize(
-      'Sets the minimum laser power used for through cutting (ignored if through max power is 0)).'
+      'Overrides the minimum laser power used on through cutting cutting mode operations (ignored if through max power is 0)).'
     ),
     group: 'groupLaserPower',
     type: 'number',
@@ -200,7 +200,7 @@ properties = {
   laserPower0600ThroughMax: {
     title: localize('Through power (max, %)'),
     description: localize(
-      "Sets the maximum laser power used for through cutting ('0' to use power specified on the tool)."
+      "Overrides the maximum laser power used on through cutting cutting mode operations ('0' to use power specified on the tool)."
     ),
     group: 'groupLaserPower',
     type: 'number',
@@ -214,7 +214,7 @@ properties = {
   machine0100SpeedUnits: {
     title: localize('Speed units'),
     description: localize(
-      'Speed units to use in comments and setup notes (used in comments only, does not change operational behavior).'
+      'Speed units to use in comments and setup notes (used in comments and setup sheets only, does not change operational behavior).'
     ),
     type: 'enum',
     values: [
@@ -287,7 +287,7 @@ properties = {
     enabled: 'cutting',
   },
   op0300LaserEnable: {
-    title: localize('Laser enable'),
+    title: localize('Laser selection'),
     description: localize(
       'Controls if the layer should be enabled and using which laser(s) (for dual laser machines).'
     ),
