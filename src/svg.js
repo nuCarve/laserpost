@@ -199,11 +199,11 @@ function onProjectComplete(redirect) {
       showNotesWarning = notesImportant;
     else if (includeNotes == INCLUDE_NOTES_SHOW) showNotesWarning = true;
 
-    // write notes to the <programName>-notes.txt file (we could write to svg using <text>, but
+    // write notes to the <programName>-setup.txt file (we could write to svg using <text>, but
     // many laser programs either render these poorly or fail to load them at all)
     const path = FileSystem.getCombinedPath(
       FileSystem.getFolderPath(getOutputPath()),
-      programName + '-notes.txt'
+      programName + '-setup.txt'
     );
     redirectToFile(path);
     const setupNotes = notes.concat(generateLayerNotes(-1, redirect));
@@ -215,14 +215,14 @@ function onProjectComplete(redirect) {
     if (notesImportant)
       showWarning(
         localize(
-          'There are important notes available from the post, please see:\n\n{path}'
+          'There are important notes you should review in the generated job setup file.  Please see:\n\n{path}'
         ),
         { path: path }
       );
     else if (showNotesWarning)
       showWarning(
         localize(
-          'Layer setup notes have been generated in the file:\n\n{path}'
+          'Job setup information has been generated in the file:\n\n{path}'
         ),
         { path: path }
       );
