@@ -2,7 +2,7 @@
 &nbsp;  
 
 # [LaserPost](https://nucarve.com/laserpost) 
-Autodesk CAM post-processors (Fusion 360, Inventor, HSMWorks) that generate vector files from CAM operations.  Currently supports LightBurn (LBRN) projects (LaserPost for LightBurn) and SVG files (LaserPost for SVG).  All laser configuration is maintained in the CAM and post setup, allowing for LightBurn projects to be created with all settings and SVG files with intelligent grouping and colors and a consistent setup sheet for laser configuration.  Converts CAM operations into vector shapes, including support for ellipses and paths using Bezier curves.  Visit the [LaserPost home page](https://nucarve.com/laserpost) for more information.
+Autodesk CAM post-processors (Fusion 360, Inventor, HSMWorks) that generate vector files from CAM operations.  Currently supports LightBurn projects (LaserPost for LightBurn) and SVG files (LaserPost for SVG).  All laser configuration is maintained in the CAM and post setup, allowing for LightBurn projects to be created with all settings and SVG files with intelligent grouping and colors and a consistent setup sheet for laser configuration.  Converts CAM operations into vector shapes, including support for ellipses and paths using Bezier curves.  Visit the [LaserPost home page](https://nucarve.com/laserpost) for more information.
 
 ## Releases
 
