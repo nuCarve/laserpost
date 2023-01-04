@@ -82,11 +82,10 @@ properties = {
       },
       { title: localize('Always show'), id: INCLUDE_NOTES_SHOW },
     ],
-    value:
-      // #if LBRN
-      INCLUDE_NOTES_SHOW_IMPORTANT,
+    // #if LBRN
+    value: INCLUDE_NOTES_SHOW_IMPORTANT,
     // #else
-    INCLUDE_NOTES_SHOW,
+    value: INCLUDE_NOTES_SHOW,
     // #endif
     scope: 'post',
   },
@@ -116,7 +115,11 @@ properties = {
     ),
     group: 'groupWorkspace',
     type: 'boolean',
+    // #if LBRN
     value: true,
+    // #else
+    value: false,
+    // #endif
     scope: 'post',
   },
   work0200OffsetX: {

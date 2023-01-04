@@ -51,7 +51,7 @@ function onWriteHeader(layer) {
   writeXML('desc', { content: generatedBy });
   writeln('');
 
-  activePath = { path: '' };
+  activePath = { path: '', cutSetting: { index: -1 } };
 }
 
 /**
@@ -345,25 +345,10 @@ function generateLayerNotes(layer, showFilename) {
  * @param shape Shape information (cutSetting, radius, centerX, centerY) to write
  */
 function writeShapeEllipse(shape) {
-  // // close out any partially completed shape
-  // closeShapePath();
-  // // generate the ellipse
-  // writeXML(
-  //   'ellipse',
-  //   {
-  //     // CutIndex: shape.cutSetting.index,
-  //     cx: mmFormat(shape.centerX),
-  //     cy: mmFormat(shape.centerY),
-  //     rx: mmFormat(shape.radius),
-  //     ry: mmFormat(shape.radius),
-  //   },
-  //   false
-  // );
-
   // if different layer specs are used, close the shape and save the new layer index
-  if (shape.cutSetting.index != activePath.cutIndex) {
+  if (shape.cutSetting.index != activePath.cutSetting.index) {
     closeShapePath();
-    activePath.cutIndex = shape.cutSetting.index;
+    activePath.cutSetting = shape.cutSetting;
   }
 
   // transform our coordinates
@@ -404,9 +389,9 @@ function writeShapeEllipse(shape) {
  */
 function writeShapePath(shape) {
   // if different layer specs are used, close the shape and save the new layer index
-  if (shape.cutSetting.index != activePath.cutIndex) {
+  if (shape.cutSetting.index != activePath.cutSetting.index) {
     closeShapePath();
-    activePath.cutIndex = shape.cutSetting.index;
+    activePath.cutSetting = shape.cutSetting;
   }
 
   // transform our start coordinate
@@ -473,15 +458,12 @@ function writeShapePath(shape) {
  */
 function closeShapePath() {
   if (activePath.path != '') {
-    // get our layer cut settings
-    const cutSetting = project.cutSettings[activePath.cutIndex];
-
-    if (cutSetting.layerMode == LAYER_MODE_LINE)
+    if (activePath.cutSetting.layerMode == LAYER_MODE_LINE)
       writeXML('path', {
         id: activePath.name + '-' + activePath.id,
         d: activePath.path,
-        stroke: cutIndexToRGBColor(activePath.cutIndex),
-        stroke$width: mmFormat(cutSetting.kerf),
+        stroke: cutIndexToRGBColor(activePath.cutSetting.index),
+        stroke$width: mmFormat(activePath.cutSetting.kerf),
         fill: 'none',
       });
     else
@@ -489,15 +471,16 @@ function closeShapePath() {
         id: activePath.name + '-' + activePath.id,
         d: activePath.path,
         stroke:
-          cutSetting.layerMode == LAYER_MODE_FILL
+        activePath.cutSetting.layerMode == LAYER_MODE_FILL
             ? 'none'
-            : cutIndexToRGBColor(activePath.cutIndex),
-        fill: cutIndexToRGBColor(activePath.cutIndex),
+            : cutIndexToRGBColor(activePath.cutSetting.index),
+        fill: cutIndexToRGBColor(activePath.cutSetting.index),
         fill$mode: 'evenodd',
       });
     activePath.id++;
 
     activePath.path = '';
+    activePath.cutSetting = { index: -1 };
   }
 }
 

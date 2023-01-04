@@ -205,7 +205,7 @@ function populateProjectLayers() {
         const segments = identifySegments(groupOperation);
 
         // build out shapes for each segments
-        generateShapesFromSegments(groupOperation, segments, projOperation);
+        generateShapesFromSegments(groupOperation, segments, projOperation, layer.cutSettings);
       }
     }
   }
@@ -457,8 +457,9 @@ function scanSegmentForClosure(startIndex, endIndex, operation) {
  * @param operation The CAM operation, where the path metrics can be found
  * @param segments The segmentation index of each shape (which references operation for the metrics)
  * @param projOperation The project operation object, where the resolved shapes are added for grouping
+ * @param cutSettings Project layer specific cutSettings
  */
-function generateShapesFromSegments(operation, segments, projOperation) {
+function generateShapesFromSegments(operation, segments, projOperation, cutSettings) {
   // process all segments and convert them into shapes (vectors and primities), including conversion of
   // non-linear paths from circular (start/end/center points) to bezier (center point, with two control points)
   for (let segmentIndex = 0; segmentIndex < segments.length; ++segmentIndex) {
@@ -466,7 +467,7 @@ function generateShapesFromSegments(operation, segments, projOperation) {
 
     // create a new shape in our shape set for this operation (to organize the shapes together by operation)
     projOperation.shapeSets.push({
-      cutSetting: project.cutSettings[operation.index],
+      cutSetting: cutSettings[operation.index],
     });
     const shape = projOperation.shapeSets[projOperation.shapeSets.length - 1];
 
@@ -1014,7 +1015,6 @@ function traceStockOutline() {
     powerSource: localize('stock dimensions'),
     customCutSettingXML: '',
     kerf: 0.1,
-    powerScale: 100,
     paths: paths,
   });
 
