@@ -19,11 +19,11 @@ function closeEquals(a, b) {
 }
 
 /**
- * Add a line to the LightBurn notes field.
+ * Add a line to the file's notes field.
  *
  * @param template Template comment to format and write to the notes field
  * @param parameters Optional key/value dictionary with parameters from template (such as {name})
- * @param important If the note is "important" (show notes in LightBurn when INCLUDE_NOTES_SHOW_IMPORTANT); optional, default `false`
+ * @param important If the note is "important" (show notes when INCLUDE_NOTES_SHOW_IMPORTANT); optional, default `false`
  */
 function appendNote(template, parameters, important) {
   if (important === true) notesImportant = true;

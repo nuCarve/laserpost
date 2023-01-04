@@ -22,8 +22,8 @@ function onOpen() {
     y: getProperty('work0300OffsetX'),
   };
 
-  // emit the the required file header (for LightBurn, we must do this early to avoid generating too
-  // many comments before the LightBurn thumbnail, which causes LightBurn to crash)
+  // emit the the required file header (LightBurn crashes if there are too many comments
+  // before the thumbnail)
   onFileCreate();
 }
 
@@ -512,7 +512,7 @@ function onSectionEnd() {
 
 /**
  * onClose is called by CAM when the last section has been completed.  Triggers the
- * processing of all entries in the `groups` array and generates the LightBurn file.
+ * processing of all entries in the `groups` array and generates the vector file(s).
  */
 function onClose() {
   // include some debugging information
@@ -524,7 +524,7 @@ function onClose() {
   // debugging info if requested
   dumpGroups();
 
-  // process all groups, converting from CAM coordinates to LightBurn
+  // process all groups, converting from CAM coordinates
   groupsToProject();
 
   // determine if we are doing file redirection

@@ -21,8 +21,8 @@ let origState = undefined; // original state loaded from state file and should n
 let groups = [];
 
 // `project` is created by `groupsToProject` after all operations are completed processing.  It
-// contains a representation of the same data, but organized similar to what LightBurn expects
-// for the lbrn file (such as conversion from CAM paths to LightBurn vectors and primitives).  No
+// contains a representation of the same data, but organized similar to what most vector 
+// based file formats expect (such as conversion to LightBurn vectors and primitives).  No
 // optimization is made, such as removing unwanted groups as that is handled in the final phase
 // when the project array is written to the file.
 //

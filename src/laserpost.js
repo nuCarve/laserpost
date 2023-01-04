@@ -2,6 +2,9 @@
  * LaserPost: Copyright (C) 2023 nuCarve
  *
  * A CAM post processor for emitting vector files (such as LightBurn and SVG) for laser (jet) operations.
+ * A common source code base is used to build vector file format specific versions of LaserPost, such
+ * as "LaserPost for LightBurn" and "LaserPost for SVG".  See the `description` global variable
+ * just below this comment to identify which format this post-processor has been built for.
  *
  * This software is licensed under the MIT License:
  *

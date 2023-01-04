@@ -3,13 +3,13 @@
  * LaserPost module: camConversion.js
  *
  * Group and Project services.  Handles the heavy lifting of converting CAM paths
- * to LightBurn objects (layers, vectors and primitives), including grouping and path closures.
+ * to LaserPost objects (layers, vectors and primitives), including grouping and path closures.
  *
  *************************************************************************************/
 
 /**
  * Converts the `groups` array into the `project` array, converting CAM style paths metrics into
- * LightBurn CutSettings and Shapes objects.
+ * CutSettings and Shapes objects.
  *
  * This must be called after all CAM operations are complete, and prior to accessing any information
  * in the `project` array.
@@ -73,7 +73,7 @@ function createLayers() {
         name: groupOperation.operationName,
         minPower: groupOperation.minPower,
         maxPower: groupOperation.maxPower,
-        speed: feedrate / 60, // LightBurn is mm/sec, CAM is mm/min
+        speed: feedrate / 60,
         layerMode: groupOperation.layerMode,
         laserEnable: groupOperation.laserEnable,
         powerSource: groupOperation.powerSource,
@@ -241,7 +241,7 @@ function populateFilesAndPath() {
 }
 
 /**
- * Identifies from operation (paths) the groupings of segments (start/end/type) to define LightBurn shapes
+ * Identifies from operation (paths) the groupings of segments (start/end/type) to define vector shapes
  *
  * Breaks apart individual paths into logical segments open paths (series of lines), closed paths (where start and end
  * point are the same), and circles (by definition, a closed path).
@@ -250,7 +250,7 @@ function populateFilesAndPath() {
  * at the start / end of the geometry), and so to make sure we can close shapes whenever possible (when end point of a cut
  * matches the start point of the geometry), we search across all the paths in the operation, and break them
  * into unique path sets - where each set is a contiguous path from start to end and broken out into a separate set whenever
- * the geometry can be closed (to define a fillable shape in LightBurn).
+ * the geometry can be closed (to define a fillable shape).
  *
  * @param operation Operation containing the path points
  * @returns Array of start/end indexes (of operation paths) and if the shape is closed ([{start, end, closed}])
@@ -449,10 +449,10 @@ function scanSegmentForClosure(startIndex, endIndex, operation) {
 }
 
 /**
- * Constructs LightBurn style shapes from a series of segments.
+ * Constructs vector shapes from a series of segments.
  *
- * Walks all segments and builds LightBurn shapes for each of them.  Handles the conversion of CAM style paths
- * to LightBurn style shapes (including bezier and circle conversions).
+ * Walks all segments and builds shapes for each of them.  Handles the conversion of CAM style paths
+ * to vector style shapes (including bezier and circle conversions).
  *
  * @param operation The CAM operation, where the path metrics can be found
  * @param segments The segmentation index of each shape (which references operation for the metrics)
@@ -473,7 +473,7 @@ function generateShapesFromSegments(operation, segments, projOperation) {
     // build out the shape
     switch (segment.type) {
       case SEGMENT_TYPE_CIRCLE:
-        // circles create LightBurn ellipses (no vertex/primitive)
+        // circles create ellipses (no vertex/primitive)
         generateEllipseShape(
           shape,
           operation,
@@ -497,9 +497,9 @@ function generateShapesFromSegments(operation, segments, projOperation) {
 }
 
 /**
- * Generates a LightBurn Ellipse, from a full circle CAM operation
+ * Generates an Ellipse, from a full circle CAM operation
  *
- * Converts the CAM style path (start xy and center xy) into LightBurn style
+ * Converts the CAM style path (start xy and center xy) into LaserPost style
  * ellipse of center xy and radius.
  *
  * @param shape Shape object to complete with the ellipse information
@@ -555,10 +555,10 @@ function generateEllipseShape(
 }
 
 /**
- * Generates a LightBurn Path, from CAM operations
+ * Generates a LaserPost Path, from CAM operations
  *
- * Handles the creation of a LightBurn Path shape, including the conversion of CAM style paths (center, start and
- * end points) into LightBurn style paths (cubic bezier vectors and primitives that connect them).
+ * Handles the creation of a LaserPost Path shape, including the conversion of CAM style paths (center, start and
+ * end points) into LaserPost style paths (cubic bezier vectors and primitives that connect them).
  *
  * @param shape Shape object to complete with the path information
  * @param operation Path data for all shapes within this operation
@@ -602,7 +602,7 @@ function generatePathShape(
   };
 
   // gather all points from the segment (from start to end) into vectors (the individual points) and primitives (the connection between vectors)
-  // this is also where we do the conversion of circular paths into bezier curves for LightBurn
+  // this is also where we do the conversion of circular paths into bezier curves
   let firstSegment = true;
   for (
     let segmentIndex = segmentStart + 1;
@@ -780,11 +780,11 @@ function generatePathShape(
 }
 
 /**
- * Converts a circular coordinate system (such as used CAM onCircular, and gcode G2/G3) into a bezier curve (as
- * used by LightBurn).  Accepts a start point, end point, center point of the circle, and a flag indicating if
- * we are moving clockwise or counterclockwise.  Returns an array of curves, containing {x, y, x1, y1, x2, y2}
- * where x/y is the end point of the curve, x1/y1 are the starting control points for the bezier, and x2/y2 are
- * the ending control points for the bezier.
+ * Converts a circular coordinate system (such as used CAM onCircular, and gcode G2/G3) into a
+ * bezier curve.  Accepts a start point, end point, center point of the circle, and a flag
+ * indicating if we are moving clockwise or counterclockwise.  Returns an array of curves,
+ * containing {x, y, x1, y1, x2, y2} where x/y is the end point of the curve, x1/y1 are the starting
+ * control points for the bezier, and x2/y2 are the ending control points for the bezier.
  *
  * @param startPoint Start position {x, y}
  * @param endPoint  End position {x, y}

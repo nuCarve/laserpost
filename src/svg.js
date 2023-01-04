@@ -83,7 +83,7 @@ function onWriteShapes(layer, redirect) {
   }
 
   // process all operation groups.  These are groups of operations and generate a grouping for
-  // LightBurn when there is more than one operation in the group (when the group name property has
+  // SVG when there is more than one operation in the group (when the group name property has
   // been used by the user)
   for (
     let setIndex = 0;
@@ -160,7 +160,7 @@ function onWriteShapes(layer, redirect) {
     // if we grouped these operations, close the group now
     if (
       opGroup.operations.length > 1 &&
-      getProperty('lightburn0500GroupOperations')
+      getProperty('laserpost0200GroupShapes')
     )
       writeXMLClose();
   }
@@ -340,7 +340,7 @@ function generateLayerNotes(layer, showFilename) {
 }
 
 /**
- * Write an ellipse (a closed circle) to the LightBurn file
+ * Write an ellipse (a closed circle) to the SVG file
  *
  * @param shape Shape information (cutSetting, radius, centerX, centerY) to write
  */
@@ -398,8 +398,7 @@ function writeShapeEllipse(shape) {
 }
 
 /**
- * Write a path (lines and beziers) to the LightBurn file.  Skips shapes that are not closed yet
- * have been set up to use fill modes, as LightBurn won't render these.
+ * Write a path (lines and beziers) to the SVG file.  
  *
  * @param shape Shape information (cutSetting, vectors[], primitives[]) to write
  */

@@ -48,12 +48,12 @@ const LAYER_MODE_OFFSET_FILL = 'offsetFill';
 const SPEED_UNITS_MMPS = 'mmps';
 const SPEED_UNITS_MMPM = 'mmpm';
 
-// LightBurn shape types
+// shape types
 const SHAPE_TYPE_ELLIPSE = 'ellipse';
 const SHAPE_TYPE_PATH = 'path';
 const SHAPE_TYPE_GROUP = 'group';
 
-// LightBurn primitive types
+// primitive types
 const PRIMITIVE_TYPE_LINE = 'line';
 const PRIMITIVE_TYPE_BEZIER = 'bezier';
 

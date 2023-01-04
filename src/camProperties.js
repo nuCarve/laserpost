@@ -306,7 +306,7 @@ properties = {
   op0400PowerScale: {
     title: localize('Power scale (%)'),
     description: localize(
-      'LightBurn power scale (0-100%) for the shapes in the operation.'
+      'Relative power scale (0-100%) for the shapes in the operation.'
     ),
     type: 'number',
     value: 100,
@@ -343,15 +343,16 @@ properties = {
   op0800GroupName: {
     title: localize('Grouping name'),
     description: localize(
-      'By default, operations have their shapes group together (if there is more than one shape) but operations themselves are not grouped.  ' +
-        'Operations that share the same "group name" will have their shapes grouped into a parent LightBurn group.  The name is used only to identify ' +
-        'operations to group and is not part of the LightBurn grouping or layering.'
+      'Operations that share the same "Grouping name" will have an additional group wrapped around them, ' +
+      'in addition to any other groupings.  The name is used only to identify ' +
+      'operations to group and is not part of the resulting generated files or laser setup.'
     ),
     type: 'string',
     value: '',
     scope: 'operation',
     enabled: 'cutting',
   },
+  // #if LBRN
   op0900CustomCutSettingXML: {
     title: localize('Custom CutSetting (XML)'),
     description: localize(
@@ -363,4 +364,5 @@ properties = {
     scope: 'operation',
     enabled: 'cutting',
   },
+  // #endif
 };
