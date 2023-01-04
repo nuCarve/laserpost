@@ -142,7 +142,7 @@ function onWriteShapes(layer, redirect) {
       // do we need to group shapes within our operation?
       if (
         operation.shapeSets.length > 1 &&
-        getProperty('laserpost0400GroupShapes')
+        getProperty('laserpost0200GroupShapes')
       ) {
         writeXML('Shape', { Type: 'Group' }, true);
         writeXML('XForm', { content: '1 0 0 1 0 0' });
@@ -165,7 +165,7 @@ function onWriteShapes(layer, redirect) {
       // if we grouped the shapes, close the group
       if (
         operation.shapeSets.length > 1 &&
-        getProperty('laserpost0400GroupShapes')
+        getProperty('laserpost0200GroupShapes')
       ) {
         writeXMLClose();
         writeXMLClose();
@@ -200,7 +200,7 @@ function onWriteShapes(layer, redirect) {
  * @param layer Layer (cutSetting) being generated (-1 for all layers)
  */
 function onWriteTrailer(layer) {
-  const includeNotes = getProperty('laserpost0100IncludeNotes');
+  const includeNotes = getProperty('laserpost0300IncludeNotes');
   if (includeNotes != INCLUDE_NOTES_NONE && notes != '') {
     // determine if we cause LightBurn to show notes on file load
     let showOnLoad = false;
