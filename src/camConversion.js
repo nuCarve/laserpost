@@ -140,7 +140,7 @@ function createProjectLayers() {
     project.layers.push({
       name: localize('All layers'),
       index: -1,
-      cutSettings: project.cutSettings,
+      cutSettings: [],
       operationSets: [],
     });
 }
@@ -192,7 +192,9 @@ function populateProjectLayers() {
           groupOperation.index = 0;
           if (layer.cutSettings.length == 0)
             layer.cutSettings.push(project.cutSettings[originalIndex]);
-        }
+        } else 
+          // cut settings are shared by all layers when in the same file
+          layer.cutSettings = project.cutSettings;
 
         // set up a operation inside the layer (each operation is grouped to make managing them easier)
         const index = projOpSet.operations.push({
