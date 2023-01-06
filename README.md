@@ -14,7 +14,7 @@ Video tutorials, documentation and tricks can be found on the [nuCarve LaserPost
 
 ## Support
 
-Use the [GitHub issue tracker](https://github.com/nuCarve/laserpost/issues) to search known issues or create a new issue.  You may also [send a private message](https://nucarve.com/about#contact) to the nuCarve team.
+Use the [GitHub issue tracker](https://github.com/nuCarve/laserpost/issues) to search known issues or create a new issue.  You may also [send a private message](https://nucarve.com/contact) to the nuCarve team.
 
 ## Building
 
