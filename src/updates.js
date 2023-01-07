@@ -113,7 +113,7 @@ function checkUpdateAvailability() {
 
   // update notes (as important) if we have an update available
   if (activeState.updateSemver) {
-    writeNote(
+    appendNote(
       localize(
         '*****\n' +
           '***** LaserPost update "{version}" available:\n' +

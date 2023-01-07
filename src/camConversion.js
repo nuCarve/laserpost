@@ -3,30 +3,42 @@
  * LaserPost module: camConversion.js
  *
  * Group and Project services.  Handles the heavy lifting of converting CAM paths
- * to LightBurn objects (layers, vectors and primitives), including grouping and path closures.
+ * to LaserPost objects (layers, vectors and primitives), including grouping and path closures.
  *
  *************************************************************************************/
 
 /**
  * Converts the `groups` array into the `project` array, converting CAM style paths metrics into
- * LightBurn CutSettings and Shapes objects.
+ * CutSettings and Shapes objects.
  *
  * This must be called after all CAM operations are complete, and prior to accessing any information
  * in the `project` array.
  */
 function groupsToProject() {
+  // process all groups and build out the unique layers that are used
+  createLayers();
+
+  // construct all top-level layers
+  createProjectLayers();
+
+  // add operations to the top-level layer grouping
+  populateProjectLayers();
+
+  // add filenames and paths for single or multi-file
+  populateFilesAndPath();
+
+  // dump the project to comments to assist with debugging problems
+  dumpProject();
+}
+
+/**
+ * Scan all groups and build out the list of unique layers in use, including setting the index for the
+ * layer (cutSetting) on the operations in the project.
+ */
+function createLayers() {
   // loop through all groups
   for (let groupIndex = 0; groupIndex < groups.length; ++groupIndex) {
     const group = groups[groupIndex];
-
-    // create a new operation set in the project to collect all the operations together in LightBurn
-    // that share the same group name
-    project.operationSets.push({
-      groupName: group.groupName,
-      operations: [],
-    });
-    const projOpSet = project.operationSets[project.operationSets.length - 1];
-
     // loop through all operations on this group
     for (
       let operationIndex = 0;
@@ -34,16 +46,8 @@ function groupsToProject() {
       ++operationIndex
     ) {
       const groupOperation = group.operations[operationIndex];
-
       // if no points, skip this one
       if (groupOperation.paths.length == 0) continue;
-
-      // set up a project operation inside the project set (each operation is grouped to make managing them in LightBurn easier)
-      const index = projOpSet.operations.push({
-        shapeSets: [],
-        operationName: groupOperation.operationName,
-      });
-      const projOperation = projOpSet.operations[index - 1];
 
       // determine the feedrate to use.  CAM specifies feedrate at the operation level, but only delivers it
       // during individual movements.  Technically three feedrates are available - cutting, lead-in and lead-out.
@@ -69,7 +73,7 @@ function groupsToProject() {
         name: groupOperation.operationName,
         minPower: groupOperation.minPower,
         maxPower: groupOperation.maxPower,
-        speed: feedrate / 60, // LightBurn is mm/sec, CAM is mm/min
+        speed: feedrate / 60,
         layerMode: groupOperation.layerMode,
         laserEnable: groupOperation.laserEnable,
         powerSource: groupOperation.powerSource,
@@ -77,29 +81,169 @@ function groupsToProject() {
         zOffset: groupOperation.zOffset,
         passes: groupOperation.passes,
         zStep: groupOperation.zStep,
+        kerf: groupOperation.kerf,
+        powerScale: groupOperation.powerScale,
         customCutSettingXML: groupOperation.customCutSettingXML,
         customCutSetting: groupOperation.customCutSetting,
       });
 
-      // convert the group (paths) into segments (groups of shapes)
-      const segments = identifySegments(groupOperation);
-
-      // build out shapes for each segments
-      generateShapesFromSegments(
-        groupOperation,
-        segments,
-        cutSetting,
-        projOperation
-      );
+      // add the reference to this cutSetting layer to the operation
+      groupOperation.cutSetting = cutSetting;
     }
   }
 
-  // dump the project to comments to assist with debugging problems
-  dumpProject();
+  // now go back and loop through everything again, this time adjusting
+  // the index to cutSetting (as the layer order may have changed as
+  // common layers were merged)
+  for (let groupIndex = 0; groupIndex < groups.length; ++groupIndex) {
+    const group2 = groups[groupIndex];
+    // loop through all operations on this group
+    for (
+      let operationIndex = 0;
+      operationIndex < group2.operations.length;
+      ++operationIndex
+    ) {
+      const groupOperation2 = group2.operations[operationIndex];
+      groupOperation2.index = groupOperation2.cutSetting.index;
+    }
+  }
 }
 
 /**
- * Identifies from operation (paths) the groupings of segments (start/end/type) to define LightBurn shapes
+ * Creates the top-level project layers, which then will (eventually) contain all operation sets
+ * either organized by layer (when grouping by layer), or lumped into a single layer (when not grouping by layer)
+ */
+function createProjectLayers() {
+  // determine if we are grouping by layer or by operation
+  const groupByLayer =
+    getProperty('laserpost0100Grouping') == GROUPING_BY_LAYER ||
+    getProperty('laserpost0100Grouping') == GROUPING_BY_LAYER_FILE;
+
+  // build up the project layers
+  project.layers = [];
+  if (groupByLayer) {
+    for (
+      let layerIndex = 0;
+      layerIndex < project.cutSettings.length;
+      ++layerIndex
+    ) {
+      const cutSetting = project.cutSettings[layerIndex];
+
+      project.layers.push({
+        name: cutSetting.name,
+        index: layerIndex,
+        cutSettings: [],
+        operationSets: [],
+      });
+    }
+  } else
+    project.layers.push({
+      name: localize('All layers'),
+      index: -1,
+      cutSettings: [],
+      operationSets: [],
+    });
+}
+
+/**
+ * Processes all groups and populates the layers with the operations and shapes for each layer (or if
+ * layers are not being grouped, populates them all into the shared top-level layer)
+ */
+function populateProjectLayers() {
+  // loop through all top-level layers
+  for (let layerIndex = 0; layerIndex < project.layers.length; ++layerIndex) {
+    const layer = project.layers[layerIndex];
+
+    // loop through all groups
+    for (let groupIndex = 0; groupIndex < groups.length; ++groupIndex) {
+      let projOpSet = undefined;
+      const group = groups[groupIndex];
+
+      // loop through all operations on this group
+      for (
+        let operationIndex = 0;
+        operationIndex < group.operations.length;
+        ++operationIndex
+      ) {
+        const groupOperation = group.operations[operationIndex];
+
+        // if no points, skip this one
+        if (groupOperation.paths.length == 0) continue;
+
+        // is this operation to be included in our layer?
+        if (layer.index !== -1 && layer.index != groupOperation.index) continue;
+
+        // set up our operation set if not already done for this group
+        if (projOpSet === undefined) {
+          // create a new operation set in the layer to collect all the operations together
+          // that share the same group name
+          layer.operationSets.push({
+            groupName: group.groupName,
+            operations: [],
+          });
+          projOpSet = layer.operationSets[layer.operationSets.length - 1];
+        }
+
+        // if a single layer per file, add our cut settings to this layer and remap all layer index
+        // to use layer 0 (since there is only one layer per file)
+        if (getProperty('laserpost0100Grouping') == GROUPING_BY_LAYER_FILE) {
+          const originalIndex = groupOperation.index;
+          project.cutSettings[originalIndex].index = 0;
+          groupOperation.index = 0;
+          if (layer.cutSettings.length == 0)
+            layer.cutSettings.push(project.cutSettings[originalIndex]);
+        } else 
+          // cut settings are shared by all layers when in the same file
+          layer.cutSettings = project.cutSettings;
+
+        // set up a operation inside the layer (each operation is grouped to make managing them easier)
+        const index = projOpSet.operations.push({
+          shapeSets: [],
+          operationName: groupOperation.operationName,
+        });
+        const projOperation = projOpSet.operations[index - 1];
+
+        // convert the group (paths) into segments (groups of shapes)
+        const segments = identifySegments(groupOperation);
+
+        // build out shapes for each segments
+        generateShapesFromSegments(groupOperation, segments, projOperation, layer.cutSettings);
+      }
+    }
+  }
+}
+
+/**
+ * Populates the filename and path properties of each layer, based on if grouping
+ * is set to by layer or all are in one file.
+ */
+function populateFilesAndPath() {
+  // determine if we are doing file redirection
+  const redirect =
+    getProperty('laserpost0100Grouping') == GROUPING_BY_LAYER_FILE;
+
+  // process all layers
+  for (let layerIndex = 0; layerIndex < project.layers.length; ++layerIndex) {
+    const layer = project.layers[layerIndex];
+
+    // set the filename for this layer
+    if (layerIndex > 0 && redirect)
+      // different file per layer
+      layer.filename = programName + '-' + layerIndex + '.' + extension;
+    else
+      // shared file across all layers (or first layer when separate files per layer)
+      layer.filename = programName + '.' + extension;
+
+    // set the path based on the determined filename
+    layer.path = FileSystem.getCombinedPath(
+      FileSystem.getFolderPath(getOutputPath()),
+      layer.filename
+    );
+}
+}
+
+/**
+ * Identifies from operation (paths) the groupings of segments (start/end/type) to define vector shapes
  *
  * Breaks apart individual paths into logical segments open paths (series of lines), closed paths (where start and end
  * point are the same), and circles (by definition, a closed path).
@@ -108,7 +252,7 @@ function groupsToProject() {
  * at the start / end of the geometry), and so to make sure we can close shapes whenever possible (when end point of a cut
  * matches the start point of the geometry), we search across all the paths in the operation, and break them
  * into unique path sets - where each set is a contiguous path from start to end and broken out into a separate set whenever
- * the geometry can be closed (to define a fillable shape in LightBurn).
+ * the geometry can be closed (to define a fillable shape).
  *
  * @param operation Operation containing the path points
  * @returns Array of start/end indexes (of operation paths) and if the shape is closed ([{start, end, closed}])
@@ -152,7 +296,11 @@ function identifySegments(operation) {
           operation
         );
 
-        for (let indSegIndex = 0; indSegIndex < independentSegments.length; ++indSegIndex) {
+        for (
+          let indSegIndex = 0;
+          indSegIndex < independentSegments.length;
+          ++indSegIndex
+        ) {
           const nextSegment = independentSegments[indSegIndex];
           segments.push({
             start: nextSegment.start,
@@ -172,7 +320,7 @@ function identifySegments(operation) {
           type: SEGMENT_TYPE_CIRCLE,
         });
 
-        writeComment(
+        debugLog(
           'identifySegments: Breaking off closed segment (circle): {start} to {end}',
           {
             start: opSegmentIndex - 1,
@@ -180,7 +328,6 @@ function identifySegments(operation) {
           },
           COMMENT_INSANE
         );
-
       }
 
       // set segment start to this segment
@@ -189,7 +336,7 @@ function identifySegments(operation) {
   }
 
   // dump the segments into insane comments
-  writeComment('identifySegments: Segmentation list:', {}, COMMENT_INSANE);
+  debugLog('identifySegments: Segmentation list:', {}, COMMENT_INSANE);
   for (let segmentIndex = 0; segmentIndex < segments.length; ++segmentIndex) {
     let type;
     switch (segments[segmentIndex].type) {
@@ -205,7 +352,7 @@ function identifySegments(operation) {
         });
         break;
     }
-    writeComment(
+    debugLog(
       '  #{num}: {type} {start} to {end} ({openClosed})',
       {
         num: segmentIndex,
@@ -221,13 +368,12 @@ function identifySegments(operation) {
   return segments;
 }
 
-
 /**
  * Scans a segment (of paths) to find the largest closure (if any).  Returns an array of segmentations, which
  * may be a single element array if no closures found (or a single perfect closure), and could contain as much
  * as three elements - one for a non-closed starting segment, one for a closed segment, and one for the non-closed
  * ending segment.
- * 
+ *
  * @param startIndex Starting index within the operation to scan
  * @param endIndex Ending index within the operation to scan
  * @param operation Operation entry with all paths
@@ -263,7 +409,7 @@ function scanSegmentForClosure(startIndex, endIndex, operation) {
             end: startScanIndex,
             closed: false,
           });
-          writeComment(
+          debugLog(
             'scanSegmentForClosure: Break off open segment (before closure): {start} to {end}',
             { start: startIndex, end: startScanIndex },
             COMMENT_INSANE
@@ -272,7 +418,7 @@ function scanSegmentForClosure(startIndex, endIndex, operation) {
 
         // break off this closed segment
         result.push({ start: startScanIndex, end: endScanIndex, closed: true });
-        writeComment(
+        debugLog(
           'scanSegmentForClosure: Break off closed segment: {start} to {end}',
           { start: startScanIndex, end: endScanIndex },
           COMMENT_INSANE
@@ -285,7 +431,7 @@ function scanSegmentForClosure(startIndex, endIndex, operation) {
             end: endIndex,
             closed: false,
           });
-          writeComment(
+          debugLog(
             'scanSegmentForClosure: Break off open segment (after closure): {start} to {end}',
             { start: endScanIndex, end: endIndex },
             COMMENT_INSANE
@@ -296,7 +442,7 @@ function scanSegmentForClosure(startIndex, endIndex, operation) {
     }
   }
   // none found
-  writeComment(
+  debugLog(
     'scanSegmentForClosure: Fully open segment: {start} to {end}',
     { start: startIndex, end: endIndex },
     COMMENT_INSANE
@@ -305,22 +451,17 @@ function scanSegmentForClosure(startIndex, endIndex, operation) {
 }
 
 /**
- * Constructs LightBurn style shapes from a series of segments.
+ * Constructs vector shapes from a series of segments.
  *
- * Walks all segments and builds LightBurn shapes for each of them.  Handles the conversion of CAM style paths
- * to LightBurn style shapes (including bezier and circle conversions).
+ * Walks all segments and builds shapes for each of them.  Handles the conversion of CAM style paths
+ * to vector style shapes (including bezier and circle conversions).
  *
  * @param operation The CAM operation, where the path metrics can be found
  * @param segments The segmentation index of each shape (which references operation for the metrics)
- * @param cutSetting The cutSettings (aka LightBurn layer) that will be used for these shapes
  * @param projOperation The project operation object, where the resolved shapes are added for grouping
+ * @param cutSettings Project layer specific cutSettings
  */
-function generateShapesFromSegments(
-  operation,
-  segments,
-  cutSetting,
-  projOperation
-) {
+function generateShapesFromSegments(operation, segments, projOperation, cutSettings) {
   // process all segments and convert them into shapes (vectors and primities), including conversion of
   // non-linear paths from circular (start/end/center points) to bezier (center point, with two control points)
   for (let segmentIndex = 0; segmentIndex < segments.length; ++segmentIndex) {
@@ -328,15 +469,15 @@ function generateShapesFromSegments(
 
     // create a new shape in our shape set for this operation (to organize the shapes together by operation)
     projOperation.shapeSets.push({
-      cutSetting: cutSetting,
+      cutSetting: cutSettings[operation.index],
     });
     const shape = projOperation.shapeSets[projOperation.shapeSets.length - 1];
 
     // build out the shape
     switch (segment.type) {
       case SEGMENT_TYPE_CIRCLE:
-        // circles create LightBurn elipses (no vertex/primitive)
-        generateElipseShape(
+        // circles create ellipses (no vertex/primitive)
+        generateEllipseShape(
           shape,
           operation,
           segment.start,
@@ -359,18 +500,18 @@ function generateShapesFromSegments(
 }
 
 /**
- * Generates a LightBurn Elipse, from a full circle CAM operation
+ * Generates an Ellipse, from a full circle CAM operation
  *
- * Converts the CAM style path (start xy and center xy) into LightBurn style
- * elipse of center xy and radius.
+ * Converts the CAM style path (start xy and center xy) into LaserPost style
+ * ellipse of center xy and radius.
  *
- * @param shape Shape object to complete with the elipse information
+ * @param shape Shape object to complete with the ellipse information
  * @param operation Path data for all shapes within this operation
  * @param segmentStart Index into operation to the circle that starts this position
  * @param segmentEnd Index into operation to the circle that defines the shape
  * @param powerScale Power scale to use for this shape
  */
-function generateElipseShape(
+function generateEllipseShape(
   shape,
   operation,
   segmentStart,
@@ -393,7 +534,7 @@ function generateElipseShape(
   const radius = Math.sqrt(deltaX * deltaX + deltaY * deltaY);
 
   // add the shape
-  shape.type = SHAPE_TYPE_ELIPSE;
+  shape.type = SHAPE_TYPE_ELLIPSE;
   shape.centerX = center.x;
   shape.centerY = center.y;
   shape.radius = radius;
@@ -401,8 +542,8 @@ function generateElipseShape(
   shape.closed = true;
 
   // debug info
-  writeComment(
-    'generateElipseShape: converting to circle on segments {segmentStart}-{segmentEnd}: [{startX}, {startY}] center [{centerX}, {centerY}] with radius {radius}',
+  debugLog(
+    'generateEllipseShape: converting to circle on segments {segmentStart}-{segmentEnd}: [{startX}, {startY}] center [{centerX}, {centerY}] with radius {radius}',
     {
       startX: formatPosition.format(start.x),
       startY: formatPosition.format(start.y),
@@ -417,10 +558,10 @@ function generateElipseShape(
 }
 
 /**
- * Generates a LightBurn Path, from CAM operations
+ * Generates a LaserPost Path, from CAM operations
  *
- * Handles the creation of a LightBurn Path shape, including the conversion of CAM style paths (center, start and
- * end points) into LightBurn style paths (cubic bezier vectors and primitives that connect them).
+ * Handles the creation of a LaserPost Path shape, including the conversion of CAM style paths (center, start and
+ * end points) into LaserPost style paths (cubic bezier vectors and primitives that connect them).
  *
  * @param shape Shape object to complete with the path information
  * @param operation Path data for all shapes within this operation
@@ -445,7 +586,7 @@ function generatePathShape(
   shape.closed = segmentClosed;
 
   // debug info
-  writeComment(
+  debugLog(
     'generatePathShape: converting to paths on segments {segmentStart}-{segmentEnd}',
     {
       segmentStart: segmentStart,
@@ -464,7 +605,7 @@ function generatePathShape(
   };
 
   // gather all points from the segment (from start to end) into vectors (the individual points) and primitives (the connection between vectors)
-  // this is also where we do the conversion of circular paths into bezier curves for LightBurn
+  // this is also where we do the conversion of circular paths into bezier curves
   let firstSegment = true;
   for (
     let segmentIndex = segmentStart + 1;
@@ -477,7 +618,7 @@ function generatePathShape(
       case PATH_TYPE_MOVE:
         break;
       case PATH_TYPE_LINEAR:
-        writeComment(
+        debugLog(
           'LINEAR Vector push: [{x}, {y}]',
           {
             x: formatPosition.format(position.x),
@@ -494,7 +635,7 @@ function generatePathShape(
 
         // add a primitive connecting the vectors, except if we are on the first one (we don't have a line yet)
         if (!firstSegment) {
-          writeComment(
+          debugLog(
             'LINEAR Primitive push: {start}-{end}',
             {
               start: formatPosition.format(shape.vectors.length - 2),
@@ -513,7 +654,7 @@ function generatePathShape(
 
         break;
       case PATH_TYPE_SEMICIRCLE:
-        writeComment(
+        debugLog(
           'Semicircle, start {clockwise} [{startX},{startY}], end [{x}, {y}], center [{centerX}, {centerY}]',
           {
             startX: formatPosition.format(position.x),
@@ -535,7 +676,7 @@ function generatePathShape(
         );
 
         // debug info
-        writeComment(
+        debugLog(
           'generatePathShape: converting to bezier [{startX}, {startY}] to [{x}, {y}] center [{centerX}, {centerY}]',
           {
             startX: formatPosition.format(position.x),
@@ -560,7 +701,7 @@ function generatePathShape(
           let c0 = { x: curves[curveIndex].x1, y: curves[curveIndex].y1 };
 
           // push this vector into the list
-          writeComment(
+          debugLog(
             'CURVE Vector push: [{x}, {y}]',
             {
               x: formatPosition.format(curvePosition.x),
@@ -579,7 +720,7 @@ function generatePathShape(
 
           // add a primitive to connect them, except if we are on the first one (we don't have a line yet)
           if (!firstSegment) {
-            writeComment(
+            debugLog(
               'CURVE Primitive push: {start}-{end}',
               {
                 start: formatPosition.format(shape.vectors.length - 2),
@@ -611,7 +752,7 @@ function generatePathShape(
   // segment, add the final vector and primitive to connect them.
   if (segmentClosed) {
     // closed - so connect primitive to start vector as our ending point
-    writeComment(
+    debugLog(
       'CLOSE Primitive push: {start}-{end}',
       { start: formatPosition.format(shape.vectors.length - 1), end: 0 },
       COMMENT_INSANE
@@ -642,11 +783,11 @@ function generatePathShape(
 }
 
 /**
- * Converts a circular coordinate system (such as used CAM onCircular, and gcode G2/G3) into a bezier curve (as
- * used by LightBurn).  Accepts a start point, end point, center point of the circle, and a flag indicating if
- * we are moving clockwise or counterclockwise.  Returns an array of curves, containing {x, y, x1, y1, x2, y2}
- * where x/y is the end point of the curve, x1/y1 are the starting control points for the bezier, and x2/y2 are
- * the ending control points for the bezier.
+ * Converts a circular coordinate system (such as used CAM onCircular, and gcode G2/G3) into a
+ * bezier curve.  Accepts a start point, end point, center point of the circle, and a flag
+ * indicating if we are moving clockwise or counterclockwise.  Returns an array of curves,
+ * containing {x, y, x1, y1, x2, y2} where x/y is the end point of the curve, x1/y1 are the starting
+ * control points for the bezier, and x2/y2 are the ending control points for the bezier.
  *
  * @param startPoint Start position {x, y}
  * @param endPoint  End position {x, y}
@@ -686,7 +827,7 @@ function circularToBezier(startPoint, endPoint, centerPoint, clockwise) {
   const ccwLargeArc = angleStartCenterEnd > Math.PI;
   const largeArcFlag = clockwise ? !ccwLargeArc : ccwLargeArc;
 
-  writeComment(
+  debugLog(
     'circularToBezier: [{px}, {py}]-[{cx},{cy}], {largeArcFlag} arc',
     {
       px: formatPosition.format(startPoint.x),
@@ -741,18 +882,18 @@ function getGroupByName(groupName, defaults) {
       }
     }
   if (!group) {
-    writeComment(
+    debugLog(
       'getGroupByName: Create new group "{group}"',
       { group: groupName },
-      COMMENT_DEBUG
+      COMMENT_INSANE
     );
     groups.push(defaults);
     group = groups[groups.length - 1];
   } else
-    writeComment(
+    debugLog(
       'getGroupByName: Join existing group "{group}"',
       { group: groupName },
-      COMMENT_DEBUG
+      COMMENT_INSANE
     );
   return group;
 }
@@ -776,11 +917,20 @@ function getCutSetting(cutSettingSpecs) {
 
     // look to see if we already have a matching cutsetting, based on the custom XML if provided,
     // otherwise the properties of the setting
-    if (cutSettingSpecs.customCutSettingXML)
+    if (
+      cutSettingSpecs.customCutSettingXML &&
+      cutSettingsSpecs.laserEnable !== LASER_ENABLE_OFF
+    )
       // if custom cut is used, we expect a perfect string match.  This might someday be
       // improved with a deep object comparison (preceeded by filtering out unwanted fields)
       matchFound =
         cutSetting.customCutSettingXML == cutSettingSpecs.customCutSettingXML;
+    else if (
+      cutSettingSpecs.laserEnable == LASER_ENABLE_OFF &&
+      cutSetting.laserEnable == LASER_ENABLE_OFF
+    )
+      // disabled lasers always match
+      matchFound = true;
     else {
       // standard properties - see if we match
       matchFound =
@@ -866,6 +1016,7 @@ function traceStockOutline() {
     powerScale: 100,
     powerSource: localize('stock dimensions'),
     customCutSettingXML: '',
+    kerf: 0.1,
     paths: paths,
   });
 
@@ -900,16 +1051,4 @@ function traceStockOutline() {
     y: stock.minY + workspaceOffsets.y,
     feed: STOCK_FEED_RATE,
   });
-}
-
-/**
- * Compare two numbers to see if they are nearly equal, based on the accuracy defined by `accuracyInMM`
- *
- * @param a First numeric value to compare
- * @param b Second numeric value to compare
- * @returns `true` if they are the same, within the accuracy defined by the global constant `accuracyInMM`
- */
-function closeEquals(a, b) {
-  return Math.abs(a - b) <= accuracyInMM;
-  // return Math.round(a / accuracyInMM) == Math.round(b / accuracyInMM);
 }

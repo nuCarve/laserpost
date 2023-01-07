@@ -5,12 +5,17 @@
  * Constants used internally by the post-processor
  *
  *************************************************************************************/
+
 // define enum for comment detail levels
 const INCLUDE_COMMENTS_NONE = 'none';
 const INCLUDE_COMMENTS_NORMAL = 'normal';
-const INCLUDE_COMMENTS_DETAILED = 'detail';
 const INCLUDE_COMMENTS_DEBUG = 'debug';
 const INCLUDE_COMMENTS_INSANE = 'insane';
+
+// operation/layer grouping
+const GROUPING_BY_OPERATION = 'group-operation';
+const GROUPING_BY_LAYER = 'group-layer';
+const GROUPING_BY_LAYER_FILE = 'file-layer';
 
 // define enum for notes include level
 const INCLUDE_NOTES_NONE = 'none';
@@ -18,9 +23,8 @@ const INCLUDE_NOTES_HIDDEN = 'hidden';
 const INCLUDE_NOTES_SHOW_IMPORTANT = 'important';
 const INCLUDE_NOTES_SHOW = 'show';
 
-// define logging levels for comments (see writeComment)
+// define logging levels for comments (see debugLog)
 const COMMENT_NORMAL = 0;
-const COMMENT_DETAIL = 1;
 const COMMENT_DEBUG = 2;
 const COMMENT_INSANE = 3;
 
@@ -35,6 +39,7 @@ const SEGMENT_TYPE_CIRCLE = 'shape-circle';
 const SEGMENT_TYPE_PATH = 'shape-path';
 
 // define enum for layer modes
+const LAYER_MODE_INHERIT = 'inherit';
 const LAYER_MODE_LINE = 'line';
 const LAYER_MODE_FILL = 'fill';
 const LAYER_MODE_OFFSET_FILL = 'offsetFill';
@@ -43,12 +48,12 @@ const LAYER_MODE_OFFSET_FILL = 'offsetFill';
 const SPEED_UNITS_MMPS = 'mmps';
 const SPEED_UNITS_MMPM = 'mmpm';
 
-// LightBurn shape types
-const SHAPE_TYPE_ELIPSE = 'elipse';
+// shape types
+const SHAPE_TYPE_ELLIPSE = 'ellipse';
 const SHAPE_TYPE_PATH = 'path';
 const SHAPE_TYPE_GROUP = 'group';
 
-// LightBurn primitive types
+// primitive types
 const PRIMITIVE_TYPE_LINE = 'line';
 const PRIMITIVE_TYPE_BEZIER = 'bezier';
 
@@ -57,6 +62,7 @@ const LASER_ENABLE_OFF = 'off';
 const LASER_ENABLE_1 = 'laser1';
 const LASER_ENABLE_2 = 'laser2';
 const LASER_ENABLE_BOTH = 'both';
+const LASER_ENABLE_TOOL = 'tool';
 
 // enum for use air
 const USE_AIR_OFF = 'off';
@@ -68,8 +74,8 @@ const USE_AIR_ASSIST_GAS = 'gas';
 const STOCK_GROUP_NAME = 'Stock trace outline';
 const STOCK_FEED_RATE = 6000;
 
-// name of the state storage file
-const STATE_FILENAME = 'laserpost.xml';
+// extension name of the state storage file
+const STATE_EXTENSION = 'xml';
 
 // time to wait on retry of version update checks when the API fails to respond
 const RETRY_VERSION_CHECK_ON_FAILURE_TIME_MS = 60 * 60 * 1000;
@@ -96,3 +102,29 @@ const xmlEncodeMap = {
   '\n': '&#xA;',
   '\r': '&#xD;',
 };
+
+// #if SVG
+// map of colors to localized names and hex value
+const layerColorMap = { 
+  black: { name: localize("Black"), hex: "000000" },
+  green: { name: localize("Green"), hex: "178837" },
+  blue: { name: localize("Blue"), hex: "2b63a3" },
+  maroon: { name: localize("Maroon"), hex: "991209" },
+  magenta: { name: localize("Magenta"), hex: "01484" },
+  orange: { name: localize("Orange"), hex: "f39915" },
+  red: { name: localize("Red"), hex: "#f7130d" },
+  gold: { name: localize("Gold"), hex: "facc14" },
+};
+
+// ordered color table - colors for layers are selected in this order
+const layerColors = [
+  "black",
+  "green",
+  "blue",
+  "maroon",
+  "magenta",
+  "orange",
+  "red",
+  "gold",
+]
+// #endif

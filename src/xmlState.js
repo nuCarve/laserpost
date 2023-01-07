@@ -7,8 +7,8 @@
  *************************************************************************************/
 
 /**
- * Loads the state from the XML file (STATE_FILENAME) used for tracking processing activities
- * of the post processor.  Results in two global variables being set:
+ * Loads the state from the XML file (in the post directory, same name as the post plus the extension STATE_EXTENSION)
+ * used for tracking processing activities of the post processor.  Results in two global variables being set:
  *
  * - activeState: The state loaded from the XML file that can be modified as needed
  * - origState: The original state that is used to compare for state changes and should not be changed.
@@ -18,12 +18,8 @@
  */
 function stateLoad() {
   // set up path to the state file, and see if it exists
-  const statePath = FileSystem.getCombinedPath(
-    getConfigurationFolder(),
-    STATE_FILENAME
-  );
   try {
-    const xmlFile = new TextFile(statePath, false, 'ansi');
+    const xmlFile = new TextFile(getStatePath(), false, 'ansi');
   } catch (ex) {
     // no file, so set an empty state
     origState = {};
@@ -75,14 +71,10 @@ function stateSave() {
     ensureSecurityRights();
 
     // write the state to the XML file
-    const statePath = FileSystem.getCombinedPath(
-      getConfigurationFolder(),
-      STATE_FILENAME
-    );
     let xmlFile;
     try {
       // write the XML state to the file
-      xmlFile = new TextFile(statePath, true, 'ansi');
+      xmlFile = new TextFile(getStatePath(), true, 'ansi');
       xmlFile.writeln('<?xml version="1.0" encoding="UTF-8"?>');
       xmlFile.writeln('<laserpost>');
       for (key in activeState) {
@@ -111,4 +103,13 @@ function stateSave() {
       }
     }
   }
+}
+
+/**
+ * Returns the path to the XML state file, based on the path to the post file.
+ * 
+ * @returns Path to the state XML file.
+ */
+function getStatePath() {
+  return FileSystem.replaceExtension(getConfigurationPath(), STATE_EXTENSION);
 }

@@ -16,8 +16,8 @@
  * the tag, except for the special property name 'content' (case sensitive) which will be rendered
  * as the content of the xml tag.
  *
- * @param tag Name of the tag
- * @param parameters Object containing key/value pairs for each parameter
+ * @param tag Name of the tag 
+ * @param parameters Object containing key/value pairs for each parameter ('_' converted to ':', '$' converted to '-')
  * @param leaveOpen Optional (default false) flag to specify to leave the tag open, pending a future call to `writeXMLClose`
  * @param commentOut Optional (default false) flag to specify the tag should be commented out (`<!-- ... -->`)
  */
@@ -35,8 +35,8 @@ function writeXML(tag, parameters, leaveOpen, commentOut) {
       key != 'content'
     ) {
       if (typeof parameters[key] === 'boolean')
-        xml += ' ' + key + '="' + (parameters[key] ? 'True' : 'False') + '"';
-      else xml += ' ' + key + '="' + encodeXML(parameters[key]) + '"';
+        xml += ' ' + key.replace('_', ':').replace('$', '-') + '="' + (parameters[key] ? 'True' : 'False') + '"';
+      else xml += ' ' + key.replace('_', ':').replace('$', '-') + '="' + encodeXML(parameters[key]) + '"';
     }
   }
 
@@ -82,54 +82,6 @@ function writeBlock() {
   write(spaces.slice(0, xmlStack.length * 2));
   for (let argumentsIndex = 0; argumentsIndex < arguments.length; ++argumentsIndex) write(arguments[argumentsIndex]);
   writeln('');
-}
-
-/**
- * Format a string as a comment for XML
- *
- * @param text Text comment to format
- * @returns String with the XML formatted comment
- */
-function formatComment(text) {
-  return '<!-- ' + text + ' -->';
-}
-
-/**
- * Write a comment formatted for XML to the file including a newine at the end.  User preferences
- * determines the detail level of comments.  Supports template strings (see `format`)
- *
- * @param template Template comment to format and write to the file
- * @param parameters Optional key/value dictionary with parameters from template (such as {name})
- * @param level Optional level of the comment (COMMENT_NORMAL, COMMENT_DETAIL, COMMENT_DEBUG, COMMENT_INSANE); defaults to COMMENT_NORMAL
- */
-function writeComment(template, parameters, level) {
-  const text = format(template, parameters);
-  text = text.replace(/[ \n]+$/, '');
-
-  if (level === undefined) level = COMMENT_NORMAL;
-  switch (includeComments) {
-    case INCLUDE_COMMENTS_NONE:
-      return;
-    case INCLUDE_COMMENTS_NORMAL:
-      if (level > COMMENT_NORMAL) return;
-      break;
-    case INCLUDE_COMMENTS_DETAILED:
-      if (level > COMMENT_DETAIL) return;
-      break;
-    case INCLUDE_COMMENTS_DEBUG:
-      if (level > COMMENT_DEBUG) return;
-      break;
-    case INCLUDE_COMMENTS_INSANE:
-      break;
-  }
-
-  if (text == '\n' || text == '') writeln('');
-  else {
-    var commentPrefix = '';
-    if (level == COMMENT_DEBUG) commentPrefix = '+ ';
-    else if (level == COMMENT_INSANE) commentPrefix = '! ';
-    writeBlock(formatComment(commentPrefix + text));
-  }
 }
 
 /**
