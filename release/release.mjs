@@ -94,12 +94,13 @@ function setupFilePaths() {
  * @returns String array with updated source
  */
 function processMacros(source, macros) {
+  console.log("processMacros: " + JSON.stringify(macros));
   // do simple macro substitutions (for macro=value style macros)
   for (const lineIndex in source) {
     let line = source[lineIndex];
     for (const macro of macros)
       if (macro.value)
-        line = source[lineIndex].replace(macro.name, macro.value);
+        line = line.replace(macro.name, macro.value);
     source[lineIndex] = line;
   }
 
