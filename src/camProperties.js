@@ -251,6 +251,30 @@ properties = {
     value: false,
     scope: 'machine',
   },
+  // #if LBRN
+  machine0500ShuttleLaser1: {
+    title: localize('Mirror shuttle laser 1'),
+    description: localize(
+      'For machines that use a mirror shuttle to switch between lasers.  ' +
+        'Leave empty if you do not have a mirror shuttle.  ' +
+        'To use, specify the value to set the "U" axis to when laser 1 is selected.'
+    ),
+    type: 'string',
+    value: '',
+    scope: 'machine',
+  },
+  machine0600ShuttleLaser2: {
+    title: localize('Mirror shuttle laser 2'),
+    description: localize(
+      'For machines that use a mirror shuttle to switch between lasers.  ' +
+        'Leave empty if you do not have a mirror shuttle.  ' +
+        'To use, specify the value to set the "U" axis to when laser 2 is selected.'
+    ),
+    type: 'string',
+    value: '',
+    scope: 'machine',
+  },
+  // #endif
 
   //
   // operation: cutting

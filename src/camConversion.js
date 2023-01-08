@@ -82,6 +82,10 @@ function createLayers() {
         passes: groupOperation.passes,
         zStep: groupOperation.zStep,
         kerf: groupOperation.kerf,
+        // #if LBRN
+        shuttleLaser1: groupOperation.shuttleLaser1,
+        shuttleLaser2: groupOperation.shuttleLaser2,
+        // #endif
         powerScale: groupOperation.powerScale,
         customCutSettingXML: groupOperation.customCutSettingXML,
         customCutSetting: groupOperation.customCutSetting,

@@ -118,6 +118,21 @@ function generateProjectNotes(layerIndex) {
         }
       );
   }
+
+  // if the user is using a mirror shuttle, output that to comments
+  // #if LBRN
+  let shuttleLaser1 = getProperty('machine0500ShuttleLaser1');
+  let shuttleLaser2 = getProperty('machine0600ShuttleLaser2');
+
+  if (shuttleLaser1 != '' || shuttleLaser2 != '') {
+    appendNote('  ' + localize('Shuttle "U" for laser 1: {value}'), {
+      value: shuttleLaser1 == '' ? '0' : shuttleLaser1,
+    });
+    appendNote('  ' + localize('Shuttle "U" for laser 2: {value}'), {
+      value: shuttleLaser2 == '' ? '0' : shuttleLaser2,
+    });
+  }
+  // #endif
 }
 
 /**
@@ -180,6 +195,19 @@ function onSection() {
       );
       return;
   }
+
+  // get values for the "U" when using a mirror shuttle
+  // #if LBRN
+  let shuttleLaser1 = getProperty('machine0500ShuttleLaser1');
+  let shuttleLaser2 = getProperty('machine0600ShuttleLaser2');
+  let shuttleLaser1Value = undefined;
+  let shuttleLaser2Value = undefined;
+
+  if (shuttleLaser1 != '' || shuttleLaser2 != '') {
+    shuttleLaser1Value = shuttleLaser1 == '' ? '0' : shuttleLaser1;
+    shuttleLaser2Value = shuttleLaser2 == '' ? '0' : shuttleLaser2;
+  }
+  // #endif
 
   // if the user did not specify an override on max power, use the tools cut (max) and/or pierce (min) power
   if (maxPower == 0) {
@@ -315,6 +343,10 @@ function onSection() {
       passes: passes,
       zStep: zStep,
       kerf: tool.getKerfWidth(),
+      // #if LBRN
+      shuttleLaser1: shuttleLaser1Value,
+      shuttleLaser2: shuttleLaser2Value,
+      // #endif
       customCutSettingXML: '',
       paths: [],
     });

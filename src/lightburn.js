@@ -370,10 +370,14 @@ function writeCutSettings(layer) {
         case LASER_ENABLE_1:
           writeXML('enableLaser1', { Value: '1' });
           writeXML('enableLaser2', { Value: '0' });
+          if (cutSetting.shuttleLaser1)
+            writeXML('uOffset', { Value: cutSetting.shuttleLaser1 });
           break;
         case LASER_ENABLE_2:
           writeXML('enableLaser1', { Value: '0' });
           writeXML('enableLaser2', { Value: '1' });
+          if (cutSetting.shuttleLaser2)
+            writeXML('uOffset', { Value: cutSetting.shuttleLaser2 });
           break;
         case LASER_ENABLE_BOTH:
           writeXML('enableLaser1', { Value: '1' });
