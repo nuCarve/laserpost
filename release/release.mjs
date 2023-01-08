@@ -31,9 +31,9 @@
 /*
  * Simple release manager for LaserPost.
  *
- * Takes all files listed in `sourceFiles` and merges them in order, and
- * performing a substitution of `VERSION_TAG` (`'0.0.0-version'`) with the
- * version number contained in a `version.json` file.
+ * Combines JS files into a single file, including support for simple macro variable
+ * substitution and macro-based conditional code inclusion.  Configuration is defined
+ * in the release.json file and augmented with command line options.
  *
  * See README.md for more information.
  */
@@ -42,36 +42,6 @@ import fsp from 'node:fs/promises';
 import fs from 'node:fs';
 import path from 'node:path';
 import * as url from 'node:url';
-
-// array of source files to merge, in order
-const sourceFiles = [
-  { file: 'laserpost.js', macro: undefined },
-  { file: 'constants.js', macro: undefined },
-  { file: 'globals.js', macro: undefined },
-  { file: 'formatters.js', macro: undefined },
-  { file: 'camProperties.js', macro: undefined },
-  { file: 'camHandlers.js', macro: undefined },
-  { file: 'camConversion.js', macro: undefined },
-  { file: 'lightburn.js', macro: 'LBRN' },
-  { file: 'svg.js', macro: 'SVG' },
-  { file: 'updates.js', macro: undefined },
-  { file: 'xml.js', macro: undefined },
-  { file: 'xmlState.js', macro: undefined },
-  { file: 'debug.js', macro: undefined },
-  { file: 'utilities.js', macro: undefined },
-  { file: 'arcToBezier.js', macro: undefined },
-];
-
-// determine the directory that holds the release project
-const releasePath = url.fileURLToPath(new URL('.', import.meta.url));
-// define paths and filenames used for source and targets
-const sourcePath = path.resolve(releasePath, '..', 'src');
-const distPath = path.resolve(releasePath, 'dist');
-const releaseFilePath = path.resolve(distPath, 'laserpost.cps');
-// path to a JSON file that contains the version number to substitute when the version tag (VERSION_TAG) is found
-const versionFile = path.resolve(releasePath, 'version.json');
-// unique tag in files to substitute with the version number
-const VERSION_TAG = "VERSION_NUMBER";
 
 /**
  * Searches all macros for a specified named macro.
@@ -85,6 +55,25 @@ function findMacro(macros, name) {
     if (macro.name.toUpperCase() == name.toUpperCase()) return macro;
     return undefined;
   }
+}
+
+/**
+ * Sets up paths to the release.json file, source files, and the path for the release distribution files
+ * 
+ * @returns Object with resolved paths
+ */
+function setupFilePaths() {
+  // determine the directory that holds the release project
+  const releasePath = url.fileURLToPath(new URL('.', import.meta.url));
+
+  // define paths and filenames used for source and targets
+  const sourcePath = path.resolve(releasePath, '..', 'src');
+  const distPath = path.resolve(releasePath, 'dist');
+
+  // path to a JSON file that contains the release setup information
+  const releaseJsonPath = path.resolve(releasePath, 'release.json');
+
+  return { releaseJsonPath, sourcePath, distPath };
 }
 
 /**
@@ -170,8 +159,7 @@ function processMacros(source, macros) {
           activeMacros[activeMacros.length - 1].primary = false;
           if (!activeMacros[activeMacros.length - 1].parentDisabled)
             activeMacros[activeMacros.length - 1].include =
-              !activeMacros[activeMacros.length - 1].include
-
+              !activeMacros[activeMacros.length - 1].include;
           // disabled by parent
           else activeMacros[activeMacros.length - 1].include = false;
           break;
@@ -223,15 +211,16 @@ function writeSource(source, path) {
 }
 
 /**
- * Release LaserPost by merging a series of source files into a single file, and performing
- * substitution of version numbers.
+ * Release LaserPost by merging a series of source files into a single file
  *
+ * @param sourcePath - Path to where source files are located
+ * @param sourceFiles - Object array with source files and macro conditions
+ * @param distPath - Path to the distribution folder
+ * @param targetFilename - Filename for the source in the distribution folder
+ * @param macros - Array of macro objects for conditional and substitution
  * @param duplicatePath - optional, if defined a duplicate of the generated file is copied to this path.
  */
-async function release(macros, duplicatePath) {
-  // load the version info
-  const version = JSON.parse(await fsp.readFile(versionFile));
-
+async function release(sourcePath, sourceFiles, distPath, targetFilename, macros, duplicatePath) {
   // load all into an array of strings
   let releaseSource = [];
   for (let sourceFile of sourceFiles) {
@@ -251,13 +240,12 @@ async function release(macros, duplicatePath) {
     if (!lastLineIsBlank) releaseSource.push('');
   }
 
-  // add the version to our macros
-  macros.push({ name: VERSION_TAG, value: version.version });
   // handle all macros
   releaseSource = processMacros(releaseSource, macros);
 
   // make sure target directory exists, and write the release source
   if (await fsp.access(distPath)) await fsp.mkdir(distPath);
+  const releaseFilePath = path.resolve(distPath, targetFilename);
   writeSource(releaseSource, releaseFilePath);
 
   // build up a list of macros used to help with debug output
@@ -269,63 +257,131 @@ async function release(macros, duplicatePath) {
   });
 
   // tell the user what we are doing
-  console.log(`Released version ${version.version}:`);
+  console.log(`Released ${targetFilename}:`);
   console.log(`  Macros: ${macrosUsed}`);
   console.log(`  Path: ${releaseFilePath}`);
 
   // is a duplicate requested?
   if (duplicatePath) {
-    writeSource(releaseSource, duplicatePath);
-    console.log(`  Duplicate: ${duplicatePath}`);
+    const duplicateFilePath = path.resolve(duplicatePath, targetFilename);
+    writeSource(releaseSource, duplicateFilePath);
+    console.log(`  Duplicate: ${duplicateFilePath}`);
   }
 }
 
-// decode the command line options
-let duplicatePath = undefined;
-const macros = [];
+/**
+ * Parse command line arguments.  None are required.  Arguments are a list of macros, optionally
+ * with a substitution value (`macro`, `macro=value`) and the one switch option `-d` to specify a duplicate
+ * path for the target file. 
+ * 
+ * @returns Object containing `macros` (array of macro objects) and `duplicatePath` if the -f option used
+ */
+async function parseArgs() {
+  // decode the command line options
+  let duplicatePath = undefined;
+  const macros = [];
 
-for (let cmdIndex = 2; cmdIndex < process.argv.length; ++cmdIndex) {
-  // is this a flag?
-  if (process.argv[cmdIndex].startsWith('-')) {
-    const flag = process.argv[cmdIndex];
-    switch (flag[1].toLowerCase()) {
-      case 'f':
-        if (flag[2] != '=') {
-          console.log(`Missing file path on ${flag}`);
+  for (let cmdIndex = 2; cmdIndex < process.argv.length; ++cmdIndex) {
+    // is this a flag?
+    if (process.argv[cmdIndex].startsWith('-')) {
+      const flag = process.argv[cmdIndex];
+      switch (flag[1].toLowerCase()) {
+        case 'd':
+          if (flag[2] != '=') {
+            console.log(`Missing file path on ${flag}`);
+            process.exit(-1);
+          }
+          duplicatePath = flag.substring(3);
+          break;
+        default:
+          console.log(`Unknown command line flag: ${flag}`);
           process.exit(-1);
-        }
-        duplicatePath = flag.substring(3);
-        break;
-      default:
-        console.log(`Unknown command line flag: ${flag}`);
+      }
+    } else {
+      let name;
+      let value = undefined;
+
+      const macro = process.argv[cmdIndex];
+      const equals = macro.indexOf('=');
+
+      if (equals >= 0) {
+        name = macro.substring(0, equals);
+        value = macro.substring(equals + 1);
+      } else name = macro;
+      if (name.length == 0) {
+        console.log(`Missing macro name: ${macro}`);
         process.exit(-1);
+      }
+      macros.push({ name: name.toUpperCase(), value });
     }
-  } else {
-    let name;
-    let value = undefined;
+  }
+  return { macros, duplicatePath };
+}
 
-    const macro = process.argv[cmdIndex];
-    const equals = macro.indexOf('=');
+/**
+ * Loads the release.json file
+ * 
+ * @param releaseJsonPath - Path to the release.json file
+ * @returns Object with release info 
+ */
+async function loadJson(releaseJsonPath) {
+  // load the release json file
+  const releaseJson = JSON.parse(await fsp.readFile(releaseJsonPath));
 
-    if (equals >= 0) {
-      name = macro.substring(0, equals);
-      value = macro.substring(equals + 1);
-    } else name = macro;
-    if (name.length == 0) {
-      console.log(`Missing macro name: ${macro}`);
-      process.exit(-1);
-    }
-    macros.push({ name: name.toUpperCase(), value });
+  return releaseJson;
+}
+
+/**
+ * Updates each targets macros to include the global shared macros as well as the command line macros
+ * 
+ * @param releaseJson release.json file object, for access to the global macros and the target list
+ * @param cmdlineMacros macros defined on the command line
+ */
+function updateMacros(releaseJson, cmdlineMacros) {
+  for (const release in releaseJson.targets) {
+    // add the global macros to this target
+    releaseJson.targets[release].macros.push(...releaseJson.macros);
+    // add any command line provided macros
+    releaseJson.targets[release].macros.push(...cmdlineMacros);
   }
 }
 
-// validate we received at least one macro definition
-if (macros.length == 0) {
-  console.log('You must specify at least one target.');
-  console.log(
-    'For example, "release lbrn" or "release svg -f <path-to-directory-for-duplicate-copy>'
-  );
-  process.exit(-1);
+/**
+ * Run the release process for all targets as defined in the `release.json` file.
+ * 
+ * @param targets - object containing the list of all targets to release, from `release.json`
+ * @param sourcePath - path to root of where all source files are held
+ * @param sourceFiles - Array of source file objects from `release.json`, with `{ file: "name",
+ * macros: "macroname" }` elements
+ * @param distPath - Path to where the distribution file(s) should be stored.
+ * @param duplicatePath - Optional path for a duplicate copy of the release files.
+ */
+async function releaseAll(targets, sourcePath, sourceFiles, distPath, duplicatePath) {
+  for (const target in targets) {
+    await release(
+      sourcePath,
+      sourceFiles,
+      distPath,
+      targets[target].filename,
+      targets[target].macros,
+      duplicatePath
+    );
+  }
+  
 }
-// start the release
-await release(macros, duplicatePath);
+
+// decode command line
+const parsed = await parseArgs();
+
+// build up file paths to access source and dist
+const filePaths = setupFilePaths();
+
+// load the release json file that defines the target releases
+const releaseJson = await loadJson(filePaths.releaseJsonPath);
+
+// update the macros from the release json file to include our command line macros and to share
+// the global macros
+updateMacros(releaseJson, parsed.macros);
+
+// execute the release for each target
+await releaseAll(releaseJson.targets, filePaths.sourcePath, releaseJson.sourceFiles, filePaths.distPath, parsed.duplicatePath);

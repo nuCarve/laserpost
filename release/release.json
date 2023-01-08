@@ -1,0 +1,43 @@
+{
+  "macros": [
+    {
+      "name": "VERSION_NUMBER",
+      "value": "1.1.0-beta.1"
+    }
+  ],
+  "targets": {
+    "lightburn": {
+      "macros": [
+        {
+          "name": "lbrn"
+        }
+      ],
+      "filename": "laserpost-lightburn.cps"
+    },
+    "svg": {
+      "macros": [
+        {
+          "name": "svg"
+        }
+      ],
+      "filename": "laserpost-svg.cps"
+    }
+  },
+  "sourceFiles": [
+    { "file": "laserpost.js" },
+    { "file": "constants.js" },
+    { "file": "globals.js" },
+    { "file": "formatters.js" },
+    { "file": "camProperties.js" },
+    { "file": "camHandlers.js" },
+    { "file": "camConversion.js" },
+    { "file": "lightburn.js", "macro": "LBRN" },
+    { "file": "svg.js", "macro": "SVG" },
+    { "file": "updates.js" },
+    { "file": "xml.js" },
+    { "file": "xmlState.js" },
+    { "file": "debug.js" },
+    { "file": "utilities.js" },
+    { "file": "arcToBezier.js" }
+  ]
+}

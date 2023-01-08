@@ -20,20 +20,20 @@ Use the [GitHub issue tracker](https://github.com/nuCarve/laserpost/issues) to s
 
 To build LaserPost, you will need [`nodejs`](https://nodejs.org/en/) installed (must be >= node 18.11.0).  No external packages are used, so NPM is not required.
 
-The command line accepts arguments that specify macro names used for conditionally building the different versions of LaserPost (so the source can be easily shared across targets).  You must specify at least one macro, which currently are `lbrn` and `svg`.  
+Release configuration is defined in the `release.json` file, including global macros, the list of source files with conditional macros, and the list of target release to create (including macros and filename).  Running the release process will build all targets, placing the resulting file(s) into the `dist` folder.
 
-For example, to build for LightFrom, from the root directory in the project, issue the command:
+For example:
 
 ```sh
-node release/release.mjs lbrn
+node release/release.mjs
 ```
 
-This will pull all the various `js` files together into a single `release/dist/laserpost-lbrn.cps` file, as well as apply the version number that is defined in the `version.json` file.  
+This will pull all the various `js` files together into a single file per target, such as `release/dist/laserpost-lbrn.cps` and `release/dist/laserpost-svg.cps`.
 
-Since Fusion 360 needs the post located in a specific directory, you can also specify a path to the directory to store a duplicate of the generated file using the `-f <path>` option, such as:
+Since Fusion 360 needs the post located in a system specific directory in order for Fusion to detect the source change, you can also specify a path to the directory to store a duplicate of the generated file using the `-d <path>` option, such as:
 
 ```sh
-node release/release.mjs svg -f="C:\Users\myname\AppData\Local\Autodesk\Autodesk Fusion 360\32TABC6DD2N8Q\W.login\M\D23203423432806\CAMPosts"
+node release/release.mjs -d="C:\Users\myname\AppData\Local\Autodesk\Autodesk Fusion 360\32TABC6DD2N8Q\W.login\M\D23203423432806\CAMPosts"
 ```
 
 ## License

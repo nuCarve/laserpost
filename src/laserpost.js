@@ -1,10 +1,19 @@
 /**
- * LaserPost: Copyright (C) 2023 nuCarve
+// #if LBRN
+ * LaserPost for LightBurn: Copyright (C) 2023 nuCarve
  *
- * A CAM post processor for emitting vector files (such as LightBurn and SVG) for laser (jet) operations.
- * A common source code base is used to build vector file format specific versions of LaserPost, such
- * as "LaserPost for LightBurn" and "LaserPost for SVG".  See the `description` global variable
- * just below this comment to identify which format this post-processor has been built for.
+ * A CAM post processor for creating LightBurn project(s) for laser (jet) operations.
+// #else
+ * LaserPost for SVG: Copyright (C) 2023 nuCarve
+ *
+ * A CAM post processor for creating SVG file(s) for laser (jet) operations.
+// #endif
+ * For more information, visit https://nucarve.com/laserpost.
+ *
+ * A shared source code base is used to build multiple versions of LaserPost, and this source
+ * file is automatically generated.  DO NOT MODIFY THIS FILE.  Visit the nuCarve LaserPost
+ * github site at https://github.com/nucarve/laserpost for the source code and release
+ * instructions.
  *
  * This software is licensed under the MIT License:
  *
