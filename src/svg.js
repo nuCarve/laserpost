@@ -186,7 +186,7 @@ function onWriteTrailer(layer) {
 
 /**
  * Project complete (all files written) - use this event to write the final setup notes file
- * 
+ *
  * @param redirect `true` if redirecting for layer-per-file, `false` if one file holds everything
  */
 function onProjectComplete(redirect) {
@@ -383,7 +383,7 @@ function writeShapeEllipse(shape) {
 }
 
 /**
- * Write a path (lines and beziers) to the SVG file.  
+ * Write a path (lines and beziers) to the SVG file.
  *
  * @param shape Shape information (cutSetting, vectors[], primitives[]) to write
  */
@@ -471,7 +471,7 @@ function closeShapePath() {
         id: activePath.name + '-' + activePath.id,
         d: activePath.path,
         stroke:
-        activePath.cutSetting.layerMode == LAYER_MODE_FILL
+          activePath.cutSetting.layerMode == LAYER_MODE_FILL
             ? 'none'
             : cutIndexToRGBColor(activePath.cutSetting.index),
         fill: cutIndexToRGBColor(activePath.cutSetting.index),

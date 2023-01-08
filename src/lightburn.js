@@ -10,7 +10,7 @@
  * LightBurn file headers and thumbnail.  These must be written before any extensive
  * comments due to a bug in LightBurn that causes it to corrupt if the thumbnail is
  * not near the top of the file.
- * 
+ *
  * @param layer Layer (cutSetting) being generated (-1 for all layers)
  */
 function onFileCreate(layer) {
@@ -45,7 +45,7 @@ function onFileCreate(layer) {
 
 /**
  * Writes the LightBurn (.lbrn) header information
- * 
+ *
  * @param layer Layer (cutSetting) being generated (-1 for all layers)
  */
 function onWriteHeader(layer) {
@@ -85,7 +85,7 @@ function onWriteHeader(layer) {
 
 /**
  * Writes the shapes (<Shape>) to the LightBurn file, including grouping as necessary
- * 
+ *
  * @param layer Layer (cutSetting) being generated
  * @param redirect Boolean indicates if we are using file redirection or not (per layer redirection)
  */
@@ -99,7 +99,9 @@ function onWriteShapes(layer, redirect) {
     projLayer.index != -1 &&
     !redirect
   ) {
-    writeCommentLine(localize('Layer group: "{name}"'), { name: projLayer.name });
+    writeCommentLine(localize('Layer group: "{name}"'), {
+      name: projLayer.name,
+    });
 
     writeXML('Shape', { Type: 'Group' }, true);
     writeXML('XForm', { content: '1 0 0 1 0 0' });
@@ -196,7 +198,7 @@ function onWriteShapes(layer, redirect) {
 /**
  * Writes the LightBurn (.lbrn) trailer information, including optionally adding notes and
  * closing off the LightBurnProject section opened in `onWriteHeader`.
- * 
+ *
  * @param layer Layer (cutSetting) being generated (-1 for all layers)
  */
 function onWriteTrailer(layer) {
@@ -211,7 +213,7 @@ function onWriteTrailer(layer) {
     const setupNotes = notes.concat(generateLayerNotes(layer));
     writeXML('Notes', {
       ShowOnLoad: showOnLoad ? 1 : 0,
-      Notes: setupNotes.join("\n"),
+      Notes: setupNotes.join('\n'),
     });
   }
 
@@ -219,7 +221,7 @@ function onWriteTrailer(layer) {
 }
 
 /**
- * Write a comment formatted for XML to the file including a newine at the end.  Supports template 
+ * Write a comment formatted for XML to the file including a newine at the end.  Supports template
  * strings (see `format`)
  *
  * @param template Message to write to the XML file as a comment (or blank line if empty or blank)
@@ -235,15 +237,16 @@ function writeCommentLine(template, parameters) {
 
 /**
  * Adds the <CutSetting> tags for all LightBurn layers as well as update notes to describe
- * the 
- * 
+ * the
+ *
  * @param layer Layer (cutSetting) being generated (-1 for all layers)
  */
 function generateLayerNotes(layer) {
   const result = [];
 
   // get access to the cutSettings based on the layer
-  const cutSettings = (layer == -1) ? project.cutSettings : project.layers[layer].cutSettings;
+  const cutSettings =
+    layer == -1 ? project.cutSettings : project.layers[layer].cutSettings;
 
   result.push('Layers:');
 
@@ -254,15 +257,20 @@ function generateLayerNotes(layer) {
   ) {
     const cutSetting = cutSettings[cutSettingsIndex];
 
-    result.push(format('  ' + localize('{layer}: {name}'), {
-      layer: formatLeadingZero.format(cutSetting.index),
-      name: cutSetting.name,
-    }));
+    result.push(
+      format('  ' + localize('{layer}: {name}'), {
+        layer: formatLeadingZero.format(cutSetting.index),
+        name: cutSetting.name,
+      })
+    );
 
     if (cutSetting.customCutSetting) {
-      result.push(format(
-        '    ' + localize('Settings overridden with custom CutSetting property')
-      ));
+      result.push(
+        format(
+          '    ' +
+            localize('Settings overridden with custom CutSetting property')
+        )
+      );
     } else {
       const laserNames = {};
       laserNames[LASER_ENABLE_OFF] = localize('lasers off');
@@ -284,24 +292,26 @@ function generateLayerNotes(layer) {
       }
 
       if (cutSetting.laserEnable !== LASER_ENABLE_OFF) {
-        result.push(format(
-          '    ' +
-            localize(
-              'Fill "{mode}" at power {min}-{max}% (scale {scale}%) and {speed} using {lasers} (air {air}, Z offset {zOffset}, passes {passes}, z-step {zStep})'
-            ),
-          {
-            min: cutSetting.minPower,
-            max: cutSetting.maxPower,
-            speed: speedToUnits(cutSetting.speed),
-            lasers: laserNames[cutSetting.laserEnable],
-            air: cutSetting.useAir ? localize('on') : localize('off'),
-            zOffset: cutSetting.zOffset,
-            passes: cutSetting.passes,
-            zStep: cutSetting.zStep,
-            scale: cutSetting.powerScale,
-            mode: layerMode,
-          }
-        ));
+        result.push(
+          format(
+            '    ' +
+              localize(
+                'Fill "{mode}" at power {min}-{max}% (scale {scale}%) and {speed} using {lasers} (air {air}, Z offset {zOffset}, passes {passes}, z-step {zStep})'
+              ),
+            {
+              min: cutSetting.minPower,
+              max: cutSetting.maxPower,
+              speed: speedToUnits(cutSetting.speed),
+              lasers: laserNames[cutSetting.laserEnable],
+              air: cutSetting.useAir ? localize('on') : localize('off'),
+              zOffset: cutSetting.zOffset,
+              passes: cutSetting.passes,
+              zStep: cutSetting.zStep,
+              scale: cutSetting.powerScale,
+              mode: layerMode,
+            }
+          )
+        );
       } else {
         // laser is off
         result.push(format('    ' + localize('Output turned off')));
@@ -314,12 +324,13 @@ function generateLayerNotes(layer) {
 /**
  * Adds the <CutSetting> tags for all LightBurn layers as well as update notes to describe
  * the layers
- * 
+ *
  * @param layer Layer (cutSetting) being generated (-1 for all layers)
  */
 function writeCutSettings(layer) {
   // get access to the cutSettings based on the layer
-  const cutSettings = (layer == -1) ? project.cutSettings : project.layers[layer].cutSettings;
+  const cutSettings =
+    layer == -1 ? project.cutSettings : project.layers[layer].cutSettings;
 
   for (
     let cutSettingsIndex = 0;

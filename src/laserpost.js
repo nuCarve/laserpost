@@ -46,13 +46,9 @@
  *************************************************************************************/
 
 // #if LBRN
-description = localize(
-  'LaserPost for LightBurn'
-);
+description = localize('LaserPost for LightBurn');
 // #else
-description = localize(
-  'LaserPost for SVG'
-);
+description = localize('LaserPost for SVG');
 // #endif
 vendor = 'nuCarve';
 vendorUrl = 'https://nucarve.com/laserpost';

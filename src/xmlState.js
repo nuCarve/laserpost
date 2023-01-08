@@ -107,7 +107,7 @@ function stateSave() {
 
 /**
  * Returns the path to the XML state file, based on the path to the post file.
- * 
+ *
  * @returns Path to the state XML file.
  */
 function getStatePath() {

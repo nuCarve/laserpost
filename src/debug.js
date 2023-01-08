@@ -192,8 +192,11 @@ function dumpProject() {
       ) {
         debugLog(
           '      Operation #{id}: "{name}"',
-          { id: operationIndex,
-            name: projLayer.operationSets[operationSetsIndex].operations[operationIndex].operationName,
+          {
+            id: operationIndex,
+            name: projLayer.operationSets[operationSetsIndex].operations[
+              operationIndex
+            ].operationName,
           },
           COMMENT_DEBUG
         );
@@ -236,7 +239,7 @@ function dumpProject() {
                 type: shape.type,
                 cutIndex: shape.cutSetting.index,
                 powerScale: shape.powerScale,
-                vectors: shape.vectors.length
+                vectors: shape.vectors.length,
               },
               COMMENT_DEBUG
             );

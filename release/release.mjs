@@ -59,7 +59,7 @@ function findMacro(macros, name) {
 
 /**
  * Sets up paths to the release.json file, source files, and the path for the release distribution files
- * 
+ *
  * @returns Object with resolved paths
  */
 function setupFilePaths() {
@@ -220,7 +220,14 @@ function writeSource(source, path) {
  * @param macros - Array of macro objects for conditional and substitution
  * @param duplicatePath - optional, if defined a duplicate of the generated file is copied to this path.
  */
-async function release(sourcePath, sourceFiles, distPath, targetFilename, macros, duplicatePath) {
+async function release(
+  sourcePath,
+  sourceFiles,
+  distPath,
+  targetFilename,
+  macros,
+  duplicatePath
+) {
   // load all into an array of strings
   let releaseSource = [];
   for (let sourceFile of sourceFiles) {
@@ -272,8 +279,8 @@ async function release(sourcePath, sourceFiles, distPath, targetFilename, macros
 /**
  * Parse command line arguments.  None are required.  Arguments are a list of macros, optionally
  * with a substitution value (`macro`, `macro=value`) and the one switch option `-d` to specify a duplicate
- * path for the target file. 
- * 
+ * path for the target file.
+ *
  * @returns Object containing `macros` (array of macro objects) and `duplicatePath` if the -f option used
  */
 async function parseArgs() {
@@ -320,9 +327,9 @@ async function parseArgs() {
 
 /**
  * Loads the release.json file
- * 
+ *
  * @param releaseJsonPath - Path to the release.json file
- * @returns Object with release info 
+ * @returns Object with release info
  */
 async function loadJson(releaseJsonPath) {
   // load the release json file
@@ -333,7 +340,7 @@ async function loadJson(releaseJsonPath) {
 
 /**
  * Updates each targets macros to include the global shared macros as well as the command line macros
- * 
+ *
  * @param releaseJson release.json file object, for access to the global macros and the target list
  * @param cmdlineMacros macros defined on the command line
  */
@@ -348,7 +355,7 @@ function updateMacros(releaseJson, cmdlineMacros) {
 
 /**
  * Run the release process for all targets as defined in the `release.json` file.
- * 
+ *
  * @param targets - object containing the list of all targets to release, from `release.json`
  * @param sourcePath - path to root of where all source files are held
  * @param sourceFiles - Array of source file objects from `release.json`, with `{ file: "name",
@@ -356,7 +363,13 @@ function updateMacros(releaseJson, cmdlineMacros) {
  * @param distPath - Path to where the distribution file(s) should be stored.
  * @param duplicatePath - Optional path for a duplicate copy of the release files.
  */
-async function releaseAll(targets, sourcePath, sourceFiles, distPath, duplicatePath) {
+async function releaseAll(
+  targets,
+  sourcePath,
+  sourceFiles,
+  distPath,
+  duplicatePath
+) {
   for (const target in targets) {
     await release(
       sourcePath,
@@ -367,7 +380,6 @@ async function releaseAll(targets, sourcePath, sourceFiles, distPath, duplicateP
       duplicatePath
     );
   }
-  
 }
 
 // decode command line
@@ -384,4 +396,10 @@ const releaseJson = await loadJson(filePaths.releaseJsonPath);
 updateMacros(releaseJson, parsed.macros);
 
 // execute the release for each target
-await releaseAll(releaseJson.targets, filePaths.sourcePath, releaseJson.sourceFiles, filePaths.distPath, parsed.duplicatePath);
+await releaseAll(
+  releaseJson.targets,
+  filePaths.sourcePath,
+  releaseJson.sourceFiles,
+  filePaths.distPath,
+  parsed.duplicatePath
+);

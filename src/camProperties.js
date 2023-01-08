@@ -91,9 +91,7 @@ properties = {
   },
   laserpost0400IncludeComments: {
     title: localize('Comments'),
-    description: localize(
-      'Detail level of comments in the generated files.'
-    ),
+    description: localize('Detail level of comments in the generated files.'),
     group: 'groupLaserPost',
     type: 'enum',
     values: [
@@ -347,8 +345,8 @@ properties = {
     title: localize('Grouping name'),
     description: localize(
       'Operations that share the same "Grouping name" will have an additional group wrapped around them, ' +
-      'in addition to any other groupings.  The name is used only to identify ' +
-      'operations to group and is not part of the resulting generated files or laser setup.'
+        'in addition to any other groupings.  The name is used only to identify ' +
+        'operations to group and is not part of the resulting generated files or laser setup.'
     ),
     type: 'string',
     value: '',

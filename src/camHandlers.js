@@ -221,8 +221,7 @@ function onSection() {
     // select fill based on the cutting mode
     if (currentSection.getJetMode() == JET_MODE_ETCHING)
       opLayerMode = LAYER_MODE_FILL;
-    else
-      opLayerMode = LAYER_MODE_LINE;
+    else opLayerMode = LAYER_MODE_LINE;
   }
   const customCutSettingXML = currentSection.getProperty(
     'op0900CustomCutSettingXML'

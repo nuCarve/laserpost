@@ -16,7 +16,7 @@
  * the tag, except for the special property name 'content' (case sensitive) which will be rendered
  * as the content of the xml tag.
  *
- * @param tag Name of the tag 
+ * @param tag Name of the tag
  * @param parameters Object containing key/value pairs for each parameter ('_' converted to ':', '$' converted to '-')
  * @param leaveOpen Optional (default false) flag to specify to leave the tag open, pending a future call to `writeXMLClose`
  * @param commentOut Optional (default false) flag to specify the tag should be commented out (`<!-- ... -->`)
@@ -35,8 +35,19 @@ function writeXML(tag, parameters, leaveOpen, commentOut) {
       key != 'content'
     ) {
       if (typeof parameters[key] === 'boolean')
-        xml += ' ' + key.replace('_', ':').replace('$', '-') + '="' + (parameters[key] ? 'True' : 'False') + '"';
-      else xml += ' ' + key.replace('_', ':').replace('$', '-') + '="' + encodeXML(parameters[key]) + '"';
+        xml +=
+          ' ' +
+          key.replace('_', ':').replace('$', '-') +
+          '="' +
+          (parameters[key] ? 'True' : 'False') +
+          '"';
+      else
+        xml +=
+          ' ' +
+          key.replace('_', ':').replace('$', '-') +
+          '="' +
+          encodeXML(parameters[key]) +
+          '"';
     }
   }
 
@@ -47,7 +58,13 @@ function writeXML(tag, parameters, leaveOpen, commentOut) {
     if (parameters.content) xml += encodeXML(parameters.content);
   } else {
     if (parameters.content)
-      xml += '>' + encodeXML(parameters.content) + '</' + tag + (commentOut ? ' --' : '') + '>';
+      xml +=
+        '>' +
+        encodeXML(parameters.content) +
+        '</' +
+        tag +
+        (commentOut ? ' --' : '') +
+        '>';
     else xml += ' ' + (commentOut ? '--' : '') + '/>';
   }
 
@@ -67,7 +84,7 @@ function writeXMLClose() {
     );
     return;
   }
-  
+
   const tag = xmlStack.pop();
   writeBlock('</' + tag.tag + (tag.commentOut ? ' --' : '') + '>');
 }
@@ -80,7 +97,12 @@ function writeXMLClose() {
 function writeBlock() {
   const spaces = '                                        ';
   write(spaces.slice(0, xmlStack.length * 2));
-  for (let argumentsIndex = 0; argumentsIndex < arguments.length; ++argumentsIndex) write(arguments[argumentsIndex]);
+  for (
+    let argumentsIndex = 0;
+    argumentsIndex < arguments.length;
+    ++argumentsIndex
+  )
+    write(arguments[argumentsIndex]);
   writeln('');
 }
 
@@ -180,7 +202,10 @@ function parseXML(xml) {
       for (let matchIndex = 0; matchIndex < match.length; matchIndex++) {
         let index = match[matchIndex].indexOf('"');
         let attrName = match[matchIndex].substring(0, index - 1);
-        let attrValue = match[matchIndex].substring(index + 1, match[matchIndex].length - 1);
+        let attrValue = match[matchIndex].substring(
+          index + 1,
+          match[matchIndex].length - 1
+        );
         currentTagObject[attrName] = decodeXML(attrValue);
       }
     }

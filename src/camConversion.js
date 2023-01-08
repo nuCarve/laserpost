@@ -192,9 +192,9 @@ function populateProjectLayers() {
           groupOperation.index = 0;
           if (layer.cutSettings.length == 0)
             layer.cutSettings.push(project.cutSettings[originalIndex]);
-        } else 
-          // cut settings are shared by all layers when in the same file
-          layer.cutSettings = project.cutSettings;
+        }
+        // cut settings are shared by all layers when in the same file
+        else layer.cutSettings = project.cutSettings;
 
         // set up a operation inside the layer (each operation is grouped to make managing them easier)
         const index = projOpSet.operations.push({
@@ -207,7 +207,12 @@ function populateProjectLayers() {
         const segments = identifySegments(groupOperation);
 
         // build out shapes for each segments
-        generateShapesFromSegments(groupOperation, segments, projOperation, layer.cutSettings);
+        generateShapesFromSegments(
+          groupOperation,
+          segments,
+          projOperation,
+          layer.cutSettings
+        );
       }
     }
   }
@@ -230,16 +235,15 @@ function populateFilesAndPath() {
     if (layerIndex > 0 && redirect)
       // different file per layer
       layer.filename = programName + '-' + layerIndex + '.' + extension;
-    else
-      // shared file across all layers (or first layer when separate files per layer)
-      layer.filename = programName + '.' + extension;
+    // shared file across all layers (or first layer when separate files per layer)
+    else layer.filename = programName + '.' + extension;
 
     // set the path based on the determined filename
     layer.path = FileSystem.getCombinedPath(
       FileSystem.getFolderPath(getOutputPath()),
       layer.filename
     );
-}
+  }
 }
 
 /**
@@ -461,7 +465,12 @@ function scanSegmentForClosure(startIndex, endIndex, operation) {
  * @param projOperation The project operation object, where the resolved shapes are added for grouping
  * @param cutSettings Project layer specific cutSettings
  */
-function generateShapesFromSegments(operation, segments, projOperation, cutSettings) {
+function generateShapesFromSegments(
+  operation,
+  segments,
+  projOperation,
+  cutSettings
+) {
   // process all segments and convert them into shapes (vectors and primities), including conversion of
   // non-linear paths from circular (start/end/center points) to bezier (center point, with two control points)
   for (let segmentIndex = 0; segmentIndex < segments.length; ++segmentIndex) {
