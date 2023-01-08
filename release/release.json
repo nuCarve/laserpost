@@ -3,10 +3,6 @@
     {
       "name": "VERSION_NUMBER",
       "value": "1.1.0-beta.1"
-    },
-    {
-      "name": "REVISION_NUMBER",
-      "value": "88"
     }
   ],
   "targets": {

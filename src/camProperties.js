@@ -11,7 +11,7 @@
  */
 groupDefinitions = {
   groupLaserPost: {
-    title: localize('LaserPost file settings'),
+    title: localize('LaserPost (VERSION_NUMBER) file settings'),
     description: localize('Settings to customize the generated files.'),
     collapsed: false,
     order: 20,

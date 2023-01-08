@@ -45,6 +45,7 @@
  *
  *************************************************************************************/
 
+// set up global parameters used by CAM to track the post processor
 // #if LBRN
 description = localize('LaserPost for LightBurn (VERSION_NUMBER)');
 longDescription = localize('LaserPost for LightBurn (VERSION_NUMBER) generates .LBRN projects from CAM operations.');
@@ -54,12 +55,29 @@ longDescription = localize('LaserPost for LightBurn (VERSION_NUMBER) generates .
 // #endif
 vendor = 'nuCarve';
 vendorUrl = 'https://nucarve.com/laserpost';
-let semVer = 'VERSION_NUMBER';
+legal = 'Copyright (C) 2023 by nuCarve';
+// #if LBRN
+extension = 'lbrn';
+// #else
+extension = 'svg';
+// #endif
+certificationLevel = 2;
 
-let codeMoreInformation = localize(
+capabilities = CAPABILITY_JET;
+tolerance = spatial(0.0001, MM);
+minimumChordLength = spatial(0.01, MM);
+minimumCircularRadius = spatial(0.01, MM);
+maximumCircularRadius = spatial(99999, MM);
+minimumCircularSweep = toRad(0.01);
+maximumCircularSweep = Math.PI * 2;
+allowHelicalMoves = false;
+allowedCircularPlanes = 1 << PLANE_XY;
+
+// define global variables used by LaserPost
+const semVer = 'VERSION_NUMBER';
+const codeMoreInformation = localize(
   'Visit https://nucarve.com/laserpost for software, instructions and instructional videos.'
 );
-
 let generatedBy;
 // #if LBRN
 generatedBy = localize(
@@ -71,23 +89,4 @@ generatedBy = localize(
 );
 // #endif
 
-legal = 'Copyright (C) 2023 by nuCarve';
-certificationLevel = 2;
-minimumRevision = REVISION_NUMBER;
-
-// #if LBRN
-extension = 'lbrn';
-// #else
-extension = 'svg';
-// #endif
 setCodePage('ascii');
-
-capabilities = CAPABILITY_JET;
-tolerance = spatial(0.0001, MM);
-minimumChordLength = spatial(0.01, MM);
-minimumCircularRadius = spatial(0.01, MM);
-maximumCircularRadius = spatial(99999, MM);
-minimumCircularSweep = toRad(0.01);
-maximumCircularSweep = Math.PI * 2;
-allowHelicalMoves = false;
-allowedCircularPlanes = 1 << PLANE_XY;
