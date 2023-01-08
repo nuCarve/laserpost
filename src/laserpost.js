@@ -46,9 +46,11 @@
  *************************************************************************************/
 
 // #if LBRN
-description = localize('LaserPost for LightBurn');
+description = localize('LaserPost for LightBurn (VERSION_NUMBER)');
+longDescription = localize('LaserPost for LightBurn (VERSION_NUMBER) generates .LBRN projects from CAM operations.');
 // #else
-description = localize('LaserPost for SVG');
+description = localize('LaserPost for SVG (VERSION_NUMBER)');
+longDescription = localize('LaserPost for LightBurn (VERSION_NUMBER) generates .SVG files from CAM operations.');
 // #endif
 vendor = 'nuCarve';
 vendorUrl = 'https://nucarve.com/laserpost';
@@ -71,7 +73,7 @@ generatedBy = localize(
 
 legal = 'Copyright (C) 2023 by nuCarve';
 certificationLevel = 2;
-minimumRevision = 45845;
+minimumRevision = REVISION_NUMBER;
 
 // #if LBRN
 extension = 'lbrn';
