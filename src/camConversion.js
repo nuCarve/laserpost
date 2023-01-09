@@ -297,7 +297,7 @@ function identifySegments(operation) {
       opSegmentPath.type == PATH_TYPE_CIRCLE
     ) {
       // we have a natural break from opSegmentStart thru (opSegmentIndex - 1)
-      if (opSegmentStart < opSegmentIndex) {
+      if (opSegmentStart < (opSegmentIndex - 1)) {
         const independentSegments = scanSegmentForClosure(
           opSegmentStart,
           opSegmentIndex - 1,
