@@ -999,69 +999,180 @@ function getCutSetting(cutSettingSpecs) {
  * sides of the stock
  */
 function traceStockOutline() {
-  // get the stock dimensions
-  const stock = {
-    minX: getGlobalParameter('stock-lower-x'),
-    minY: getGlobalParameter('stock-lower-y'),
-    maxX: getGlobalParameter('stock-upper-x'),
-    maxY: getGlobalParameter('stock-upper-y'),
-  };
+  // is stock outline requested?
+  if (getProperty('work0100TraceStock')) {
+    // get the stock dimensions
+    const stock = {
+      minX: getGlobalParameter('stock-lower-x'),
+      minY: getGlobalParameter('stock-lower-y'),
+      maxX: getGlobalParameter('stock-upper-x'),
+      maxY: getGlobalParameter('stock-upper-y'),
+    };
 
-  // set up a private group
-  currentGroup = getGroupByName(STOCK_GROUP_NAME, {
-    groupName: STOCK_GROUP_NAME,
-    operations: [],
-  });
+    // set up a private group
+    currentGroup = getGroupByName(STOCK_GROUP_NAME, {
+      groupName: STOCK_GROUP_NAME,
+      operations: [],
+    });
 
-  // set up an operation to contain the stock outline
-  const paths = [];
-  currentGroup.operations.push({
-    operationName: STOCK_GROUP_NAME,
-    minPower: 100,
-    maxPower: 100,
-    speed: STOCK_FEED_RATE,
-    zOffset: 0,
-    passes: 1,
-    zStep: 0,
-    useAir: USE_AIR_OFF,
-    laserEnable: LASER_ENABLE_OFF,
-    layerMode: LAYER_MODE_LINE,
-    powerScale: 100,
-    powerSource: localize('stock dimensions'),
-    customCutSettingXML: '',
-    kerf: 0.1,
-    paths: paths,
-  });
+    // set up an operation to contain the stock outline
+    const paths = [];
+    currentGroup.operations.push({
+      operationName: STOCK_GROUP_NAME,
+      minPower: 100,
+      maxPower: 100,
+      speed: NO_OUTPUT_FEED_RATE,
+      zOffset: 0,
+      passes: 1,
+      zStep: 0,
+      useAir: USE_AIR_OFF,
+      laserEnable: LASER_ENABLE_OFF,
+      layerMode: LAYER_MODE_LINE,
+      powerScale: 100,
+      powerSource: localize('stock dimensions'),
+      customCutSettingXML: '',
+      kerf: 0.1,
+      paths: paths,
+    });
 
-  // add a path outlining the stock
-  paths.push({
-    type: PATH_TYPE_MOVE,
-    x: stock.minX + workspaceOffsets.x,
-    y: stock.minY + workspaceOffsets.y,
-    feed: STOCK_FEED_RATE,
-  });
-  paths.push({
-    type: PATH_TYPE_LINEAR,
-    x: stock.maxX + workspaceOffsets.x,
-    y: stock.minY + workspaceOffsets.y,
-    feed: STOCK_FEED_RATE,
-  });
-  paths.push({
-    type: PATH_TYPE_LINEAR,
-    x: stock.maxX + workspaceOffsets.x,
-    y: stock.maxY + workspaceOffsets.y,
-    feed: STOCK_FEED_RATE,
-  });
-  paths.push({
-    type: PATH_TYPE_LINEAR,
-    x: stock.minX + workspaceOffsets.x,
-    y: stock.maxY + workspaceOffsets.y,
-    feed: STOCK_FEED_RATE,
-  });
-  paths.push({
-    type: PATH_TYPE_LINEAR,
-    x: stock.minX + workspaceOffsets.x,
-    y: stock.minY + workspaceOffsets.y,
-    feed: STOCK_FEED_RATE,
-  });
+    // add a path outlining the stock
+    paths.push({
+      type: PATH_TYPE_MOVE,
+      x: stock.minX + workspaceOffsets.x,
+      y: stock.minY + workspaceOffsets.y,
+      feed: NO_OUTPUT_FEED_RATE,
+    });
+    paths.push({
+      type: PATH_TYPE_LINEAR,
+      x: stock.maxX + workspaceOffsets.x,
+      y: stock.minY + workspaceOffsets.y,
+      feed: NO_OUTPUT_FEED_RATE,
+    });
+    paths.push({
+      type: PATH_TYPE_LINEAR,
+      x: stock.maxX + workspaceOffsets.x,
+      y: stock.maxY + workspaceOffsets.y,
+      feed: NO_OUTPUT_FEED_RATE,
+    });
+    paths.push({
+      type: PATH_TYPE_LINEAR,
+      x: stock.minX + workspaceOffsets.x,
+      y: stock.maxY + workspaceOffsets.y,
+      feed: NO_OUTPUT_FEED_RATE,
+    });
+    paths.push({
+      type: PATH_TYPE_LINEAR,
+      x: stock.minX + workspaceOffsets.x,
+      y: stock.minY + workspaceOffsets.y,
+      feed: NO_OUTPUT_FEED_RATE,
+    });
+  }
+}
+
+/**
+ * Create alignment marks (circle with vertical and horz lines) along the outside edge of the stock (if
+ * requested by properties)
+ */
+function createAlignmentMark() {
+  // set up the alignment mark if requested
+  const alignmentMark = getProperty('laserpost0300AlignmentMarks');
+  if (alignmentMark !== ALIGNMENT_MARK_NONE) {
+    // get the stock dimensions
+    const stock = {
+      minX: getGlobalParameter('stock-lower-x'),
+      minY: getGlobalParameter('stock-lower-y'),
+      maxX: getGlobalParameter('stock-upper-x'),
+      maxY: getGlobalParameter('stock-upper-y'),
+    };
+
+    // set up a private group
+    currentGroup = getGroupByName(ALIGNMENT_MARK_GROUP_NAME, {
+      groupName: ALIGNMENT_MARK_GROUP_NAME,
+      operations: [],
+    });
+
+    // set up an operation to contain the alignment mark
+    const paths = [];
+    currentGroup.operations.push({
+      operationName: ALIGNMENT_MARK_GROUP_NAME,
+      minPower: 100,
+      maxPower: 100,
+      speed: NO_OUTPUT_FEED_RATE,
+      zOffset: 0,
+      passes: 1,
+      zStep: 0,
+      useAir: USE_AIR_OFF,
+      laserEnable: LASER_ENABLE_OFF,
+      layerMode: LAYER_MODE_LINE,
+      powerScale: 100,
+      powerSource: localize('stock dimensions'),
+      customCutSettingXML: '',
+      kerf: 0.1,
+      paths: paths,
+    });
+
+    // set up alignment mark position and size
+    const markSize = 15;
+    const markStartX = workspaceOffsets.x + stock.maxX + markSize / 2;
+    let markStartY;
+    switch (alignmentMark) {
+      case ALIGNMENT_MARK_TOP:
+        markStartY = workspaceOffsets.y + stock.minY;
+        break;
+      case ALIGNMENT_MARK_MIDDLE:
+        markStartY =
+          workspaceOffsets.y +
+          stock.minY +
+          (stock.maxY - stock.minY) / 2 +
+          workspaceOffsets.y -
+          markSize / 2;
+        break;
+      case ALIGNMENT_MARK_BOTTOM:
+        markStartY = workspaceOffsets.y + stock.maxY - markSize;
+        break;
+    }
+    const markEndX = markStartX + markSize;
+    const markEndY = markStartY + markSize;
+
+    // add the mark
+    paths.push({
+      type: PATH_TYPE_MOVE,
+      x: markStartX + markSize / 2,
+      y: markStartY,
+      feed: NO_OUTPUT_FEED_RATE,
+    });
+    paths.push({
+      type: PATH_TYPE_LINEAR,
+      x: markStartX + markSize / 2,
+      y: markEndY,
+      feed: NO_OUTPUT_FEED_RATE,
+    });
+    paths.push({
+      type: PATH_TYPE_MOVE,
+      x: markStartX,
+      y: markStartY + markSize / 2,
+      feed: NO_OUTPUT_FEED_RATE,
+    });
+    paths.push({
+      type: PATH_TYPE_LINEAR,
+      x: markEndX,
+      y: markStartY + markSize / 2,
+      feed: NO_OUTPUT_FEED_RATE,
+    });
+    paths.push({
+      type: PATH_TYPE_MOVE,
+      x: markStartX,
+      y: markStartY + markSize / 2,
+      feed: NO_OUTPUT_FEED_RATE,
+    });
+    paths.push({
+      type: PATH_TYPE_CIRCLE,
+      centerX: markStartX + markSize / 2,
+      centerY: markStartY + markSize / 2,
+      x: markStartX,
+      y: markStartY + markSize / 2,
+      clockwise: true,
+      feed: NO_OUTPUT_FEED_RATE,
+    });
+  }
 }

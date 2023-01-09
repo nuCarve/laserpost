@@ -66,7 +66,23 @@ properties = {
     value: true,
     scope: 'post',
   },
-  laserpost0300IncludeNotes: {
+  laserpost0300AlignmentMarks: {
+    title: localize('Alignment marks'),
+    description: localize(
+      'Add alignment marks in a group/layer along the outside edge of the stock.  Useful when grouping is set to "File per layer" and the laser tool does not import shapes aligned to their original positions.'
+    ),
+    group: 'groupLaserPost',
+    type: 'enum',
+    values: [
+      { title: localize('None'), id: ALIGNMENT_MARK_NONE },
+      { title: localize('Aligned to stock top'), id: ALIGNMENT_MARK_TOP },
+      { title: localize('Aligned to stock middle'), id: ALIGNMENT_MARK_MIDDLE },
+      { title: localize('Aligned to stock bottom'), id: ALIGNMENT_MARK_BOTTOM },
+    ],
+    value: ALIGNMENT_MARK_NONE,
+    scope: 'post',
+  },
+  laserpost0400IncludeNotes: {
     title: localize('Notes'),
     description: localize('Detail level of generated setup notes.'),
     group: 'groupLaserPost',
@@ -89,7 +105,7 @@ properties = {
     // #endif
     scope: 'post',
   },
-  laserpost0400IncludeComments: {
+  laserpost0500IncludeComments: {
     title: localize('Comments'),
     description: localize('Detail level of comments in the generated files.'),
     group: 'groupLaserPost',
@@ -109,7 +125,7 @@ properties = {
   work0100TraceStock: {
     title: localize('Trace stock'),
     description: localize(
-      'Includes vectors on a custom layer (with output off) that traces the outline of the stock.'
+      'Includes a group/layer that traces the outline of the stock.'
     ),
     group: 'groupWorkspace',
     type: 'boolean',

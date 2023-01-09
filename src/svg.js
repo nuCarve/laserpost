@@ -191,7 +191,7 @@ function onWriteTrailer(layer) {
  */
 function onProjectComplete(redirect) {
   // determine if we include the setup notes file
-  const includeNotes = getProperty('laserpost0300IncludeNotes');
+  const includeNotes = getProperty('laserpost0400IncludeNotes');
   if (includeNotes != INCLUDE_NOTES_NONE && notes != '') {
     // determine if we should tell the user via a warning dialog that the notes are available
     let showNotesWarning = false;

@@ -69,10 +69,18 @@ const USE_AIR_OFF = 'off';
 const USE_AIR_ON = 'on';
 const USE_AIR_ASSIST_GAS = 'gas';
 
-// define the name of the group used to trace the stock outline border, and the feed rate
-// to associate with it (which is required, but not meaningful as the layer is turned off)
-const STOCK_GROUP_NAME = 'Stock trace outline';
-const STOCK_FEED_RATE = 6000;
+// enum to alignment marks
+const ALIGNMENT_MARK_NONE = 'mark-none';
+const ALIGNMENT_MARK_TOP = 'mark-top';
+const ALIGNMENT_MARK_MIDDLE = 'mark-middle';
+const ALIGNMENT_MARK_BOTTOM = 'mark-bottom';
+
+// define the name of the groups used with no putput, including the stock outline border, the
+// alignment mark, and and the feed rate to associate with them (which is required, but not
+// meaningful as the layer is turned off)
+const STOCK_GROUP_NAME = 'Stock outline';
+const ALIGNMENT_MARK_GROUP_NAME = 'Alignment mark';
+const NO_OUTPUT_FEED_RATE = 6000;
 
 // extension name of the state storage file
 const STATE_EXTENSION = 'xml';

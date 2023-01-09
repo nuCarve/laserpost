@@ -202,7 +202,7 @@ function onWriteShapes(layer, redirect) {
  * @param layer Layer (cutSetting) being generated (-1 for all layers)
  */
 function onWriteTrailer(layer) {
-  const includeNotes = getProperty('laserpost0300IncludeNotes');
+  const includeNotes = getProperty('laserpost0400IncludeNotes');
   if (includeNotes != INCLUDE_NOTES_NONE && notes != '') {
     // determine if we cause LightBurn to show notes on file load
     let showOnLoad = false;

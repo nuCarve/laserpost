@@ -550,7 +550,10 @@ function onClose() {
   debugLog('onClose', {}, COMMENT_INSANE);
 
   // trace the stock outline
-  if (getProperty('work0100TraceStock')) traceStockOutline();
+  traceStockOutline();
+
+  // add alignment marks
+  createAlignmentMark();
 
   // debugging info if requested
   dumpGroups();
