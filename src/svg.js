@@ -36,15 +36,16 @@ function onWriteHeader(layer) {
     writeCommentLine(headerNotes[noteIndex]);
   writeln('');
 
+  // write the header, with X and Y flipped to match SVG coordinate space
   writeXML(
     'svg',
     {
       version: '1.1',
       xmlns: 'http://www.w3.org/2000/svg',
       xmlns_xlink: 'http://www.w3.org/1999/xlink',
-      width: mmFormat(maxX),
-      height: mmFormat(maxY),
-      viewbox: '0 0 ' + mmFormat(maxX) + ' ' + mmFormat(maxY),
+      width: mmFormat(maxY),
+      height: mmFormat(maxX),
+      viewbox: '0 0 ' + mmFormat(maxY) + ' ' + mmFormat(maxX),
     },
     true
   );
@@ -535,18 +536,18 @@ function mmFormat(mm) {
 }
 
 /**
- * Perform transformation of coordinates to flip the coordinate space so the SVG file is correctly rendered.  This
- * could have been done using the svg transform w/scale(-1, 1), but not all laser programs correctly handle the
- * translation (I'm looking at you, LaserWeb)
+ * Perform transformation of coordinates to match SVG's coordinate space.  This could have been done
+ * using the svg transform w/scale(), but not all laser programs correctly handle the translation
+ * (I'm looking at you, LaserWeb)
  *
- * @param xy Object with `x` and `y` properties to translate
- * returns Object with same properties, but now translated
+ * @param xy Object with `x` and `y` properties to translate returns Object with same properties,
+ * but now translated
  */
 function transform(xy) {
-  // let minX = getGlobalParameter('stock-lower-x');
-  // let minY = getGlobalParameter('stock-lower-y');
   let maxX = getGlobalParameter('stock-upper-x');
   // let maxY = getGlobalParameter('stock-upper-y');
 
-  return { x: maxX - xy.x, y: xy.y };
+  // this is transformation when upper-right is the wcs
+  // return { x: maxX - xy.x, y: xy.y };
+  return { x: xy.y, y: maxX - xy.x };
 }

@@ -30,8 +30,8 @@ function onFileCreate(layer) {
       AppVersion: '1.2.04',
       FormatVersion: 0,
       MaterialHeight: 0,
-      MirrorX: mirror.x,
-      MirrorY: mirror.y,
+      MirrorX: false, //mirror.x,  // todo: fix orientation
+      MirrorY: false, //mirror.y,
     },
     true
   );
