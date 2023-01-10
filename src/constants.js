@@ -75,6 +75,15 @@ const ALIGNMENT_MARK_TOP = 'mark-top';
 const ALIGNMENT_MARK_MIDDLE = 'mark-middle';
 const ALIGNMENT_MARK_BOTTOM = 'mark-bottom';
 
+// #if LBRN
+// machine orientation
+const MACHINE_ORIENTATION_TOP_LEFT = 'top-left';
+const MACHINE_ORIENTATION_TOP_RIGHT = 'top-right';
+const MACHINE_ORIENTATION_BOTTOM_LEFT = 'bottom-left';
+const MACHINE_ORIENTATION_BOTTOM_RIGHT = 'bottom-right';
+const MACHINE_ORIENTATION_DEFAULT = MACHINE_ORIENTATION_TOP_RIGHT;
+// #endif
+
 // define the name of the groups used with no putput, including the stock outline border, the
 // alignment mark, and and the feed rate to associate with them (which is required, but not
 // meaningful as the layer is turned off)

@@ -5,6 +5,29 @@
  * LightBurn file syntax services
  *
  *************************************************************************************/
+
+/**
+ * Adjust the coordinate translation to match the users preferences for LightBurn
+ * machine origin
+ */
+function onTranslateSetup() {
+  let orientation = getProperty(
+    'machine0050Orientation',
+    MACHINE_ORIENTATION_DEFAULT
+  );
+
+  if (
+    orientation == MACHINE_ORIENTATION_BOTTOM_RIGHT ||
+    orientation == MACHINE_ORIENTATION_TOP_RIGHT
+  )
+    project.translate.x = true;
+  if (
+    orientation == MACHINE_ORIENTATION_TOP_LEFT ||
+    orientation == MACHINE_ORIENTATION_TOP_RIGHT
+  )
+    project.translate.y = true;
+}
+
 /**
  * Writes the LightBurn (.lbrn) XML header (the `<?xml...?>` tag) along with the
  * LightBurn file headers and thumbnail.  These must be written before any extensive
@@ -16,13 +39,34 @@
 function onFileCreate(layer) {
   // locate the first section and extract the stock origin information to define the LightBurn mirror X/Y header
   const section = getSection(0);
-  const mirror = {
-    x:
-      section.modelPlane.getElement(0, 0) != section.workPlane.getElement(0, 0),
-    y:
-      section.modelPlane.getElement(1, 1) != section.workPlane.getElement(1, 1),
-  };
+  let mirror;
 
+  switch (getProperty('machine0500Orientation', MACHINE_ORIENTATION_DEFAULT)) {
+    case MACHINE_ORIENTATION_BOTTOM_LEFT:
+      mirror = {
+        x: false,
+        y: false,
+      };
+      break;
+    case MACHINE_ORIENTATION_BOTTOM_RIGHT:
+      mirror = {
+        x: true,
+        y: false,
+      };
+      break;
+    case MACHINE_ORIENTATION_TOP_LEFT:
+      mirror = {
+        x: false,
+        y: true,
+      };
+      break;
+    case MACHINE_ORIENTATION_TOP_RIGHT:
+      mirror = {
+        x: true,
+        y: true,
+      };
+      break;
+  }
   writeln('<?xml version="1.0" encoding="UTF-8"?>');
   writeXML(
     'LightBurnProject',
@@ -30,8 +74,8 @@ function onFileCreate(layer) {
       AppVersion: '1.2.04',
       FormatVersion: 0,
       MaterialHeight: 0,
-      MirrorX: false, //mirror.x,  // todo: fix orientation
-      MirrorY: false, //mirror.y,
+      MirrorX: mirror.x,
+      MirrorY: mirror.y,
     },
     true
   );
@@ -93,10 +137,7 @@ function onWriteShapes(layer) {
 
   // create a group if there is more than one item in the layer, we are grouping by layer and
   // we are not redirecting
-  if (
-    projLayer.operationSets.length > 1 &&
-    projLayer.index != -1
-  ) {
+  if (projLayer.operationSets.length > 1 && projLayer.index != -1) {
     writeCommentLine(localize('Layer group: "{name}"'), {
       name: projLayer.name,
     });
@@ -183,10 +224,7 @@ function onWriteShapes(layer) {
   }
 
   // close the layer group if created
-  if (
-    projLayer.operationSets.length > 1 &&
-    projLayer.index != -1
-  ) {
+  if (projLayer.operationSets.length > 1 && projLayer.index != -1) {
     writeXMLClose();
     writeXMLClose();
   }
@@ -454,6 +492,7 @@ function writeShapePath(shape) {
     ++shapeVectorIndex
   ) {
     const vector = shape.vectors[shapeVectorIndex];
+
     writeXML('V', {
       vx: formatPosition.format(vector.x),
       vy: formatPosition.format(vector.y),

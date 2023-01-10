@@ -11,7 +11,6 @@ let notes = []; // notes to add to the file when the trailer is written
 let notesImportant = false; // true when notes contain something "important" (such as update is available)
 let currentGroup = undefined; // tracks the current group in use, set in `onSection`.
 let currentPower = undefined; // track if the laser is powered on, used to understand CAM movements vs. cuts
-let workspaceOffsets = { x: 0, y: 0 }; // offsets the geometry in the workspace based on preferences
 let activeState = undefined; // current state that will be persisted to the state file when done
 let origState = undefined; // original state loaded from state file and should not be changed
 

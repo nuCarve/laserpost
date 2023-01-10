@@ -15,6 +15,22 @@
  * in the `project` array.
  */
 function groupsToProject() {
+  // set up the project.translate and project.box to reflect the CAM settings
+  project.box = {
+    minX: getGlobalParameter('stock-lower-x') + getProperty('work0200OffsetX'),
+    minY: getGlobalParameter('stock-lower-y') + getProperty('work0300OffsetY'),
+    maxX: getGlobalParameter('stock-upper-x') + getProperty('work0200OffsetX'),
+    maxY: getGlobalParameter('stock-upper-y') + getProperty('work0300OffsetY'),
+  };
+  project.translate = {
+    x: false,
+    y: false,
+    reflect: false,
+  };
+
+  // let the writer modify these values as needed
+  if (typeof onTranslateSetup == 'function') onTranslateSetup();
+
   // process all groups and build out the unique layers that are used
   createLayers();
 
@@ -29,6 +45,9 @@ function groupsToProject() {
 
   // add filenames and paths for single or multi-file
   populateFilesAndPath();
+
+  // transform the coordinate space
+  transformCoordinateSpace();
 
   // dump the project to comments to assist with debugging problems
   dumpProject();
@@ -462,6 +481,120 @@ function scanSegmentForClosure(startIndex, endIndex, operation) {
 }
 
 /**
+ * Transforms the coordinate space according to the project.mirror property.  See the `transform`
+ * method for details on this property and how transformations work.  This method walks all the
+ * elements of the project to ensure all coordinates are transformed.  Must be executed after all
+ * segments have been generated (including alignment marks) to ensure all coordinates are correctly
+ * transformed.
+ */
+function transformCoordinateSpace() {
+  // process all layers
+  for (let layerIndex = 0; layerIndex < project.layers.length; ++layerIndex) {
+    const layer = project.layers[layerIndex];
+
+    // all operationSets within the layer
+    for (
+      let operationSetIndex = 0;
+      operationSetIndex < layer.operationSets.length;
+      ++operationSetIndex
+    ) {
+      const operationSet = layer.operationSets[operationSetIndex];
+
+      // all operations within the operation set
+      for (
+        let operationIndex = 0;
+        operationIndex < operationSet.operations.length;
+        ++operationIndex
+      ) {
+        const operation = operationSet.operations[operationIndex];
+
+        // all shapes within the operation
+        for (
+          let shapeSetIndex = 0;
+          shapeSetIndex < operation.shapeSets.length;
+          ++shapeSetIndex
+        ) {
+          const shape = operation.shapeSets[shapeSetIndex];
+
+          // handle ellipse versus path
+          if (shape.type == SHAPE_TYPE_ELLIPSE) {
+            // ellipse
+            const transformed = transform({
+              x: shape.centerX,
+              y: shape.centerY,
+            });
+            shape.centerX = transformed.x;
+            shape.centerY = transformed.y;
+          } else {
+            // path - work through all vectors
+            for (
+              let vectorIndex = 0;
+              vectorIndex < shape.vectors.length;
+              ++vectorIndex
+            ) {
+              const vector = shape.vectors[vectorIndex];
+
+              vector = transform(vector);
+              const transformC0 = transform({ x: vector.c0x, y: vector.c0y });
+              const transformC1 = transform({ x: vector.c1x, y: vector.c1y });
+              vector.c0x = transformC0.x;
+              vector.c0y = transformC0.y;
+              vector.c1x = transformC1.x;
+              vector.c1y = transformC1.y;
+            }
+          }
+        }
+      }
+    }
+  }
+}
+
+/**
+ * Perform transformation of coordinates to match the desired coordinate space.  Uses the project.translate
+ * and project.box properties to define the transformation, as well as applies the offsets from the
+ * workspace post properties.
+ *
+ * project.translate properties:
+ * - x: boolean; when true transforms X based on project.box
+ * - y: boolean; when true transforms Y based on project.box
+ * - reflect: boolean, flips X and Y coordinates
+ *
+ * project.box properties:
+ * - minX: minimum X coordinate (often 0)
+ * - minY: minimum Y coordinate  (often 0)
+ * - maxX: maximum X coordinate (where maxX - minX => width)
+ * - maxY: maximum Y coordinate (where maxY - minY => height)
+ *
+ * @param xy Object with `x` and `y` properties to translate.  Values `undefined` and returned likewise.
+ * @returns Object with same properties, but translated according to project.box
+ */
+function transform(xy) {
+  workspaceOffsets = {
+    x: getProperty('work0200OffsetX'),
+    y: getProperty('work0300OffsetY'),
+  };
+
+  if (xy.x !== undefined && project.translate.x) {
+    xy.x = project.box.maxX - project.box.minX - xy.x + project.box.minX;
+  }
+  if (xy.y !== undefined && project.translate.y) {
+    xy.y = project.box.maxY - project.box.minY - xy.y + project.box.minY;
+  }
+
+  if (xy.x !== undefined)
+    xy.x += workspaceOffsets.x;
+  if (xy.y !== undefined)
+    xy.y += workspaceOffsets.y;
+
+  if (project.translate.reflect) {
+    xy.x = xy.x !== undefined ? xy.y : undefined;
+    xy.y = xy.y !== undefined ? xy.x : undefined;
+  }
+
+  return xy;
+}
+
+/**
  * Constructs vector shapes from a series of segments.
  *
  * Walks all segments and builds shapes for each of them.  Handles the conversion of CAM style paths
@@ -645,8 +778,10 @@ function generatePathShape(
         shape.vectors.push({
           x: position.x,
           y: position.y,
-          c1x: c1 ? c1.x : undefined, // there may be a bezier control point from the last curve that needs to be applied
-          c1y: c1 ? c1.y : undefined,
+          c0x: undefined,
+          c0y: undefined,
+          c1x: c1 !== undefined ? c1.x : undefined, // there may be a bezier control point from the last curve that needs to be applied
+          c1y: c1 !== undefined ? c1.y : undefined,
         });
 
         // add a primitive connecting the vectors, except if we are on the first one (we don't have a line yet)
@@ -660,7 +795,8 @@ function generatePathShape(
             COMMENT_INSANE
           );
           shape.primitives.push({
-            type: c1 ? PRIMITIVE_TYPE_BEZIER : PRIMITIVE_TYPE_LINE,
+            type:
+              c1 !== undefined ? PRIMITIVE_TYPE_BEZIER : PRIMITIVE_TYPE_LINE,
             start: shape.vectors.length - 2,
             end: shape.vectors.length - 1,
           });
@@ -730,8 +866,8 @@ function generatePathShape(
             y: curvePosition.y,
             c0x: c0.x,
             c0y: c0.y,
-            c1x: c1 ? c1.x : undefined, // include the entry control point if the prior vector had left it for us
-            c1y: c1 ? c1.y : undefined,
+            c1x: c1 !== undefined ? c1.x : undefined, // include the entry control point if the prior vector had left it for us
+            c1y: c1 !== undefined ? c1.y : undefined,
           });
 
           // add a primitive to connect them, except if we are on the first one (we don't have a line yet)
@@ -745,7 +881,8 @@ function generatePathShape(
               COMMENT_INSANE
             );
             shape.primitives.push({
-              type: c1 ? PRIMITIVE_TYPE_BEZIER : PRIMITIVE_TYPE_LINE,
+              type:
+                c1 !== undefined ? PRIMITIVE_TYPE_BEZIER : PRIMITIVE_TYPE_LINE,
               start: shape.vectors.length - 2,
               end: shape.vectors.length - 1,
             });
@@ -778,8 +915,8 @@ function generatePathShape(
       start: shape.vectors.length - 1,
       end: 0,
     });
-    shape.vectors[0].c1x = c1 ? c1.x : undefined;
-    shape.vectors[0].c1y = c1 ? c1.y : undefined;
+    shape.vectors[0].c1x = c1 !== undefined ? c1.x : undefined;
+    shape.vectors[0].c1y = c1 !== undefined ? c1.y : undefined;
   } else {
     // open - so add the final vector and connect them
     shape.vectors.push({
@@ -787,11 +924,11 @@ function generatePathShape(
       y: operation.paths[segmentEnd].y,
       c0x: undefined,
       c0y: undefined,
-      c1x: c1 ? c1.x : undefined, // include the entry control point if the prior vector had left it for us
-      c1y: c1 ? c1.y : undefined,
+      c1x: c1 !== undefined ? c1.x : undefined, // include the entry control point if the prior vector had left it for us
+      c1y: c1 !== undefined ? c1.y : undefined,
     });
     shape.primitives.push({
-      type: c1 ? PRIMITIVE_TYPE_BEZIER : PRIMITIVE_TYPE_LINE,
+      type: c1 !== undefined ? PRIMITIVE_TYPE_BEZIER : PRIMITIVE_TYPE_LINE,
       start: shape.vectors.length - 2,
       end: shape.vectors.length - 1,
     });
@@ -1038,35 +1175,37 @@ function traceStockOutline() {
       paths: paths,
     });
 
+    // update the box size to support the alignment mark
+
     // add a path outlining the stock
     paths.push({
       type: PATH_TYPE_MOVE,
-      x: stock.minX + workspaceOffsets.x,
-      y: stock.minY + workspaceOffsets.y,
+      x: stock.minX,
+      y: stock.minY,
       feed: NO_OUTPUT_FEED_RATE,
     });
     paths.push({
       type: PATH_TYPE_LINEAR,
-      x: stock.maxX + workspaceOffsets.x,
-      y: stock.minY + workspaceOffsets.y,
+      x: stock.maxX,
+      y: stock.minY,
       feed: NO_OUTPUT_FEED_RATE,
     });
     paths.push({
       type: PATH_TYPE_LINEAR,
-      x: stock.maxX + workspaceOffsets.x,
-      y: stock.maxY + workspaceOffsets.y,
+      x: stock.maxX,
+      y: stock.maxY,
       feed: NO_OUTPUT_FEED_RATE,
     });
     paths.push({
       type: PATH_TYPE_LINEAR,
-      x: stock.minX + workspaceOffsets.x,
-      y: stock.maxY + workspaceOffsets.y,
+      x: stock.minX,
+      y: stock.maxY,
       feed: NO_OUTPUT_FEED_RATE,
     });
     paths.push({
       type: PATH_TYPE_LINEAR,
-      x: stock.minX + workspaceOffsets.x,
-      y: stock.minY + workspaceOffsets.y,
+      x: stock.minX,
+      y: stock.minY,
       feed: NO_OUTPUT_FEED_RATE,
     });
   }
@@ -1092,22 +1231,17 @@ function createAlignmentMark() {
 
     // set up alignment mark position and size
     const markSize = 15;
-    const markStartX = workspaceOffsets.x + stock.maxX + markSize / 2;
+    const markStartX = stock.maxX + markSize / 2;
     let markStartY;
     switch (alignmentMark) {
       case ALIGNMENT_MARK_TOP:
-        markStartY = workspaceOffsets.y + stock.minY;
+        markStartY = stock.minY;
         break;
       case ALIGNMENT_MARK_MIDDLE:
-        markStartY =
-          workspaceOffsets.y +
-          stock.minY +
-          (stock.maxY - stock.minY) / 2 +
-          workspaceOffsets.y -
-          markSize / 2;
+        markStartY = stock.minY + (stock.maxY - stock.minY) / 2 + markSize / 2;
         break;
       case ALIGNMENT_MARK_BOTTOM:
-        markStartY = workspaceOffsets.y + stock.maxY - markSize;
+        markStartY = stock.maxY - markSize;
         break;
     }
     const markEndX = markStartX + markSize;
@@ -1156,8 +1290,7 @@ function createAlignmentMark() {
           foundCutSetting = true;
           break;
         }
-      if (!foundCutSetting)
-        projLayer.cutSettings.push(cutSetting);
+      if (!foundCutSetting) projLayer.cutSettings.push(cutSetting);
 
       // create the circle of the alignment mark
       shapeSets.push({

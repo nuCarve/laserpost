@@ -16,12 +16,6 @@ function onOpen() {
   // check if an update is available
   checkUpdateAvailability();
 
-  // capture and save the preferences that affect file generation
-  workspaceOffsets = {
-    x: getProperty('work0200OffsetX'),
-    y: getProperty('work0300OffsetX'),
-  };
-
   // emit the the required file header (LightBurn crashes if there are too many comments
   // before the thumbnail)
   onFileCreate();
@@ -396,10 +390,6 @@ function onSection() {
  * @param feed Feedrate to use.
  */
 function onLinear(x, y, z, feed) {
-  // adjust offsets
-  x += workspaceOffsets.x;
-  y += workspaceOffsets.y;
-
   // set up quick reference to the current operation
   const operation = currentGroup.operations[currentGroup.operations.length - 1];
 
@@ -474,12 +464,6 @@ function onCircular(clockwise, cx, cy, cz, x, y, z, feed) {
 
   // get quick reference to current operation
   const operation = currentGroup.operations[currentGroup.operations.length - 1];
-
-  // adjust offsets
-  cx += workspaceOffsets.x;
-  cy += workspaceOffsets.y;
-  x += workspaceOffsets.x;
-  y += workspaceOffsets.y;
 
   debugLog(
     'onCircular: {clockwise} {fullSemi} [{ex}, {ey}] center [{cx}, {cy}], feed={feed} mm/min',

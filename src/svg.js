@@ -10,6 +10,14 @@
 let activePath;
 
 /**
+ * Adjust the coordinate translation to match working space of SVG
+ */
+function onTranslateSetup() {
+  project.translate.x = false;
+  project.translate.y = true;
+}
+
+/**
  * Write the generic SVG file header
  *
  * @param layer Layer (cutSetting) being generated (-1 for all layers)
@@ -24,10 +32,8 @@ function onFileCreate(layer) {
  * @param layer Layer (cutSetting) being generated (-1 for all layers)
  */
 function onWriteHeader(layer) {
-  // let minX = getGlobalParameter('stock-lower-x');
-  // let minY = getGlobalParameter('stock-lower-y');
-  let maxX = getGlobalParameter('stock-upper-x');
-  let maxY = getGlobalParameter('stock-upper-y');
+  let maxX = project.box.maxX;
+  let maxY = project.box.maxY;
 
   // output notes, including layer notes, to the header
   const headerNotes = notes.concat(generateLayerNotes(layer, false));
@@ -43,9 +49,13 @@ function onWriteHeader(layer) {
       version: '1.1',
       xmlns: 'http://www.w3.org/2000/svg',
       xmlns_xlink: 'http://www.w3.org/1999/xlink',
-      width: mmFormat(maxY),
-      height: mmFormat(maxX),
-      viewbox: '0 0 ' + mmFormat(maxY) + ' ' + mmFormat(maxX),
+      width: mmFormat(maxX + 1),
+      height: mmFormat(maxY + 1),
+      viewbox: format("{minX} {minY} {maxX} {maxY}", {
+        minX: 0,
+        minY: 0,
+        maxX: mmFormat(maxX + 1),
+        maxY: mmFormat(maxY + 1)})
     },
     true
   );
@@ -362,12 +372,8 @@ function writeShapeEllipse(shape) {
     activePath.cutSetting = shape.cutSetting;
   }
 
-  // transform our coordinates
-  const start = transform({
-    x: shape.centerX + shape.radius,
-    y: shape.centerY,
-  });
-
+  const start = { x: shape.centerX, y: shape.centerY };
+  
   // construct the ellipse using two have arcs
   activePath.path +=
     (activePath.path == '' ? '' : ' ') +
@@ -405,8 +411,7 @@ function writeShapePath(shape) {
     activePath.cutSetting = shape.cutSetting;
   }
 
-  // transform our start coordinate
-  const start = transform(shape.vectors[0]);
+  const start = shape.vectors[0];
 
   // walk all primtives to build up an SVG path string
   activePath.path +=
@@ -421,28 +426,28 @@ function writeShapePath(shape) {
     ++shapePrimitiveIndex
   ) {
     const primitive = shape.primitives[shapePrimitiveIndex];
-    const endXY = transform(shape.vectors[primitive.end]);
+    const endXY = shape.vectors[primitive.end];
 
     if (primitive.type == PRIMITIVE_TYPE_LINE)
       activePath.path += ' L ' + mmFormat(endXY.x) + ',' + mmFormat(endXY.y);
     else {
-      const startXY = transform(shape.vectors[primitive.start]);
-      const c0 = transform({
+      const startXY = shape.vectors[primitive.start];
+      const c0 = {
         x: shape.vectors[primitive.start].c0x,
         y: shape.vectors[primitive.start].c0y,
-      });
-      const c1 = transform({
+      };
+      const c1 = {
         x: shape.vectors[primitive.end].c1x,
         y: shape.vectors[primitive.end].c1y,
-      });
+      };
 
       const bezier1 = {
-        x: c0.x ? c0.x : startXY.x,
-        y: c0.y ? c0.y : startXY.y,
+        x: c0.x !== undefined ? c0.x : startXY.x,
+        y: c0.y !== undefined ? c0.y : startXY.y,
       };
       const bezier2 = {
-        x: c1.x ? c1.x : endXY.x,
-        y: c1.y ? c1.y : endXY.y,
+        x: c1.x !== undefined ? c1.x : endXY.x,
+        y: c1.y !== undefined ? c1.y : endXY.y,
       };
 
       activePath.path +=
@@ -535,19 +540,3 @@ function mmFormat(mm) {
   return formatPosition.format(mm * 3.779527559);
 }
 
-/**
- * Perform transformation of coordinates to match SVG's coordinate space.  This could have been done
- * using the svg transform w/scale(), but not all laser programs correctly handle the translation
- * (I'm looking at you, LaserWeb)
- *
- * @param xy Object with `x` and `y` properties to translate returns Object with same properties,
- * but now translated
- */
-function transform(xy) {
-  let maxX = getGlobalParameter('stock-upper-x');
-  // let maxY = getGlobalParameter('stock-upper-y');
-
-  // this is transformation when upper-right is the wcs
-  // return { x: maxX - xy.x, y: xy.y };
-  return { x: xy.y, y: maxX - xy.x };
-}

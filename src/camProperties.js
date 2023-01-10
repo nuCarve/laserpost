@@ -146,7 +146,7 @@ properties = {
     value: 0,
     scope: 'post',
   },
-  work0300OffsetX: {
+  work0300OffsetY: {
     title: localize('Offset Y axis'),
     description: localize(
       'Sets an optional Y offset (in mm) to move all geometry in the workspace.  Positive and negative numbers are allowed.'
@@ -228,6 +228,23 @@ properties = {
   //
   // machine: common machine settings
   //
+  // #if LBRN
+  machine0050Orientation: {
+    title: localize('Machine orientation'),
+    description: localize(
+      'Orientation of the home position on the physical laser machine.  Must match the LightBurn machine orientation.'
+    ),
+    type: 'enum',
+    values: [
+      { title: localize('Top left'), id: MACHINE_ORIENTATION_TOP_LEFT },
+      { title: localize('Top right'), id: MACHINE_ORIENTATION_TOP_RIGHT },
+      { title: localize('Bottom left'), id: MACHINE_ORIENTATION_BOTTOM_LEFT },
+      { title: localize('Bottom right'), id: MACHINE_ORIENTATION_BOTTOM_RIGHT },
+    ],
+    value: MACHINE_ORIENTATION_DEFAULT,
+    scope: 'machine',
+  },
+  // #endif
   machine0100SpeedUnits: {
     title: localize('Speed units'),
     description: localize(
