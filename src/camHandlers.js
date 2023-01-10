@@ -581,7 +581,7 @@ function onClose() {
     }
 
     // render the layer
-    onWriteShapes(layerIndex, redirect);
+    onWriteShapes(layerIndex)
 
     // close file redirect if used
     if (layerIndex > 0 && redirect) {

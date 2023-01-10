@@ -58,17 +58,15 @@ function onWriteHeader(layer) {
  * Writes the shapes (<Shape>) to the SVG file, including grouping as necessary
  *
  * @param layer Layer (cutSetting) being generated
- * @param redirect Boolean indicates if we are using file redirection or not (per layer redirection)
  */
-function onWriteShapes(layer, redirect) {
+function onWriteShapes(layer) {
   const projLayer = project.layers[layer];
 
   // create a group if there is more than one item in the layer, we are grouping by layer and
   // we are not redirecting
   if (
     projLayer.operationSets.length > 1 &&
-    projLayer.index != -1 &&
-    !redirect
+    projLayer.index != -1
   ) {
     writeCommentLine(localize('Layer group: "{name}"'), {
       name: projLayer.name,
@@ -168,8 +166,7 @@ function onWriteShapes(layer, redirect) {
   // close the layer group if created
   if (
     projLayer.operationSets.length > 1 &&
-    projLayer.index != -1 &&
-    !redirect
+    projLayer.index != -1
   ) {
     writeXMLClose();
   }
