@@ -1129,7 +1129,6 @@ function createAlignmentMark() {
       powerSource: localize('stock dimensions'),
       customCutSettingXML: '',
       kerf: 0.1,
-      // paths: paths,
     });
 
     // loop for all layers
@@ -1149,6 +1148,16 @@ function createAlignmentMark() {
       });
       const shapeSets =
         projLayer.operationSets[operationSetIndex - 1].operations[0].shapeSets;
+
+      // add our cut setting to the layer if not already there
+      let foundCutSetting = false;
+      for (let i = 0; i < projLayer.cutSettings.length; ++i)
+        if (projLayer.cutSettings[i].index == cutSetting.index) {
+          foundCutSetting = true;
+          break;
+        }
+      if (!foundCutSetting)
+        projLayer.cutSettings.push(cutSetting);
 
       // create the circle of the alignment mark
       shapeSets.push({

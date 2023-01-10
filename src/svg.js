@@ -254,85 +254,98 @@ function writeCommentLine(template, parameters) {
 function generateLayerNotes(layer, showFilename) {
   const result = [];
 
-  // get access to the cutSettings based on the layer
-  const cutSettings =
-    layer == -1 ? project.cutSettings : project.layers[layer].cutSettings;
+  // determine which layers to generated based on `layer` proeprty
+  const startLayer = layer == -1 ? 0 : layer;
+  const endLayer = layer == -1 ? project.layers.length : layer + 1;
 
-  result.push('Layers:');
+  // include header based on organization by file/layer or just layer
+  if (showFilename) result.push(localize('Files:'));
+  else result.push(localize('Layers:'));
 
-  // scan the top-level cutSettings (on project) as this contains all layers and not the per-layer settings
-  // (since this file is shared across all generated files)
-  for (
-    let cutSettingsIndex = 0;
-    cutSettingsIndex < cutSettings.length;
-    ++cutSettingsIndex
-  ) {
-    const cutSetting = cutSettings[cutSettingsIndex];
+  // process requested layers
+  for (let layerIndex = startLayer; layerIndex < endLayer; ++layerIndex) {
+    const cutSettings = project.layers[layerIndex].cutSettings;
 
-    // determine if we are doing file redirection
-    const redirect =
-      getProperty('laserpost0100Grouping') == GROUPING_BY_LAYER_FILE;
-
-    // include layer details, changing to layer numbers or file names depending on if multiple files are used
-    if (!showFilename)
+    // break out into filename per layer section if requested
+    if (showFilename)
       result.push(
-        format('  ' + localize('Layer {layer} ({color}): {name}'), {
-          layer: cutSettingsIndex,
-          color: cutIndexToColorName(cutSetting.index),
-          name: cutSetting.name,
-        })
-      );
-    else
-      result.push(
-        format('  ' + localize('Layer {file}: {name}'), {
-          file: project.layers[cutSettingsIndex].filename,
-          name: cutSetting.name,
+        format('  ' + localize('File {file}:'), {
+          file: project.layers[layerIndex].filename,
         })
       );
 
-    const laserNames = {};
-    laserNames[LASER_ENABLE_OFF] = localize('lasers off');
-    laserNames[LASER_ENABLE_1] = localize('laser 1');
-    laserNames[LASER_ENABLE_2] = localize('laser 2');
-    laserNames[LASER_ENABLE_BOTH] = localize('lasers 1 and 2');
+    // scan the top-level cutSettings (on project) as this contains all layers and not the per-layer settings
+    // (since this file is shared across all generated files)
+    for (
+      let cutSettingsIndex = 0;
+      cutSettingsIndex < cutSettings.length;
+      ++cutSettingsIndex
+    ) {
+      const cutSetting = cutSettings[cutSettingsIndex];
 
-    let layerMode;
-    switch (cutSetting.layerMode) {
-      case LAYER_MODE_LINE:
-        layerMode = localize('cut');
-        break;
-      case LAYER_MODE_FILL:
-        layerMode = localize('fill');
-        break;
-      case LAYER_MODE_OFFSET_FILL:
-        layerMode = localize('outline fill');
-        break;
-    }
-
-    if (cutSetting.laserEnable !== LASER_ENABLE_OFF) {
+      // include layer details
       result.push(
         format(
-          '    ' +
-            localize(
-              'Fill "{mode}" at power {min}-{max}% (scale {scale}%) and {speed} using {lasers} (air {air}, Z offset {zOffset}, passes {passes}, z-step {zStep})'
-            ),
+          '  ' +
+            (showFilename ? '  ' : '') +
+            localize('Layer {layer} ({color}): {name}'),
           {
-            min: cutSetting.minPower,
-            max: cutSetting.maxPower,
-            speed: speedToUnits(cutSetting.speed),
-            lasers: laserNames[cutSetting.laserEnable],
-            air: cutSetting.useAir ? localize('on') : localize('off'),
-            zOffset: cutSetting.zOffset,
-            passes: cutSetting.passes,
-            zStep: cutSetting.zStep,
-            scale: cutSetting.powerScale,
-            mode: layerMode,
+            layer: cutSettingsIndex,
+            color: cutIndexToColorName(cutSetting.index),
+            name: cutSetting.name,
           }
         )
       );
-    } else {
-      // laser is off
-      result.push(format('    ' + localize('Laser turned off')));
+
+      const laserNames = {};
+      laserNames[LASER_ENABLE_OFF] = localize('lasers off');
+      laserNames[LASER_ENABLE_1] = localize('laser 1');
+      laserNames[LASER_ENABLE_2] = localize('laser 2');
+      laserNames[LASER_ENABLE_BOTH] = localize('lasers 1 and 2');
+
+      let layerMode;
+      switch (cutSetting.layerMode) {
+        case LAYER_MODE_LINE:
+          layerMode = localize('cut');
+          break;
+        case LAYER_MODE_FILL:
+          layerMode = localize('fill');
+          break;
+        case LAYER_MODE_OFFSET_FILL:
+          layerMode = localize('outline fill');
+          break;
+      }
+
+      if (cutSetting.laserEnable !== LASER_ENABLE_OFF) {
+        result.push(
+          format(
+            '    ' +
+              (showFilename ? '  ' : '') +
+              localize(
+                'Mode "{mode}" at power {min}-{max}% (scale {scale}%) and {speed} using {lasers} (air {air}, Z offset {zOffset}, passes {passes}, z-step {zStep})'
+              ),
+            {
+              min: cutSetting.minPower,
+              max: cutSetting.maxPower,
+              speed: speedToUnits(cutSetting.speed),
+              lasers: laserNames[cutSetting.laserEnable],
+              air: cutSetting.useAir ? localize('on') : localize('off'),
+              zOffset: cutSetting.zOffset,
+              passes: cutSetting.passes,
+              zStep: cutSetting.zStep,
+              scale: cutSetting.powerScale,
+              mode: layerMode,
+            }
+          )
+        );
+      } else {
+        // laser is off
+        result.push(
+          format(
+            '    ' + (showFilename ? '  ' : '') + localize('Laser turned off')
+          )
+        );
+      }
     }
   }
 

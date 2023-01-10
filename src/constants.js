@@ -100,7 +100,7 @@ const UPDATE_FREQUENCY_MONTHLY = 'monthly';
 // file-by-layer).  When JavaScript errors occur during redirection the logging information is
 // lost or hard to find.  Setting this to `false` will disable redirection, but will also stop
 // creating the extra files.  Should always be `true` expect when debugging problems.
-const ALLOW_REDIRECT_TO_FILE = false;
+const ALLOW_REDIRECT_TO_FILE = true;
 
 // accuracy of units from CAM to determine if a segment is closed or connected
 const accuracyInMM = 0.01;
