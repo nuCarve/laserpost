@@ -88,13 +88,19 @@ const STATE_EXTENSION = 'xml';
 // time to wait on retry of version update checks when the API fails to respond
 const RETRY_VERSION_CHECK_ON_FAILURE_TIME_MS = 60 * 60 * 1000;
 
-// freqncy of update checking from the post properties UI
+// frequency of update checking from the post properties UI
 const UPDATE_FREQUENCY_NEVER = 'never';
 const UPDATE_FREQUENCY_ALWAYS = 'always';
 const UPDATE_FREQUENCY_HOURLY = 'hourly';
 const UPDATE_FREQUENCY_DAILY = 'daily';
 const UPDATE_FREQUENCY_WEEKLY = 'weekly';
 const UPDATE_FREQUENCY_MONTHLY = 'monthly';
+
+// CAM APIs offer a redirection feature to create multiple output fles (such as used in
+// file-by-layer).  When JavaScript errors occur during redirection the logging information is
+// lost or hard to find.  Setting this to `false` will disable redirection, but will also stop
+// creating the extra files.  Should always be `true` expect when debugging problems.
+const ALLOW_REDIRECT_TO_FILE = false;
 
 // accuracy of units from CAM to determine if a segment is closed or connected
 const accuracyInMM = 0.01;

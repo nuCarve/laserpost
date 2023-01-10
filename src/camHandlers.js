@@ -574,7 +574,7 @@ function onClose() {
 
     // redirect if after the first layer and using redirection
     if (layerIndex > 0 && redirect) {
-      redirectToFile(layer.path);
+      redirectToFile2(layer.path);
       generateProjectNotes(layerIndex);
       onFileCreate(layerIndex);
       onWriteHeader(layerIndex);
@@ -586,7 +586,7 @@ function onClose() {
     // close file redirect if used
     if (layerIndex > 0 && redirect) {
       onWriteTrailer(layerIndex);
-      closeRedirection();
+      closeRedirection2();
     }
   }
 

@@ -205,11 +205,11 @@ function onProjectComplete(redirect) {
       FileSystem.getFolderPath(getOutputPath()),
       programName + '-setup.txt'
     );
-    redirectToFile(path);
+    redirectToFile2(path);
     const setupNotes = notes.concat(generateLayerNotes(-1, redirect));
     for (let noteIndex = 0; noteIndex < setupNotes.length; ++noteIndex)
       writeln(setupNotes[noteIndex]);
-    closeRedirection();
+    closeRedirection2();
 
     // tell the user if they requested it
     if (notesImportant)

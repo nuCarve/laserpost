@@ -80,3 +80,24 @@ function speedToUnits(speedInMMPM) {
 
   return formatSpeed.format(speedInMMPM) + ' ' + localize('mm/sec');
 }
+
+
+/**
+ * Redirects CAM output to a file.  This is a simple wrapper to `redirectToFile` but allows for
+ * disabling it using the constant `ALLOW_REDIRECT_TO_FILE` (see contants.js), which makes debugging 
+ * JavaScript failures in the post-processor easier as the log files are correctly retained.
+ */
+function redirectToFile2(redirectFile) {
+  if (ALLOW_REDIRECT_TO_FILE)
+    redirectToFile(redirectedFile);
+}
+
+/**
+ * Closes active redirection of CAM output to a file.  This is a simple wrapper to `closeRedirection` but allows for
+ * disabling it using the constant `ALLOW_REDIRECT_TO_FILE` (see contants.js), which makes debugging 
+ * JavaScript failures in the post-processor easier as the log files are correctly retained.
+ */
+function closeRedirect2() {
+  if (ALLOW_REDIRECT_TO_FILE)
+    closeRedirection();
+}
