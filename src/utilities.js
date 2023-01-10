@@ -89,7 +89,7 @@ function speedToUnits(speedInMMPM) {
  */
 function redirectToFile2(redirectFile) {
   if (ALLOW_REDIRECT_TO_FILE)
-    redirectToFile(redirectedFile);
+    redirectToFile(redirectFile);
 }
 
 /**
@@ -97,7 +97,7 @@ function redirectToFile2(redirectFile) {
  * disabling it using the constant `ALLOW_REDIRECT_TO_FILE` (see contants.js), which makes debugging 
  * JavaScript failures in the post-processor easier as the log files are correctly retained.
  */
-function closeRedirect2() {
+function closeRedirection2() {
   if (ALLOW_REDIRECT_TO_FILE)
     closeRedirection();
 }
