@@ -24,6 +24,9 @@ function groupsToProject() {
   // add operations to the top-level layer grouping
   populateProjectLayers();
 
+  // add alignment mark(s)
+  createAlignmentMark();
+
   // add filenames and paths for single or multi-file
   populateFilesAndPath();
 
@@ -297,7 +300,7 @@ function identifySegments(operation) {
       opSegmentPath.type == PATH_TYPE_CIRCLE
     ) {
       // we have a natural break from opSegmentStart thru (opSegmentIndex - 1)
-      if (opSegmentStart < (opSegmentIndex - 1)) {
+      if (opSegmentStart < opSegmentIndex - 1) {
         const independentSegments = scanSegmentForClosure(
           opSegmentStart,
           opSegmentIndex - 1,
@@ -1071,7 +1074,9 @@ function traceStockOutline() {
 
 /**
  * Create alignment marks (circle with vertical and horz lines) along the outside edge of the stock (if
- * requested by properties)
+ * requested by properties).  These are added per-layer, and therefore are done after conversion
+ * from segments to shapes (which is different than traceStockOutline, that operates in advance of
+ * conversion to shapes).
  */
 function createAlignmentMark() {
   // set up the alignment mark if requested
@@ -1084,32 +1089,6 @@ function createAlignmentMark() {
       maxX: getGlobalParameter('stock-upper-x'),
       maxY: getGlobalParameter('stock-upper-y'),
     };
-
-    // set up a private group
-    currentGroup = getGroupByName(ALIGNMENT_MARK_GROUP_NAME, {
-      groupName: ALIGNMENT_MARK_GROUP_NAME,
-      operations: [],
-    });
-
-    // set up an operation to contain the alignment mark
-    const paths = [];
-    currentGroup.operations.push({
-      operationName: ALIGNMENT_MARK_GROUP_NAME,
-      minPower: 100,
-      maxPower: 100,
-      speed: NO_OUTPUT_FEED_RATE,
-      zOffset: 0,
-      passes: 1,
-      zStep: 0,
-      useAir: USE_AIR_OFF,
-      laserEnable: LASER_ENABLE_OFF,
-      layerMode: LAYER_MODE_LINE,
-      powerScale: 100,
-      powerSource: localize('stock dimensions'),
-      customCutSettingXML: '',
-      kerf: 0.1,
-      paths: paths,
-    });
 
     // set up alignment mark position and size
     const markSize = 15;
@@ -1134,45 +1113,89 @@ function createAlignmentMark() {
     const markEndX = markStartX + markSize;
     const markEndY = markStartY + markSize;
 
-    // add the mark
-    paths.push({
-      type: PATH_TYPE_MOVE,
-      x: markStartX + markSize / 2,
-      y: markStartY,
-      feed: NO_OUTPUT_FEED_RATE,
+    // set up our layer to hold the alignment marks
+    const cutSetting = getCutSetting({
+      operationName: ALIGNMENT_MARK_GROUP_NAME,
+      minPower: 100,
+      maxPower: 100,
+      speed: NO_OUTPUT_FEED_RATE,
+      zOffset: 0,
+      passes: 1,
+      zStep: 0,
+      useAir: USE_AIR_OFF,
+      laserEnable: LASER_ENABLE_OFF,
+      layerMode: LAYER_MODE_LINE,
+      powerScale: 100,
+      powerSource: localize('stock dimensions'),
+      customCutSettingXML: '',
+      kerf: 0.1,
+      // paths: paths,
     });
-    paths.push({
-      type: PATH_TYPE_LINEAR,
-      x: markStartX + markSize / 2,
-      y: markEndY,
-      feed: NO_OUTPUT_FEED_RATE,
-    });
-    paths.push({
-      type: PATH_TYPE_MOVE,
-      x: markStartX,
-      y: markStartY + markSize / 2,
-      feed: NO_OUTPUT_FEED_RATE,
-    });
-    paths.push({
-      type: PATH_TYPE_LINEAR,
-      x: markEndX,
-      y: markStartY + markSize / 2,
-      feed: NO_OUTPUT_FEED_RATE,
-    });
-    paths.push({
-      type: PATH_TYPE_MOVE,
-      x: markStartX,
-      y: markStartY + markSize / 2,
-      feed: NO_OUTPUT_FEED_RATE,
-    });
-    paths.push({
-      type: PATH_TYPE_CIRCLE,
-      centerX: markStartX + markSize / 2,
-      centerY: markStartY + markSize / 2,
-      x: markStartX,
-      y: markStartY + markSize / 2,
-      clockwise: true,
-      feed: NO_OUTPUT_FEED_RATE,
-    });
+
+    // loop for all layers
+    for (
+      let projLayerIndex = 0;
+      projLayerIndex < project.layers.length;
+      ++projLayerIndex
+    ) {
+      const projLayer = project.layers[projLayerIndex];
+
+      // create a new operation set, operation, and empty shapeSets array that will hold our
+      // alignment mark
+      const operationSetIndex = projLayer.operationSets.push({
+        operations: [
+          { operationName: ALIGNMENT_MARK_GROUP_NAME, shapeSets: [] },
+        ],
+      });
+      const shapeSets =
+        projLayer.operationSets[operationSetIndex - 1].operations[0].shapeSets;
+
+      // create the circle of the alignment mark
+      shapeSets.push({
+        type: SHAPE_TYPE_ELLIPSE,
+        cutSetting: cutSetting,
+        powerScale: 100,
+        centerX: markStartX + markSize / 2,
+        centerY: markStartY + markSize / 2,
+        radius: markSize / 2,
+      });
+
+      // create the cross hatch with two lines
+      shapeSets.push({
+        type: SHAPE_TYPE_PATH,
+        cutSetting: cutSetting,
+        powerScale: 100,
+        vectors: [
+          {
+            x: markStartX + markSize / 2,
+            y: markStartY,
+          },
+          {
+            x: markStartX + markSize / 2,
+            y: markEndY,
+          },
+          {
+            x: markStartX,
+            y: markStartY + markSize / 2,
+          },
+          {
+            x: markEndX,
+            y: markStartY + markSize / 2,
+          },
+        ],
+        primitives: [
+          {
+            type: PRIMITIVE_TYPE_LINE,
+            start: 0,
+            end: 1,
+          },
+          {
+            type: PRIMITIVE_TYPE_LINE,
+            start: 2,
+            end: 3,
+          },
+        ],
+      });
+    }
   }
 }

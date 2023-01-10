@@ -552,9 +552,6 @@ function onClose() {
   // trace the stock outline
   traceStockOutline();
 
-  // add alignment marks
-  createAlignmentMark();
-
   // debugging info if requested
   dumpGroups();
 
