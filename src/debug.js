@@ -26,6 +26,7 @@ function showWarning(message, keyValue) {
  * Dumps the contents of the groups (CAM based pathing) to comments in the file.
  */
 function dumpGroups() {
+  debugLog('', {}, COMMENT_DEBUG);
   debugLog(
     'Dump: Groups ({groupCount} groups):',
     { groupCount: groups.length },
@@ -117,6 +118,7 @@ function dumpGroups() {
  * Dump the contents of the project to comments in the file.
  */
 function dumpProject() {
+  debugLog('', {}, COMMENT_DEBUG);
   debugLog('Project organization:', {}, COMMENT_DEBUG);
   debugLog('  Cut settings:', {}, COMMENT_DEBUG);
   for (
@@ -311,6 +313,7 @@ function dumpToolTable() {
   // add comments for tool information
   var tools = getToolTable();
   if (tools.getNumberOfTools() > 0) {
+    debugLog('', {});
     debugLog(localize('Tools'));
     for (var toolIndex = 0; toolIndex < tools.getNumberOfTools(); ++toolIndex) {
       var tool = tools.getTool(toolIndex);
