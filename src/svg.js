@@ -83,7 +83,7 @@ function onWriteShapes(layer) {
       name: projLayer.name,
     });
 
-    writeXML('g', { id: projLayer.name }, true);
+    writeXML('g', { id: safeId(projLayer.name) }, true);
     writeXML('desc', {
       content: format(localize('Layer group: "{name}"'), {
         name: projLayer.name,
@@ -107,7 +107,7 @@ function onWriteShapes(layer) {
         name: opGroup.groupName,
       });
 
-      writeXML('g', { id: opGroup.groupName }, true);
+      writeXML('g', { id: safeId(opGroup.groupName) }, true);
       writeXML('desc', {
         content: format(
           localize('Operation group: "{name}")', { name: opGroup.groupName })
@@ -132,7 +132,7 @@ function onWriteShapes(layer) {
         operation.shapeSets.length > 1 &&
         getProperty('laserpost0200GroupShapes')
       ) {
-        writeXML('g', { id: operation.operationName }, true);
+        writeXML('g', { id: safeId(operation.operationName) }, true);
         writeXML('desc', {
           content: format(localize('Operation: {name}'), {
             name: operation.operationName,
@@ -476,7 +476,7 @@ function closeShapePath() {
   if (activePath.path != '') {
     if (activePath.cutSetting.layerMode == LAYER_MODE_LINE)
       writeXML('path', {
-        id: activePath.name + '-' + activePath.id,
+        id: safeId(activePath.name + '-' + activePath.id),
         d: activePath.path,
         stroke: cutIndexToRGBColor(activePath.cutSetting.index),
         stroke$width: mmFormat(activePath.cutSetting.kerf),
@@ -484,7 +484,7 @@ function closeShapePath() {
       });
     else
       writeXML('path', {
-        id: activePath.name + '-' + activePath.id,
+        id: safeId(activePath.name + '-' + activePath.id),
         d: activePath.path,
         stroke:
           activePath.cutSetting.layerMode == LAYER_MODE_FILL
@@ -540,3 +540,13 @@ function mmFormat(mm) {
   return formatPosition.format(mm * 3.779527559);
 }
 
+/**
+ * Converts a generic string (with spaces, symbols, letters, etc) into an SVG-safe id string.  For
+ * example, "Cut 32 holes, outline" becomes "laserpost_cut_32_holes_outline"
+ * 
+ * @param idString String to use to make into an id-safe string
+ * @returns ID-safe string
+ */
+function safeId(idString) {
+  return "laserpost_" + idString.toLowerCase().replace(/\W/g, '_').replace(/_+/g, '_');
+}
