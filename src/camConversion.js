@@ -1115,7 +1115,7 @@ function createAlignmentMark() {
 
     // set up our layer to hold the alignment marks
     const cutSetting = getCutSetting({
-      operationName: ALIGNMENT_MARK_GROUP_NAME,
+      name: ALIGNMENT_MARK_GROUP_NAME,
       minPower: 100,
       maxPower: 100,
       speed: NO_OUTPUT_FEED_RATE,
