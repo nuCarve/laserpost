@@ -53,7 +53,7 @@ properties = {
       { title: localize('Group by layer'), id: GROUPING_BY_LAYER },
       { title: localize('File per layer'), id: GROUPING_BY_LAYER_FILE },
     ],
-    value: GROUPING_BY_OPERATION,
+    value: GROUPING_DEFAULT,
     scope: 'post',
   },
   laserpost0200GroupShapes: {
@@ -63,7 +63,7 @@ properties = {
     ),
     group: 'groupLaserPost',
     type: 'boolean',
-    value: true,
+    value: GROUP_SHAPES_DEFAULT,
     scope: 'post',
   },
   laserpost0300AlignmentMarks: {
@@ -79,7 +79,7 @@ properties = {
       { title: localize('Aligned to stock center-right'), id: ALIGNMENT_MARK_CENTER_RIGHT },
       { title: localize('Aligned to stock bottom-right'), id: ALIGNMENT_MARK_BOTTOM_RIGHT },
     ],
-    value: ALIGNMENT_MARK_NONE,
+    value: ALIGNMENT_MARK_DEFAULT,
     scope: 'post',
   },
   laserpost0400IncludeNotes: {
@@ -98,11 +98,7 @@ properties = {
       },
       { title: localize('Always show'), id: INCLUDE_NOTES_SHOW },
     ],
-    // #if LBRN
-    value: INCLUDE_NOTES_SHOW_IMPORTANT,
-    // #else
-    value: INCLUDE_NOTES_SHOW,
-    // #endif
+    value: INCLUDE_NOTES_DEFAULT,
     scope: 'post',
   },
   laserpost0500IncludeComments: {
@@ -116,7 +112,7 @@ properties = {
       { title: localize('Debug'), id: INCLUDE_COMMENTS_DEBUG },
       { title: localize('Insane'), id: INCLUDE_COMMENTS_INSANE },
     ],
-    value: INCLUDE_COMMENTS_NORMAL,
+    value: INCLUDE_COMMENTS_DEFAULT,
     scope: 'post',
   },
   //
@@ -129,11 +125,7 @@ properties = {
     ),
     group: 'groupWorkspace',
     type: 'boolean',
-    // #if LBRN
-    value: true,
-    // #else
-    value: false,
-    // #endif
+    value: TRACE_STOCK_DEFAULT,
     scope: 'post',
   },
   work0200OffsetX: {
@@ -143,7 +135,7 @@ properties = {
     ),
     group: 'groupWorkspace',
     type: 'number',
-    value: 0,
+    value: OFFSET_X_AXIS_DEFAULT,
     scope: 'post',
   },
   work0300OffsetY: {
@@ -153,7 +145,7 @@ properties = {
     ),
     group: 'groupWorkspace',
     type: 'number',
-    value: 0,
+    value: OFFSET_Y_AXIS_DEFAULT,
     scope: 'post',
   },
   //
@@ -166,7 +158,7 @@ properties = {
     ),
     group: 'groupLaserPower',
     type: 'number',
-    value: 0,
+    value: LASER_POWER_ETCH_MIN_DEFAULT,
     range: [0, 100],
     scope: 'post',
   },
@@ -177,7 +169,7 @@ properties = {
     ),
     group: 'groupLaserPower',
     type: 'number',
-    value: 0,
+    value: LASER_POWER_ETCH_MAX_DEFAULT,
     range: [0, 100],
     scope: 'post',
   },
@@ -188,7 +180,7 @@ properties = {
     ),
     group: 'groupLaserPower',
     type: 'number',
-    value: 0,
+    value: LASER_POWER_VAPORIZE_MIN_DEFAULT,
     range: [0, 100],
     scope: 'post',
   },
@@ -199,7 +191,7 @@ properties = {
     ),
     group: 'groupLaserPower',
     type: 'number',
-    value: 0,
+    value: LASER_POWER_VAPORIZE_MAX_DEFAULT,
     range: [0, 100],
     scope: 'post',
   },
@@ -210,7 +202,7 @@ properties = {
     ),
     group: 'groupLaserPower',
     type: 'number',
-    value: 0,
+    value: LASER_POWER_THROUGH_MIN_DEFAULT,
     range: [0, 100],
     scope: 'post',
   },
@@ -221,7 +213,7 @@ properties = {
     ),
     group: 'groupLaserPower',
     type: 'number',
-    value: 0,
+    value: LASER_POWER_THROUGH_MAX_DEFAULT,
     range: [0, 100],
     scope: 'post',
   },
@@ -255,7 +247,7 @@ properties = {
       { title: localize('mm/sec'), id: SPEED_UNITS_MMPS },
       { title: localize('mm/min'), id: SPEED_UNITS_MMPM },
     ],
-    value: SPEED_UNITS_MMPS,
+    value: SPEED_UNITS_DEFAULT,
     scope: 'machine',
   },
   machine0300AutomaticUpdate: {
@@ -272,7 +264,7 @@ properties = {
       { title: localize('Weekly'), id: UPDATE_FREQUENCY_WEEKLY },
       { title: localize('Monthly'), id: UPDATE_FREQUENCY_MONTHLY },
     ],
-    value: UPDATE_FREQUENCY_DAILY,
+    value: UPDATE_FREQUENCY_DEFAULT,
     scope: 'machine',
   },
   machine0400UpdateAllowBeta: {
@@ -281,7 +273,7 @@ properties = {
       'Enable to allow for checking if beta release updates are available, disable for stable releases only.'
     ),
     type: 'boolean',
-    value: false,
+    value: UPDATE_ALLOW_BETA_DEFAULT,
     scope: 'machine',
   },
   // #if LBRN
@@ -293,7 +285,7 @@ properties = {
         'To use, specify the value to set the "U" axis to when laser 1 is selected.'
     ),
     type: 'string',
-    value: '',
+    value: SHUTTLE_LASER_1_DEFAULT,
     scope: 'machine',
   },
   machine0600ShuttleLaser2: {
@@ -304,7 +296,7 @@ properties = {
         'To use, specify the value to set the "U" axis to when laser 2 is selected.'
     ),
     type: 'string',
-    value: '',
+    value: SHUTTLE_LASER_2_DEFAULT,
     scope: 'machine',
   },
   // #endif
@@ -324,7 +316,7 @@ properties = {
       { title: localize('Fill'), id: LAYER_MODE_FILL },
       { title: localize('Offset Fill'), id: LAYER_MODE_OFFSET_FILL },
     ],
-    value: LAYER_MODE_INHERIT,
+    value: LAYER_MODE_DEFAULT,
     scope: 'operation',
     enabled: 'cutting',
   },
@@ -340,7 +332,7 @@ properties = {
       { title: localize('On'), id: USE_AIR_ON },
       { title: localize('Use tool setting'), id: USE_AIR_ASSIST_GAS },
     ],
-    value: USE_AIR_ASSIST_GAS,
+    value: USE_AIR_DEFAULT,
     scope: 'operation',
     enabled: 'cutting',
   },
@@ -357,7 +349,7 @@ properties = {
       { title: localize('Laser 2'), id: LASER_ENABLE_2 },
       { title: localize('Both lasers'), id: LASER_ENABLE_BOTH },
     ],
-    value: LASER_ENABLE_1,
+    value: LASER_ENABLE_DEFAULT,
     scope: 'operation',
     enabled: 'cutting',
   },
@@ -367,7 +359,7 @@ properties = {
       'Relative power scale (0-100%) for the shapes in the operation.'
     ),
     type: 'number',
-    value: 100,
+    value: POWER_SCALE_DEFAULT,
     range: [0, 100],
     scope: 'operation',
     enabled: 'cutting',
@@ -378,7 +370,7 @@ properties = {
       'Amount to offset Z into the material (or out of it) at the start of cutting.  Useful for deep cutting or defocusing.'
     ),
     type: 'number',
-    value: 0,
+    value: Z_OFFSET_DEFAULT,
     scope: 'operation',
     enabled: 'cutting',
   },
@@ -386,7 +378,7 @@ properties = {
     title: localize('Pass count'),
     description: localize('Number of times to repeat the cut.'),
     type: 'number',
-    value: 1,
+    value: PASS_COUNT_DEFAULT,
     scope: 'operation',
     enabled: 'cutting',
   },
@@ -394,7 +386,7 @@ properties = {
     title: localize('Z-step per pass (mm)'),
     description: localize('Amount of raise or lower Z for each cut pass.'),
     type: 'number',
-    value: 0,
+    value: Z_STEP_PER_PASS_DEFAULT,
     scope: 'operation',
     enabled: 'cutting',
   },
@@ -406,7 +398,7 @@ properties = {
         'operations to group and is not part of the resulting generated files or laser setup.'
     ),
     type: 'string',
-    value: '',
+    value: GROUP_NAME_DEFAULT,
     scope: 'operation',
     enabled: 'cutting',
   },
@@ -418,7 +410,7 @@ properties = {
         'LightBurn file (it does not matter if it is from lbrn or lbrn2).  Include everything from <CutSettings> through </CutSettings> (including those tags).'
     ),
     type: 'string',
-    value: '',
+    value: CUSTOM_CUT_SETTING_XML_DEFAULT,
     scope: 'operation',
     enabled: 'cutting',
   },

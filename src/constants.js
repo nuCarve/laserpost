@@ -11,17 +11,25 @@ const INCLUDE_COMMENTS_NONE = 'none';
 const INCLUDE_COMMENTS_NORMAL = 'normal';
 const INCLUDE_COMMENTS_DEBUG = 'debug';
 const INCLUDE_COMMENTS_INSANE = 'insane';
+const INCLUDE_COMMENTS_DEFAULT = INCLUDE_COMMENTS_NORMAL;
 
 // operation/layer grouping
 const GROUPING_BY_OPERATION = 'group-operation';
 const GROUPING_BY_LAYER = 'group-layer';
 const GROUPING_BY_LAYER_FILE = 'file-layer';
+const GROUPING_DEFAULT = GROUPING_BY_OPERATION;
 
 // define enum for notes include level
 const INCLUDE_NOTES_NONE = 'none';
 const INCLUDE_NOTES_HIDDEN = 'hidden';
 const INCLUDE_NOTES_SHOW_IMPORTANT = 'important';
 const INCLUDE_NOTES_SHOW = 'show';
+const INCLUDE_NOTES_DEFAULT =
+// #if LBRN
+INCLUDE_NOTES_SHOW_IMPORTANT;
+// #else
+INCLUDE_NOTES_SHOW;
+// #endif
 
 // define logging levels for comments (see debugLog)
 const COMMENT_NORMAL = 0;
@@ -43,10 +51,12 @@ const LAYER_MODE_INHERIT = 'inherit';
 const LAYER_MODE_LINE = 'line';
 const LAYER_MODE_FILL = 'fill';
 const LAYER_MODE_OFFSET_FILL = 'offsetFill';
+const LAYER_MODE_DEFAULT = LAYER_MODE_INHERIT;
 
 // define enum for speed units
 const SPEED_UNITS_MMPS = 'mmps';
 const SPEED_UNITS_MMPM = 'mmpm';
+const SPEED_UNITS_DEFAULT = SPEED_UNITS_MMPS;
 
 // shape types
 const SHAPE_TYPE_ELLIPSE = 'ellipse';
@@ -63,17 +73,20 @@ const LASER_ENABLE_1 = 'laser1';
 const LASER_ENABLE_2 = 'laser2';
 const LASER_ENABLE_BOTH = 'both';
 const LASER_ENABLE_TOOL = 'tool';
+const LASER_ENABLE_DEFAULT = LASER_ENABLE_1;
 
 // enum for use air
 const USE_AIR_OFF = 'off';
 const USE_AIR_ON = 'on';
 const USE_AIR_ASSIST_GAS = 'gas';
+const USE_AIR_DEFAULT = USE_AIR_ASSIST_GAS;
 
 // enum to alignment marks
 const ALIGNMENT_MARK_NONE = 'mark-none';
 const ALIGNMENT_MARK_TOP_RIGHT = 'mark-top-right';
 const ALIGNMENT_MARK_CENTER_RIGHT = 'mark-center-right';
 const ALIGNMENT_MARK_BOTTOM_RIGHT = 'mark-bottom-right';
+const ALIGNMENT_MARK_DEFAULT = ALIGNMENT_MARK_NONE;
 
 // #if LBRN
 // machine orientation
@@ -104,6 +117,35 @@ const UPDATE_FREQUENCY_HOURLY = 'hourly';
 const UPDATE_FREQUENCY_DAILY = 'daily';
 const UPDATE_FREQUENCY_WEEKLY = 'weekly';
 const UPDATE_FREQUENCY_MONTHLY = 'monthly';
+const UPDATE_FREQUENCY_DEFAULT = UPDATE_FREQUENCY_DAILY;
+
+// defaults used for non-enum properties in camProperties
+const GROUP_SHAPES_DEFAULT = true;
+const TRACE_STOCK_DEFAULT =
+// #if LBRN
+true;
+// #else
+false;
+// #endif
+const OFFSET_X_AXIS_DEFAULT = 0;
+const OFFSET_Y_AXIS_DEFAULT = 0;
+const LASER_POWER_ETCH_MIN_DEFAULT = 0;
+const LASER_POWER_ETCH_MAX_DEFAULT = 0;
+const LASER_POWER_VAPORIZE_MIN_DEFAULT = 0;
+const LASER_POWER_VAPORIZE_MAX_DEFAULT = 0;
+const LASER_POWER_THROUGH_MIN_DEFAULT = 0;
+const LASER_POWER_THROUGH_MAX_DEFAULT = 0;
+const UPDATE_ALLOW_BETA_DEFAULT = false;
+// #if LBRN
+const SHUTTLE_LASER_1_DEFAULT = '';
+const SHUTTLE_LASER_2_DEFAULT = '';
+// #endif
+const POWER_SCALE_DEFAULT = 100;
+const Z_OFFSET_DEFAULT = 0;
+const PASS_COUNT_DEFAULT = 1;
+const Z_STEP_PER_PASS_DEFAULT = 0;
+const GROUP_NAME_DEFAULT = '';
+const CUSTOM_CUT_SETTING_XML_DEFAULT = '';
 
 // CAM APIs offer a redirection feature to create multiple output fles (such as used in
 // file-by-layer).  When JavaScript errors occur during redirection the logging information is

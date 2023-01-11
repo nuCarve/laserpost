@@ -77,12 +77,12 @@ function generateProjectNotes(layerIndex) {
   appendNote('');
 
   // if the user did any laser overrides, include those in the comments
-  let laserPowerEtchMin = getProperty('laserPower0100EtchMin');
-  let laserPowerEtchMax = getProperty('laserPower0200EtchMax');
-  let laserPowerVaporizeMin = getProperty('laserPower0300VaporizeMin');
-  let laserPowerVaporizeMax = getProperty('laserPower0400VaporizeMax');
-  let laserPowerThroughMin = getProperty('laserPower0500ThroughMin');
-  let laserPowerThroughMax = getProperty('laserPower0600ThroughMax');
+  let laserPowerEtchMin = getProperty('laserPower0100EtchMin', LASER_POWER_ETCH_MIN_DEFAULT);
+  let laserPowerEtchMax = getProperty('laserPower0200EtchMax', LASER_POWER_ETCH_MAX_DEFAULT);
+  let laserPowerVaporizeMin = getProperty('laserPower0300VaporizeMin', LASER_POWER_VAPORIZE_MIN_DEFAULT);
+  let laserPowerVaporizeMax = getProperty('laserPower0400VaporizeMax', LASER_POWER_VAPORIZE_MAX_DEFAULT);
+  let laserPowerThroughMin = getProperty('laserPower0500ThroughMin', LASER_POWER_THROUGH_MIN_DEFAULT);
+  let laserPowerThroughMax = getProperty('laserPower0600ThroughMax', LASER_POWER_THROUGH_MAX_DEFAULT);
 
   if (
     laserPowerEtchMax != 0 ||
@@ -115,8 +115,8 @@ function generateProjectNotes(layerIndex) {
 
   // if the user is using a mirror shuttle, output that to comments
   // #if LBRN
-  let shuttleLaser1 = getProperty('machine0500ShuttleLaser1');
-  let shuttleLaser2 = getProperty('machine0600ShuttleLaser2');
+  let shuttleLaser1 = getProperty('machine0500ShuttleLaser1', SHUTTLE_LASER_1_DEFAULT);
+  let shuttleLaser2 = getProperty('machine0600ShuttleLaser2', SHUTTLE_LASER_2_DEFAULT);
 
   if (shuttleLaser1 != '' || shuttleLaser2 != '') {
     appendNote('  ' + localize('Shuttle "U" for laser 1: {value}'), {
@@ -166,18 +166,18 @@ function onSection() {
 
   switch (currentSection.getJetMode()) {
     case JET_MODE_ETCHING:
-      minPower = getProperty('laserPower0100EtchMin');
-      maxPower = getProperty('laserPower0200EtchMax');
+      minPower = getProperty('laserPower0100EtchMin', LASER_POWER_ETCH_MIN_DEFAULT);
+      maxPower = getProperty('laserPower0200EtchMax', LASER_POWER_ETCH_MAX_DEFAULT);
       powerSource = localize('post-processor etch power properties');
       break;
     case JET_MODE_VAPORIZE:
-      minPower = getProperty('laserPower0300VaporizeMin');
-      maxPower = getProperty('laserPower0400VaporizeMax');
+      minPower = getProperty('laserPower0300VaporizeMin', LASER_POWER_VAPORIZE_MIN_DEFAULT);
+      maxPower = getProperty('laserPower0400VaporizeMax', LASER_POWER_VAPORIZE_MAX_DEFAULT);
       powerSource = localize('post-processor vaporize power properties"');
       break;
     case JET_MODE_THROUGH:
-      minPower = getProperty('laserPower0500ThroughMin');
-      maxPower = getProperty('laserPower0600ThroughMax');
+      minPower = getProperty('laserPower0500ThroughMin', LASER_POWER_THROUGH_MIN_DEFAULT);
+      maxPower = getProperty('laserPower0600ThroughMax', LASER_POWER_THROUGH_MAX_DEFAULT);
       powerSource = localize('post-processor through power properties');
       break;
     default:
@@ -192,8 +192,8 @@ function onSection() {
 
   // get values for the "U" when using a mirror shuttle
   // #if LBRN
-  let shuttleLaser1 = getProperty('machine0500ShuttleLaser1');
-  let shuttleLaser2 = getProperty('machine0600ShuttleLaser2');
+  let shuttleLaser1 = getProperty('machine0500ShuttleLaser1', SHUTTLE_LASER_1_DEFAULT);
+  let shuttleLaser2 = getProperty('machine0600ShuttleLaser2', SHUTTLE_LASER_2_DEFAULT);
   let shuttleLaser1Value = undefined;
   let shuttleLaser2Value = undefined;
 
@@ -212,7 +212,7 @@ function onSection() {
 
   // determine the air setting.
   let useAir = true;
-  switch (getProperty('op0200UseAir')) {
+  switch (getProperty('op0200UseAir', USE_AIR_DEFAULT)) {
     case USE_AIR_OFF:
       useAir = false;
       break;
@@ -228,7 +228,7 @@ function onSection() {
   }
 
   // set up the group - using the shared group name if specified, else a new empty group
-  const groupName = currentSection.getProperty('op0800GroupName');
+  const groupName = currentSection.getProperty('op0800GroupName', GROUP_NAME_DEFAULT);
   if (groupName == '') groupName = undefined;
 
   currentGroup = getGroupByName(groupName, {
@@ -237,8 +237,8 @@ function onSection() {
   });
 
   // collect settings from the user via operation properties
-  const powerScale = currentSection.getProperty('op0400PowerScale');
-  let opLayerMode = currentSection.getProperty('op0100LayerMode');
+  const powerScale = currentSection.getProperty('op0400PowerScale', POWER_SCALE_DEFAULT);
+  let opLayerMode = currentSection.getProperty('op0100LayerMode', LAYER_MODE_DEFAULT);
   if (opLayerMode == LAYER_MODE_INHERIT) {
     // select fill based on the cutting mode
     if (currentSection.getJetMode() == JET_MODE_ETCHING)
@@ -246,12 +246,12 @@ function onSection() {
     else opLayerMode = LAYER_MODE_LINE;
   }
   const customCutSettingXML = currentSection.getProperty(
-    'op0900CustomCutSettingXML'
+    'op0900CustomCutSettingXML', CUSTOM_CUT_SETTING_XML_DEFAULT
   );
-  let laserEnable = currentSection.getProperty('op0300LaserEnable');
-  const zOffset = currentSection.getProperty('op0500ZOffset');
-  const passes = currentSection.getProperty('op0600Passes');
-  const zStep = currentSection.getProperty('op0700ZStep');
+  let laserEnable = currentSection.getProperty('op0300LaserEnable', LASER_ENABLE_DEFAULT);
+  const zOffset = currentSection.getProperty('op0500ZOffset', Z_OFFSET_DEFAULT);
+  const passes = currentSection.getProperty('op0600Passes', PASS_COUNT_DEFAULT);
+  const zStep = currentSection.getProperty('op0700ZStep', Z_STEP_PER_PASS_DEFAULT);
 
   // if laser enable set to inherit from tool, get value from the tool's pierce time
   if (laserEnable == LASER_ENABLE_TOOL) {
@@ -544,7 +544,7 @@ function onClose() {
 
   // determine if we are doing file redirection
   const redirect =
-    getProperty('laserpost0100Grouping') == GROUPING_BY_LAYER_FILE;
+    getProperty('laserpost0100Grouping', GROUPING_DEFAULT) == GROUPING_BY_LAYER_FILE;
 
   // build up project notes
   generateProjectNotes(redirect ? 0 : -1);

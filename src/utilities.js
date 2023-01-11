@@ -44,7 +44,7 @@ function debugLog(template, parameters, level) {
   text = text.replace(/[ \n]+$/, '');
 
   if (level === undefined) level = COMMENT_NORMAL;
-  switch (getProperty('laserpost0500IncludeComments')) {
+  switch (getProperty('laserpost0500IncludeComments', INCLUDE_COMMENTS_DEFAULT)) {
     case INCLUDE_COMMENTS_NONE:
       return;
     case INCLUDE_COMMENTS_NORMAL:
@@ -74,7 +74,7 @@ function debugLog(template, parameters, level) {
  * @returns String with "### mm/min" or "### mm/sec"
  */
 function speedToUnits(speedInMMPM) {
-  const speedUnits = getProperty('machine0100SpeedUnits');
+  const speedUnits = getProperty('machine0100SpeedUnits', SPEED_UNITS_DEFAULT);
   if (speedUnits == SPEED_UNITS_MMPM)
     return formatSpeed.format(speedInMMPM) + ' ' + localize('mm/min');
 

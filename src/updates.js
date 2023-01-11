@@ -26,9 +26,9 @@ function checkUpdateAvailability() {
   }
 
   // determine parameters for doing update checking from the post properties
-  const allowBeta = getProperty('machine0400UpdateAllowBeta');
+  const allowBeta = getProperty('machine0400UpdateAllowBeta', UPDATE_ALLOW_BETA_DEFAULT);
   let timeBetweenChecksMs = 0;
-  switch (getProperty('machine0300AutomaticUpdate')) {
+  switch (getProperty('machine0300AutomaticUpdate', UPDATE_FREQUENCY_DEFAULT)) {
     case UPDATE_FREQUENCY_NEVER:
       timeBetweenChecksMs = undefined;
       break;

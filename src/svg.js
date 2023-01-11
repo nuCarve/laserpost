@@ -130,7 +130,7 @@ function onWriteShapes(layer) {
       // do we need to group shapes within our operation?
       if (
         operation.shapeSets.length > 1 &&
-        getProperty('laserpost0200GroupShapes')
+        getProperty('laserpost0200GroupShapes', GROUP_SHAPES_DEFAULT)
       ) {
         writeXML('g', { id: safeId(operation.operationName) }, true);
         writeXML('desc', {
@@ -161,7 +161,7 @@ function onWriteShapes(layer) {
       // if we grouped the shapes, close the group
       if (
         operation.shapeSets.length > 1 &&
-        getProperty('laserpost0200GroupShapes')
+        getProperty('laserpost0200GroupShapes', GROUP_SHAPES_DEFAULT)
       )
         writeXMLClose();
     }
@@ -169,7 +169,7 @@ function onWriteShapes(layer) {
     // if we grouped these operations, close the group now
     if (
       opGroup.operations.length > 1 &&
-      getProperty('laserpost0200GroupShapes')
+      getProperty('laserpost0200GroupShapes', GROUP_SHAPES_DEFAULT)
     )
       writeXMLClose();
   }
@@ -199,7 +199,7 @@ function onWriteTrailer(layer) {
  */
 function onProjectComplete(redirect) {
   // determine if we include the setup notes file
-  const includeNotes = getProperty('laserpost0400IncludeNotes');
+  const includeNotes = getProperty('laserpost0400IncludeNotes', INCLUDE_NOTES_DEFAULT);
   if (includeNotes != INCLUDE_NOTES_NONE && notes != '') {
     // determine if we should tell the user via a warning dialog that the notes are available
     let showNotesWarning = false;
