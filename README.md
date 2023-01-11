@@ -30,11 +30,15 @@ node release/release.mjs
 
 This will pull all the various `js` files together into a single file per target, such as `release/dist/laserpost-lbrn.cps` and `release/dist/laserpost-svg.cps`.
 
-Since Fusion 360 needs the post located in a system specific directory in order for Fusion to detect the source change, you can also specify a path to the directory to store a duplicate of the generated file using the `-d <path>` option, such as:
+Since Fusion 360 needs the post located in a system specific directory in order for Fusion to detect the source change, you can also specify a path to the directory to store a duplicate of the generated file using the `-d <path>` option, such as on Windows a path might be similar to:
 
 ```sh
 node release/release.mjs -d="C:\Users\myname\AppData\Local\Autodesk\Autodesk Fusion 360\32TABC6DD2N8Q\W.login\M\D23203423432806\CAMPosts"
 ```
+
+## Testing
+
+Automated testing using the Autodesk CAM post processor is available.  See the [README.md](https://github.com/nuCarve/laserpost/raw/main/tests/README.md) file located in the `tests` folder.
 
 ## License
 
