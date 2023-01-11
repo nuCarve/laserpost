@@ -1212,10 +1212,10 @@ function traceStockOutline() {
 }
 
 /**
- * Create alignment marks (circle with vertical and horz lines) along the outside edge of the stock (if
- * requested by properties).  These are added per-layer, and therefore are done after conversion
- * from segments to shapes (which is different than traceStockOutline, that operates in advance of
- * conversion to shapes).
+ * Create alignment marks (circle with vertical and horz lines) according to the post-property
+ * options.  These are added per-layer, and therefore are done after conversion from segments to
+ * shapes (which is different than traceStockOutline, that operates in advance of conversion to
+ * shapes).
  */
 function createAlignmentMark() {
   // set up the alignment mark if requested
@@ -1230,23 +1230,25 @@ function createAlignmentMark() {
     };
 
     // set up alignment mark position and size
-    const markSize = 15;
-    const markStartX = stock.maxX + markSize / 2;
-    let markStartY;
+    const markRadius = 5;
+    const markGap = 0;
+    const markCenterX = stock.maxX + markGap + markRadius;
+    let markCenterY;
     switch (alignmentMark) {
-      case ALIGNMENT_MARK_TOP:
-        markStartY = stock.minY;
+      case ALIGNMENT_MARK_TOP_RIGHT:
+        markCenterY = stock.maxY - markRadius;
         break;
-      case ALIGNMENT_MARK_MIDDLE:
-        markStartY = stock.minY + (stock.maxY - stock.minY) / 2 + markSize / 2;
+      case ALIGNMENT_MARK_CENTER_RIGHT:
+        markCenterY = (stock.maxY - stock.minY) / 2 + stock.minY;
         break;
-      case ALIGNMENT_MARK_BOTTOM:
-        markStartY = stock.maxY - markSize;
+      case ALIGNMENT_MARK_BOTTOM_RIGHT:
+        markCenterY = markRadius;
         break;
     }
-    const markEndX = markStartX + markSize;
-    const markEndY = markStartY + markSize;
 
+    // increase the width of our working box
+    project.box.maxX += markGap + markRadius * 2;
+    
     // set up our layer to hold the alignment marks
     const cutSetting = getCutSetting({
       name: ALIGNMENT_MARK_GROUP_NAME,
@@ -1297,9 +1299,9 @@ function createAlignmentMark() {
         type: SHAPE_TYPE_ELLIPSE,
         cutSetting: cutSetting,
         powerScale: 100,
-        centerX: markStartX + markSize / 2,
-        centerY: markStartY + markSize / 2,
-        radius: markSize / 2,
+        centerX: markCenterX,
+        centerY: markCenterY,
+        radius: markRadius,
       });
 
       // create the cross hatch with two lines
@@ -1309,20 +1311,20 @@ function createAlignmentMark() {
         powerScale: 100,
         vectors: [
           {
-            x: markStartX + markSize / 2,
-            y: markStartY,
+            x: markCenterX,
+            y: markCenterY - markRadius,
           },
           {
-            x: markStartX + markSize / 2,
-            y: markEndY,
+            x: markCenterX,
+            y: markCenterY + markRadius,
           },
           {
-            x: markStartX,
-            y: markStartY + markSize / 2,
+            x: markCenterX - markRadius,
+            y: markCenterY,
           },
           {
-            x: markEndX,
-            y: markStartY + markSize / 2,
+            x: markCenterX + markRadius,
+            y: markCenterY,
           },
         ],
         primitives: [

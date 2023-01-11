@@ -75,9 +75,9 @@ properties = {
     type: 'enum',
     values: [
       { title: localize('None'), id: ALIGNMENT_MARK_NONE },
-      { title: localize('Aligned to stock top'), id: ALIGNMENT_MARK_TOP },
-      { title: localize('Aligned to stock middle'), id: ALIGNMENT_MARK_MIDDLE },
-      { title: localize('Aligned to stock bottom'), id: ALIGNMENT_MARK_BOTTOM },
+      { title: localize('Aligned to stock top-right'), id: ALIGNMENT_MARK_TOP_RIGHT },
+      { title: localize('Aligned to stock center-right'), id: ALIGNMENT_MARK_CENTER_RIGHT },
+      { title: localize('Aligned to stock bottom-right'), id: ALIGNMENT_MARK_BOTTOM_RIGHT },
     ],
     value: ALIGNMENT_MARK_NONE,
     scope: 'post',

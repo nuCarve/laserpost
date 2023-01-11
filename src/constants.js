@@ -71,9 +71,9 @@ const USE_AIR_ASSIST_GAS = 'gas';
 
 // enum to alignment marks
 const ALIGNMENT_MARK_NONE = 'mark-none';
-const ALIGNMENT_MARK_TOP = 'mark-top';
-const ALIGNMENT_MARK_MIDDLE = 'mark-middle';
-const ALIGNMENT_MARK_BOTTOM = 'mark-bottom';
+const ALIGNMENT_MARK_TOP_RIGHT = 'mark-top-right';
+const ALIGNMENT_MARK_CENTER_RIGHT = 'mark-center-right';
+const ALIGNMENT_MARK_BOTTOM_RIGHT = 'mark-bottom-right';
 
 // #if LBRN
 // machine orientation
