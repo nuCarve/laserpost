@@ -13,13 +13,18 @@
  * @param keyValue Object to resolve any {arguments} in message
  */
 function showWarning(message, keyValue) {
-  alert(
-    format(localize('{description} ({version})'), {
-      description: description,
-      version: semVer,
-    }),
-    format(message, keyValue)
-  );
+  try {
+    alert(
+      format(localize('{description} ({version})'), {
+        description: description,
+        version: semVer,
+      }),
+      format(message, keyValue)
+    );
+  } catch (ex) {
+    // when running automated tests, interaction is disable and this throws errors
+    debugLog('SHOW WARNING: ' + format(message, keyValue));
+  }
 }
 
 /**
