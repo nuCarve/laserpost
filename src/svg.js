@@ -378,7 +378,7 @@ function writeShapeEllipse(shape) {
   activePath.path +=
     (activePath.path == '' ? '' : ' ') +
     'M ' +
-    mmFormat(start.x) +
+    mmFormat(start.x - shape.radius) +
     ',' +
     mmFormat(start.y) +
     ' A ' +
@@ -386,7 +386,7 @@ function writeShapeEllipse(shape) {
     ',' +
     mmFormat(shape.radius) +
     ' 0 0 1 ' +
-    mmFormat(start.x + shape.radius * 2) +
+    mmFormat(start.x + shape.radius) +
     ',' +
     mmFormat(start.y) +
     ' A ' +
@@ -394,7 +394,7 @@ function writeShapeEllipse(shape) {
     ',' +
     mmFormat(shape.radius) +
     ' 0 0 1 ' +
-    mmFormat(start.x) +
+    mmFormat(start.x - shape.radius) +
     ',' +
     mmFormat(start.y);
 }
@@ -411,27 +411,24 @@ function writeShapePath(shape) {
     activePath.cutSetting = shape.cutSetting;
   }
 
-  const start = shape.vectors[0];
+  // track our current position based on the primitive id, to know if we need to do a move
+  let currentPrimitive = undefined;
 
-  // walk all primtives to build up an SVG path string
-  activePath.path +=
-    (activePath.path == '' ? '' : ' ') +
-    'M ' +
-    mmFormat(start.x) +
-    ',' +
-    mmFormat(start.y);
   for (
     let shapePrimitiveIndex = 0;
     shapePrimitiveIndex < shape.primitives.length;
     ++shapePrimitiveIndex
   ) {
     const primitive = shape.primitives[shapePrimitiveIndex];
+    const startXY = shape.vectors[primitive.start];
     const endXY = shape.vectors[primitive.end];
+
+    if (currentPrimitive != primitive.start)
+      activePath.path += ' M ' + mmFormat(startXY.x) + ',' + mmFormat(startXY.y);
 
     if (primitive.type == PRIMITIVE_TYPE_LINE)
       activePath.path += ' L ' + mmFormat(endXY.x) + ',' + mmFormat(endXY.y);
     else {
-      const startXY = shape.vectors[primitive.start];
       const c0 = {
         x: shape.vectors[primitive.start].c0x,
         y: shape.vectors[primitive.start].c0y,
@@ -464,6 +461,9 @@ function writeShapePath(shape) {
         ',' +
         mmFormat(endXY.y);
     }
+
+    // reset our current primitive to mark where our path ended
+    currentPrimitive = primitive.end;
   }
 }
 
