@@ -1,2 +1,6 @@
 release/dist/
 *.log
+*.lbrn
+*.svg
+*.failed
+*.txt
