@@ -38,7 +38,7 @@ node release/release.mjs -d="C:\Users\myname\AppData\Local\Autodesk\Autodesk Fus
 
 ## Testing
 
-Automated testing using the Autodesk CAM post processor is available.  See the [README.md](https://github.com/nuCarve/laserpost/raw/main/tests/README.md) file located in the `tests` folder.
+Automated testing using the Autodesk CAM post processor is available.  See the [README.md](tests/README.md) file located in the `tests` folder.
 
 ## License
 
