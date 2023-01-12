@@ -212,6 +212,7 @@ function buildPostCommand(setup, postNumber, cmdOptions, cncPath) {
 
   return [
     ...optionsArray,
+    ...propertiesArray,
     `${path.resolve(cmdOptions.cpsPath, setup.posts[postNumber])}.cps`,
     `${path.resolve(cncPath, setup.cnc)}.cnc`,
   ];
@@ -274,6 +275,10 @@ function runPostTest(cmdOptions, cmdArguments) {
   if (result.status == 0) {
     console.log(`Stdout: ${result.stdout}`);
     console.log(`Stderr: ${result.stderr}`);
+    // todo: remove, or make optional?
+    console.log(`\nCommand line executed:`);
+    console.log(`${cmdOptions.postPath} ${cmdArguments.join(' ')}`);
+    console.log();
     return true;
   }
 
