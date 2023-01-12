@@ -21,8 +21,8 @@
   },
   "homepage": "https://github.com/nucarve/laserpost#readme",
   "dependencies": {
-    "@xmldom/xmldom": "^0.8.6",
     "minimatch": "^5.1.2",
+    "xmldom-qsa": "^1.1.2",
     "xpath": "^0.0.32"
   }
 }

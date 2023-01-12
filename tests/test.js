@@ -35,6 +35,8 @@ import path from 'node:path';
 import * as url from 'node:url';
 import cp from 'node:child_process';
 import minimatch from 'minimatch';
+import xpath from 'xpath';
+import dom from 'xmldom-qsa';
 
 /**
  * Parse command line arguments.  See the "-?" implementation for details.
@@ -66,23 +68,43 @@ function parseArgs() {
             console.log(`LaserPost automated testing framework`);
             console.log(`Copyright (c) 2023 nuCarve`);
             console.log(``);
-            console.log(`Command syntax: node tests/test.js {<options...>} {<filters>...}`);
+            console.log(
+              `Command syntax: node tests/test.js {<options...>} {<filters>...}`
+            );
             console.log(``);
-            console.log(`<filters>:`)
-            console.log(`Filters limit the tests to run by matching on the test name.  If no filters are specified,`);
-            console.log(`all tests will be executed.  Filters are case insensitive, and match anywhere in the test`);
-            console.log(`name ("box" will match "Test box width" and "Box dimensions" but not "Circle test")`);
+            console.log(`<filters>:`);
+            console.log(
+              `Filters limit the tests to run by matching on the test name.  If no filters are specified,`
+            );
+            console.log(
+              `all tests will be executed.  Filters are case insensitive, and match anywhere in the test`
+            );
+            console.log(
+              `name ("box" will match "Test box width" and "Box dimensions" but not "Circle test")`
+            );
             console.log(``);
             console.log(`<options>:`);
-            console.log(`-p=<post-filter>: Limits tests to matching posts (partial match, such as "-p=light" matches "laserpost-lightburn")`);
-            console.log(`                  Can specify multiple "-p" arguments.`);
+            console.log(
+              `-p=<post-filter>: Limits tests to matching posts (partial match, such as "-p=light" matches "laserpost-lightburn")`
+            );
+            console.log(
+              `                  Can specify multiple "-p" arguments.`
+            );
             console.log(`-v: Verbose mode (default is false)`);
-            console.log(`-pp=<path>: Path to Autodesk post executable (default is env variable AUTODESK_POST, else "post")`);
-            console.log(`-sp=<path>: Path to folder with post-processor CPS source files (default is "release/dist")`);
-            console.log(`-ip=<path>: Path to folder with post-processor CNC intermediate test files (default is "tests/cnc")`);
+            console.log(
+              `-pp=<path>: Path to Autodesk post executable (default is env variable AUTODESK_POST, else "post")`
+            );
+            console.log(
+              `-sp=<path>: Path to folder with post-processor CPS source files (default is "release/dist")`
+            );
+            console.log(
+              `-ip=<path>: Path to folder with post-processor CNC intermediate test files (default is "tests/cnc")`
+            );
             console.log(``);
-            console.log(`Source code, additional instructions and license available at:`);
-            console.log(`https://github.com/nuCarve/laserpost/tree/main/tests`)
+            console.log(
+              `Source code, additional instructions and license available at:`
+            );
+            console.log(`https://github.com/nuCarve/laserpost/tree/main/tests`);
             console.log(``);
             process.exit(-1);
           case '-v':
@@ -389,10 +411,19 @@ function validatePostResults(setup, postNumber, cmdOptions, cncPath) {
           // we have a match - a validator and a file to validate
           switch (validator.validator) {
             case 'xpath':
-              result.pass++;
+              const xpathResult = validateXPath(
+                validator,
+                cncPath,
+                file,
+                cmdOptions
+              );
+              if (xpathResult.success) result.pass++;
+              else result.fail++;
+              // console.log(`Snapshot:\n${xpathResult.snapshot}`);
               break;
             case 'text':
-              result.pass++;
+              console.error('    TEXT validator not implemented');
+              result.fail++;
               break;
             default:
               console.error(
@@ -404,6 +435,131 @@ function validatePostResults(setup, postNumber, cmdOptions, cncPath) {
     }
   }
   return result;
+}
+
+// set up global used by valiateXMLPathHandleError to track if an error has occured with the DOM
+let validateXMLPathError = false;
+
+/**
+ * Handler for XMLDOM errors.  Called via callback when the DOM experiences an error.  Outputs the
+ * errors to the console, and sets the global `validateXMLPathError` to `true` to provide the error
+ * back to the calling code.
+ *
+ * @param type - String with the type of error (such as "Error")
+ * @param message - String (multi-line supported) with the error message
+ */
+function validateXMLPathHandleError(type, message) {
+  if (!validateXMLPathError) console.log('    FAIL: XML file failed to parse:');
+
+  console.log(`      ${type}: ${message.replace(/\n/g, '\n      ')}`);
+  validateXMLPathError = true;
+}
+
+/**
+ * Execute the XPath based validator.  The validator setup must include the `xpath` property, which
+ * can be set to a single xpath query, or an array of xpath queries.  The query can be a single string
+ * (in which case there must be a match or it will fail), or an object that can include { query:
+ * string, required: boolean } to to specify if the field is optional.
+ *
+ * @param validator - Validator object from the setup
+ * @param cncPath - Path to the cnc folder
+ * @param file - Filename being validated
+ * @param cmdOptions Options from the command line (tests, paths).
+ * @returns Object with { snapshot: string, success: boolean }
+ */
+function validateXPath(validator, cncPath, file, cmdOptions) {
+  let snapshot = '';
+  let success = true;
+
+  // make sure we have a valid xpath specification
+  if (validator.xpath) {
+    // set up an array for the xpath property, converting a single string to an array
+    const xpathArray = Array.isArray(validator.xpath)
+      ? validator.xpath
+      : [validator.xpath];
+
+    // load up the file into memory as a string
+    const xmlSource = fs.readFileSync(path.resolve(cncPath, file), {
+      encoding: 'utf-8',
+    });
+
+    // set up the XML dom and parse the XML.  Note the use of the global variable
+    // `validateXMLPathError` that is set to true in the `validateXMLPathHandleError` callbacks
+    // to indicate an error was discovered
+    validateXMLPathError = false;
+    const xmlDoc = new dom.DOMParser({
+      locator: {},
+      errorHandler: {
+        warning: (m) => validateXMLPathHandleError('Warning', m),
+        error: (m) => validateXMLPathHandleError('Error', m),
+        fatalError: (m) => validateXMLPathHandleError('Fatal error', m),
+      },
+    }).parseFromString(xmlSource, 'application/xml');
+
+    // fail if we had a parsing problem
+    if (validateXMLPathError)
+      return { snapshot: `XML parse failure`, success: false };
+
+    // process the queries
+    for (const xpathQuery of xpathArray) {
+      // unify the query to be an object with { query, required } values
+      let queryObject =
+        typeof xpathQuery === 'string'
+          ? { query: xpathQuery, required: true }
+          : { query: xpathQuery.query, required: xpathQuery.required ?? true };
+
+      if (cmdOptions.verbose) {
+        console.log(
+          `    Processing query "${queryObject.query}" (${
+            queryObject.required ? 'required' : 'not required'
+          }):`
+        );
+      }
+      snapshot += `XPath query "${queryObject.query}" (${
+        queryObject.required ? 'required' : 'not required'
+      }):\n`;
+
+      try {
+        const nodes = xpath.select(queryObject.query, xmlDoc);
+        if (nodes.length == 0 && queryObject.required) {
+          console.log(
+            `    Processing query "${queryObject.query}" (required):`
+          );
+          console.error(
+            `      FAIL: Required query did not match any elements`
+          );
+          success = false;
+          snapshot += `  FAIL: Required query did not match any elements.\n`;
+          continue;
+        }
+
+        if (cmdOptions.verbose)
+          console.log(`      ${nodes.length} elements found`);
+
+        // add the results to the snapshot
+        for (const node of nodes) {
+          snapshot += node.toString();
+          // make sure snapshot has a newline at the end
+          if (snapshot.slice(-1) != '\n') snapshot += '\n';
+        }
+      } catch (ex) {
+        console.log(
+          `    FAIL: Failed to parse XPath query "${queryObject.query}"`
+        );
+        success = false;
+        snapshot += `  FAIL: Failed to parse XPath query`;
+      }
+    }
+  } else {
+    console.error(
+      `    FAIL: XPath validator setup missing required "xpath" property`
+    );
+    return {
+      snapshot: `FAIL: XPath validator setup missing required "xpath" property`,
+      success: false,
+    };
+  }
+  return { snapshot, success };
 }
 
 /**
@@ -438,12 +594,13 @@ function runTest(testSuite, testSetups, cmdOptions) {
       if (cmdOptions.postFilter.length > 0) {
         let matchPost = false;
         for (const filter of cmdOptions.postFilter)
-          if (setup.posts[postIndex].toLowerCase().includes(filter.toLowerCase())) {
+          if (
+            setup.posts[postIndex].toLowerCase().includes(filter.toLowerCase())
+          ) {
             matchPost = true;
             break;
           }
-        if (!matchPost)
-          continue;
+        if (!matchPost) continue;
       }
 
       // show test header if not already done

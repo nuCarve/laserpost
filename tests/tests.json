@@ -16,8 +16,10 @@
           "file": "*.lbrn",
           "validator": "xpath",
           "xpath": [
-            "/LightburnProject/(@MirrorX, @MirrorY)",
-            "/LightBurnProject/Shape|/LightBurnProject/CutSetting"]
+            {"query": "/LightBurnProject/@MirrorX", "required": true },
+            "/LightBurnProject/@MirrorY",
+            "/LightBurnProject/CutSetting",
+            "/LightBurnProject/Shape"]
         },
         "svg-default": {
           "post": "laserpost-svg",
