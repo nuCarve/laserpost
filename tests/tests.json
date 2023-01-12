@@ -10,12 +10,30 @@
         "timeout": ["--timeout", "1"]
       },
       "cnc": "cover",
-      "validate": [
-        { "post": "laserpost-lightburn", "file": "cover-1.xml", "elements": ["LightBurnProject.Shape[*]", "LightBurnProject.CutSetting[*]"] },
-        { "post": "laserpost-svg", "file": "cover-1.svg", "elements": ["svg[1] (no children?)"]},
-        { "comment": "// also, how do we modify these rules in inheritance?" },
-        { "comment": "// do we want log file / non-XML files (set up the setup.txt file)?" }
-      ],
+      "validators": {
+        "lbrn-default": {
+          "post": "laserpost-lightburn",
+          "file": "*.lbrn",
+          "validator": "xpath",
+          "xpath": [
+            "/LightburnProject/(@MirrorX, @MirrorY)",
+            "/LightBurnProject/Shape|/LightBurnProject/CutSetting"]
+        },
+        "svg-default": {
+          "post": "laserpost-svg",
+          "file": "*.svg",
+          "validator": "xpath",
+          "xpath": [
+            "/svg[@version='1.1']/(@width, @height, @viewbox)",
+            "/svg/g|/svg/path"
+          ]
+        },
+        "txt-default": {
+          "post": "*",
+          "file": "*.txt",
+          "validator": "text"
+        }
+      },
       "properties": {
         "work0100TraceStock": "0"
       }
@@ -40,6 +58,6 @@
         "work0200OffsetX": "100",
         "work0300OffsetY": "200"
       }
-      }
+    }
   ]
 }

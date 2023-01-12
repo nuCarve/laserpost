@@ -5,3 +5,4 @@ release/dist/
 *.failed
 *.txt
 tests/cnc/results/
+node_modules

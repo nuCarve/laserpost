@@ -10,7 +10,10 @@ premade `cnc` files using the LaserPost post-processors.  The tests are located 
 node tests/test.mjs
 ```
 
-This will attempt to run the Autodesk post-processor (`post.exe` or `post`, depending on your operating system).  If this cannot be found in your path, the tests will fail with errors.  You can use the `-p` option to specify the path to the post processor, such as (Windows style example):
+This will attempt to run the Autodesk post-processor (`post.exe` or `post`, depending on your
+operating system).  If this cannot be found in your path, the tests will fail with errors.  You can
+set the environment variable `AUTODESK_POST` to the location of the post, add it to your path, or
+specify a specific path using the `-p` option:
 
 ```sh
 node tests/test.mjs -p="C:\Users\myname\AppData\Local\Autodesk\webdeploy\production\212ef2a73b4faa7986fe0d205fb521fc68f5f11b\Applications\CAM360\post"

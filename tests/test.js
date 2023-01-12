@@ -34,27 +34,20 @@ import fs from 'node:fs';
 import path from 'node:path';
 import * as url from 'node:url';
 import cp from 'node:child_process';
+import minimatch from 'minimatch';
 
 /**
- * Parse command line arguments.
+ * Parse command line arguments.  See the "-?" implementation for details.
  *
- * Command line syntax:
- * test {<test-name> {<test-name...>}} {-p=<path-to-post-processor-executable>}
- * {-s=<path-to-CPS-source-directory>} {-c=<path-to-CNC-directory>}
- *
- * Defaults:
- * - -p: "post" (requires path to resolve the location of the post processor)
- * - -s: "release/dist"
- * - -c: "tests/cnc"
- *
- * @returns Object { tests: <array of test names>, postPath: <post path>, cpsPath: <cps directory>,
- * cncPath: <cnc directory> }
+ * @returns Object containing command line property results
  */
 function parseArgs() {
   // decode the command line options
-  let postPath = 'post';
+  let postPath = process.env.AUTODESK_POST ?? 'post';
   let cpsPath = 'release/dist';
   let cncPath = 'tests/cnc';
+  let postFilter = [];
+  let verbose = false;
 
   const tests = [];
 
@@ -63,31 +56,75 @@ function parseArgs() {
     if (process.argv[cmdIndex].startsWith('-')) {
       const flag = process.argv[cmdIndex];
 
-      // all options require an '=' with a value
-      if (flag[2] != '=') {
-        console.log(`Missing path on ${flag}`);
-        process.exit(-1);
-      }
+      const splitEquals = flag.split('=');
 
-      // decode the switch option
-      switch (flag[1].toLowerCase()) {
-        case 'p':
-          postPath = flag.substring(3);
-          break;
-        case 'c':
-          cpsPath = flag.substring(3);
-          break;
-        case 'i':
-          cncPath = flag.substring(3);
-          break;
-        default:
-          console.log(`Unknown command line flag: ${flag}`);
+      // decode options that don't require parameters
+      if (splitEquals.length == 1) {
+        switch (splitEquals[0].toLowerCase()) {
+          case '-?':
+            console.log(``);
+            console.log(`LaserPost automated testing framework`);
+            console.log(`Copyright (c) 2023 nuCarve`);
+            console.log(``);
+            console.log(`Command syntax: node tests/test.js {<options...>} {<filters>...}`);
+            console.log(``);
+            console.log(`<filters>:`)
+            console.log(`Filters limit the tests to run by matching on the test name.  If no filters are specified,`);
+            console.log(`all tests will be executed.  Filters are case insensitive, and match anywhere in the test`);
+            console.log(`name ("box" will match "Test box width" and "Box dimensions" but not "Circle test")`);
+            console.log(``);
+            console.log(`<options>:`);
+            console.log(`-p=<post-filter>: Limits tests to matching posts (partial match, such as "-p=light" matches "laserpost-lightburn")`);
+            console.log(`                  Can specify multiple "-p" arguments.`);
+            console.log(`-v: Verbose mode (default is false)`);
+            console.log(`-pp=<path>: Path to Autodesk post executable (default is env variable AUTODESK_POST, else "post")`);
+            console.log(`-sp=<path>: Path to folder with post-processor CPS source files (default is "release/dist")`);
+            console.log(`-ip=<path>: Path to folder with post-processor CNC intermediate test files (default is "tests/cnc")`);
+            console.log(``);
+            console.log(`Source code, additional instructions and license available at:`);
+            console.log(`https://github.com/nuCarve/laserpost/tree/main/tests`)
+            console.log(``);
+            process.exit(-1);
+          case '-v':
+            verbose = true;
+            break;
+          default:
+            console.log(`Unknown command line flag "${flag}"`);
+            process.exit(-1);
+        }
+      } else {
+        if (splitEquals.length > 2) {
+          console.log(`Too many '=' on "${flag}"`);
           process.exit(-1);
+        }
+        if (splitEquals[0].length == 0) {
+          console.log(`Missing option name "${flag}"`);
+          process.exit(-1);
+        }
+
+        // decode the switch option
+        switch (splitEquals[0].toLowerCase()) {
+          case '-p':
+            postFilter.push(splitEquals[1]);
+            break;
+          case '-pp':
+            postPath = splitEquals[1];
+            break;
+          case '-sp':
+            cpsPath = splitEquals[1];
+            break;
+          case '-ip':
+            cncPath = splitEquals[1];
+            break;
+          default:
+            console.log(`Unknown command line flag "${splitEquals[0]}=..."`);
+            process.exit(-1);
+        }
       }
     } else tests.push(process.argv[cmdIndex].toLowerCase());
   }
 
-  return { tests, postPath, cpsPath, cncPath };
+  return { tests, postPath, cpsPath, cncPath, verbose, postFilter };
 }
 
 /**
@@ -134,6 +171,7 @@ function mergeSetups(setup, parentSetup) {
   result.cnc = setup.cnc ?? parentSetup.cnc ?? '';
   result.properties = setup.properties ?? [];
   result.options = setup.options ?? {};
+  result.validators = setup.validators ?? {};
   result.name = setup.name;
 
   // descend into child properties and transfer
@@ -150,6 +188,18 @@ function mergeSetups(setup, parentSetup) {
     for (const parentOption in parentSetup.options) {
       if (!setup.options || !setup.options.hasOwnProperty(parentOption))
         result.options[parentOption] = parentSetup.options[parentOption];
+    }
+  }
+
+  // descent into child validators and transfer
+  if (parentSetup.validators) {
+    for (const parentValidator in parentSetup.validators) {
+      if (
+        !setup.validators ||
+        !setup.validators.hasOwnProperty(parentValidator)
+      )
+        result.validators[parentValidator] =
+          parentSetup.validators[parentValidator];
     }
   }
 
@@ -230,14 +280,25 @@ function buildPostCommand(setup, postNumber, cmdOptions, cncPath) {
  */
 function prepResultsFolder(setup, postNumber, cmdOptions) {
   // the target folder is <cncPath>/results/<post-name>/<test-name>
-  const testName = setup.name.toLowerCase().replace(/\W/g, '-').replace(/_+/g, '-');
-  const targetPath = path.resolve(cmdOptions.cncPath, 'results', setup.posts[postNumber], testName);
+  const testName = setup.name
+    .toLowerCase()
+    .replace(/\W/g, '-')
+    .replace(/_+/g, '-');
+  const targetPath = path.resolve(
+    cmdOptions.cncPath,
+    'results',
+    setup.posts[postNumber],
+    testName
+  );
 
   // make sure the directory exists
   fs.mkdirSync(targetPath, { recursive: true });
 
   // transfer the CNC file into this path
-  fs.copyFileSync(`${path.resolve(cmdOptions.cncPath, setup.cnc)}.cnc`, `${path.resolve(targetPath, setup.cnc)}.cnc`);
+  fs.copyFileSync(
+    `${path.resolve(cmdOptions.cncPath, setup.cnc)}.cnc`,
+    `${path.resolve(targetPath, setup.cnc)}.cnc`
+  );
 
   return targetPath;
 }
@@ -254,31 +315,33 @@ function clearResultsFolder(cmdOptions) {
 }
 
 /**
- * Executes a single Autodesk post operation.  
+ * Executes a single Autodesk post operation.
  *
  * @param cmdOptions Options from the command line (tests, paths)
  * @param cmdArguments Command line arguments for the post processor (see buildPostCommand)
  * @returns `true` if successful, `false` if it fails to work. May terminate process on fatal
  * errors.
  */
-function runPostTest(cmdOptions, cmdArguments) {
+function runPostProcessor(cmdOptions, cmdArguments) {
   // spawn the post-processor
   const result = cp.spawnSync(cmdOptions.postPath, cmdArguments, {
     shell: true,
     cwd: process.cwd(),
     env: process.env,
     stdio: 'pipe',
-    encoding: 'utf-8'
+    encoding: 'utf-8',
   });
 
   // was the execution successful?
   if (result.status == 0) {
-    console.log(`Stdout: ${result.stdout}`);
-    console.log(`Stderr: ${result.stderr}`);
-    // todo: remove, or make optional?
-    console.log(`\nCommand line executed:`);
-    console.log(`${cmdOptions.postPath} ${cmdArguments.join(' ')}`);
-    console.log();
+    if (cmdOptions.verbose) {
+      console.log(`Stdout: ${result.stdout}`);
+      console.log(`Stderr: ${result.stderr}`);
+
+      console.log(`\nCommand line executed:`);
+      console.log(`${cmdOptions.postPath} ${cmdArguments.join(' ')}`);
+      console.log();
+    }
     return true;
   }
 
@@ -288,13 +351,59 @@ function runPostTest(cmdOptions, cmdArguments) {
   } else {
     console.log(`Post ran, but had error ${result.status}: ${result.stderr}`);
   }
-  console.log(`\nCommand line executed:`);
-  console.log(`${cmdOptions.postPath} ${cmdArguments.join(' ')}`);
-  console.log();
+  if (cmdOptions.verbose) {
+    console.log(`\nCommand line executed:`);
+    console.log(`${cmdOptions.postPath} ${cmdArguments.join(' ')}`);
+    console.log();
+  }
 
   // terminate on fatal executions
   if (result.status == 1) process.exit(-1);
   return false;
+}
+
+/**
+ * Validates the results of a prior post execution.  Identifies the validators to use based on the
+ * post type and the artifact files discovered, and delegates to the appropriate validator.
+ *
+ * @param setup Setup to use for the command line arguments.
+ * @param postNumber Index into which post should be generated.
+ * @param cmdOptions Options from the command line (tests, paths).
+ * @param cncPath Path to the transferred CNC file (in the test results folder).
+ * @returns { pass: number, fail: number }
+ */
+function validatePostResults(setup, postNumber, cmdOptions, cncPath) {
+  const result = { pass: 0, fail: 0 };
+
+  // determine the post we used for this test
+  const post = setup.posts[postNumber];
+
+  // find validators that match our post for this setup
+  for (const key in setup.validators) {
+    const validator = setup.validators[key];
+    if (minimatch(post, validator.post)) {
+      // now see if any artifact files match the validator file pattern
+      const files = fs.readdirSync(cncPath);
+      for (const file of files)
+        if (minimatch(file, validator.file))
+          // we have a match - a validator and a file to validate
+          switch (validator.validator) {
+            case 'xpath':
+              result.pass++;
+              break;
+            case 'text':
+              result.pass++;
+              break;
+            default:
+              console.error(
+                `    Unknown validator "${validator.validator}" on "${key}" for "${file}".`
+              );
+              result.fail++;
+              break;
+          }
+    }
+  }
+  return result;
 }
 
 /**
@@ -307,6 +416,7 @@ function runPostTest(cmdOptions, cmdArguments) {
 function runTest(testSuite, testSetups, cmdOptions) {
   let setup = aggregateSetup(testSuite.setup, testSetups);
   setup = mergeSetups(testSuite, setup);
+  let headerShown = false;
 
   // validate the setup
   let valid = true;
@@ -324,16 +434,47 @@ function runTest(testSuite, testSetups, cmdOptions) {
   // if valid test, loop through all posts on the test and run each one
   if (valid) {
     for (let postIndex = 0; postIndex < setup.posts.length; ++postIndex) {
+      // if using post filter(s), make sure the post matches
+      if (cmdOptions.postFilter.length > 0) {
+        let matchPost = false;
+        for (const filter of cmdOptions.postFilter)
+          if (setup.posts[postIndex].toLowerCase().includes(filter.toLowerCase())) {
+            matchPost = true;
+            break;
+          }
+        if (!matchPost)
+          continue;
+      }
+
+      // show test header if not already done
+      if (!headerShown) {
+        console.log(`Test: "${testSuite.name}" (setup "${testSuite.setup}"):`);
+        headerShown = true;
+      }
+      console.log(`  Post: ${setup.posts[postIndex]}`);
+
       // prepare the test results folder
       const cncPath = prepResultsFolder(setup, postIndex, cmdOptions);
 
       // execute the test
-      const passed = runPostTest(
+      const passed = runPostProcessor(
         cmdOptions,
         buildPostCommand(setup, postIndex, cmdOptions, cncPath)
       );
-      if (passed) result.pass++;
-      else result.fail++;
+
+      // did we successfully run the post?
+      if (passed) {
+        // validate the post results
+        const validateResult = validatePostResults(
+          setup,
+          postIndex,
+          cmdOptions,
+          cncPath
+        );
+
+        if (validateResult.fail > 0) result.fail++;
+        else result.pass++;
+      } else result.fail++;
     }
   } else console.warn('  TEST SKIPPED');
 
@@ -357,7 +498,7 @@ function runTests(testSuites, cmdOptions) {
     // if selectedTests were specified, limit to those that match
     if (cmdOptions.tests.length) {
       for (const test of cmdOptions.tests) {
-        if (testSuite.name?.toLowerCase().contains(test?.toLowerCase())) {
+        if (testSuite.name?.toLowerCase().includes(test.toLowerCase())) {
           testSelected = true;
           break;
         }
@@ -366,7 +507,6 @@ function runTests(testSuites, cmdOptions) {
 
     // if test selected, run the test
     if (testSelected) {
-      console.log(`Test: "${testSuite.name}" (setup "${testSuite.setup}"):`);
       const result = runTest(testSuite, testSuites.setups, cmdOptions);
       summary.pass += result.pass;
       summary.fail += result.fail;
