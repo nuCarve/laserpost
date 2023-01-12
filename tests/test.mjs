@@ -91,14 +91,14 @@ function parseArgs() {
 }
 
 /**
- * Loads the test.json file
+ * Loads the tests.json file
  *
- * @param testJsonPath - Path to the test.json file
+ * @param testsJsonPath - Path to the tests.json file
  * @returns Object with test info
  */
-function loadJson(testJsonPath) {
+function loadJson(testsJsonPath) {
   // load the release json file
-  const testjson = JSON.parse(fs.readFileSync(testJsonPath));
+  const testjson = JSON.parse(fs.readFileSync(testsJsonPath));
 
   return testjson;
 }
@@ -113,13 +113,13 @@ function setupFilePaths() {
   const testPath = url.fileURLToPath(new URL('.', import.meta.url));
 
   // path to a JSON file that contains the test information
-  const testJsonPath = path.resolve(testPath, 'test.json');
+  const testsJsonPath = path.resolve(testPath, 'tests.json');
 
-  return { testJsonPath: testJsonPath };
+  return { testsJsonPath: testsJsonPath };
 }
 
 /**
- * Merges setup information from the test.json file (setup and test section) such that the top-most
+ * Merges setup information from the tests.json file (setup and test section) such that the top-most
  * setup wins on conflicts (to allow for overriding settings)
  *
  * @param setup Setup object (most current, top level)
@@ -379,7 +379,7 @@ const cmdOptions = parseArgs();
 const filePaths = setupFilePaths();
 
 // load the test json file that defines the test cases
-const testSuites = loadJson(filePaths.testJsonPath);
+const testSuites = loadJson(filePaths.testsJsonPath);
 
 // clear out the prior test results folder
 clearResultsFolder(cmdOptions);

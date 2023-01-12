@@ -9,7 +9,13 @@
         "nointeraction": "--nointeraction",
         "timeout": ["--timeout", "1"]
       },
-      "cnc": "test"
+      "cnc": "test",
+      "validate": [
+        { "type": "snapshot" },
+        { "type": "match", "value": "error", "max": 0 },
+        { "type": "match", "value": "warning", "max": 0 },
+        { "type": "match", "value": "copyright", "min": 1 }
+      ]
     },
     "defaultBasic": {
       "setup": "default",
@@ -45,9 +51,7 @@
       "properties": {
         "work0100TraceStock": "1"
       },
-      "posts": ["laserpost-lightburn"],
-      "result-as-single": "compare|fail|pass|match:[something]",
-      "result-as-arrray": ["compare", "warning", "match:pattern"]
+      "posts": ["laserpost-lightburn"]
     }
   ]
 }

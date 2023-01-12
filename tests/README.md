@@ -4,7 +4,7 @@
 # [LaserPost](https://nucarve.com/laserpost) Automated Testing
 
 Automated testing is done with a custom test tool that runs the Autodesk `post` executable against a collection of
-premade `cnc` files using the LaserPost post-processors.  The tests are located in the `tests` folder, with configuration defined by the `test.json` file.  To run all tests, execute the command:
+premade `cnc` files using the LaserPost post-processors.  The tests are located in the `tests` folder, with configuration defined by the `tests.json` file.  To run all tests, execute the command:
 
 ```sh
 node tests/test.mjs
@@ -36,15 +36,18 @@ The artifacts folder is removed, including all contents, at the start of each te
 ## CNC intermediate files
 
 Models used for testing are defined using Autodesk CAM "intermediate" CNC files.  These start with a
-solid model and CAM manufacturing setups, and then are generated using the "Export CNC file to
-Visual Studio Code" (`export cnc file to vs code.cps`) post-processor (available on the [Autodesk
-CAM Post Library](https://cam.autodesk.com/hsmposts)).  Run the post-processor, locate the genrated
-`.nc` file, and inside that file is the path to the folder that contains the required `.cnc` file.
-Copy that file into the `tests/cnc` folder. 
+solid model and CAM manufacturing setups and operations, and then are generated using the "Export
+CNC file to Visual Studio Code" (`export cnc file to vs code.cps`) post-processor (available on the
+[Autodesk CAM Post Library](https://cam.autodesk.com/hsmposts)).  Use the machine setup that is
+correct for the post-processor, and change the processor in the post-processor dialog when running
+the post.  This way the machine settings remain associated with the machine, even though it is a
+ different post processor.  Then locate the generated `.nc` file, and inside that file is the path
+ to the folder that contains the required `.cnc` file.  Copy that file into the `tests/cnc` folder
+ and configure the `tests.json` file for whatever tests you wish to run using the model.
 
 ## Test configuration
 
-See the `test.json` file located in the `tests` folder for all test configuration.  An inheritance
+See the `tests.json` file located in the `tests` folder for all test configuration.  An inheritance
 model is used to simplify the file construction.  The `setups` object defines all available setups,
 which control options delivered to the Autodesk Post executable.  Individual setups can reference
 other setups by name, which will inherit all values and then allow individual values to be
