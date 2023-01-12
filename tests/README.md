@@ -38,12 +38,19 @@ The artifacts folder is removed, including all contents, at the start of each te
 Models used for testing are defined using Autodesk CAM "intermediate" CNC files.  These start with a
 solid model and CAM manufacturing setups and operations, and then are generated using the "Export
 CNC file to Visual Studio Code" (`export cnc file to vs code.cps`) post-processor (available on the
-[Autodesk CAM Post Library](https://cam.autodesk.com/hsmposts)).  Use the machine setup that is
-correct for the post-processor, and change the processor in the post-processor dialog when running
-the post.  This way the machine settings remain associated with the machine, even though it is a
- different post processor.  Then locate the generated `.nc` file, and inside that file is the path
- to the folder that contains the required `.cnc` file.  Copy that file into the `tests/cnc` folder
- and configure the `tests.json` file for whatever tests you wish to run using the model.
+[Autodesk CAM Post Library](https://cam.autodesk.com/hsmposts)).  
+
+The most consistent way to set up CNC files for testing is to always ensure that all properties
+remain at their default (unchanged) values.  First ensure the machine has the default values, by
+editing the machine, switching to the post-properties tab, clicking on the three dots next to "Post
+properties" and selecting "Restore all defaults".  Operation defaults are manual - you need to
+ensure each operation has no custom settings.  Then when running the post, click the three dots in
+the upper-right corner and select "Restore to all machine defaults".
+
+To run the post, use the post-dropdown to switch to the "Export CNC file to Visual Studio Code"
+post, and run the post.  Open the resulting `.nc` file, and inside that file is the path to the
+ folder that contains the required `.cnc` file.  Locate and copy that file into the `tests/cnc`
+ folder and configure the `tests.json` file for whatever tests you wish to run using the model.
 
 ## Test configuration
 
