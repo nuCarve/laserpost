@@ -9,49 +9,37 @@
         "nointeraction": "--nointeraction",
         "timeout": ["--timeout", "1"]
       },
-      "cnc": "test",
+      "cnc": "panel",
       "validate": [
-        { "type": "snapshot" },
-        { "type": "match", "value": "error", "max": 0 },
-        { "type": "match", "value": "warning", "max": 0 },
-        { "type": "match", "value": "copyright", "min": 1 }
-      ]
-    },
-    "defaultBasic": {
-      "setup": "default",
+        { "post": "laserpost-lightburn", "file": "cover-1.xml", "elements": ["LightBurnProject.Shape[*]", "LightBurnProject.CutSetting[*]"] },
+        { "post": "laserpost-svg", "file": "cover-1.svg", "elements": ["svg[1] (no children?)"]},
+        { "comment": "// also, how do we modify these rules in inheritance?" },
+        { "comment": "// do we want log file / non-XML files (set up the setup.txt file)?" }
+      ],
       "properties": {
         "work0100TraceStock": "0"
-      }
-    },
-    "stockTrace": {
-      "setup": "defaultBasic",
-      "properties": {
-        "work0100TraceStock": "1"
-      }
-    },
-    "workOffset": {
-      "setup": "defaultBasic",
-      "options": {
-        "nobackup": null
-      },
-      "properties": {
-        "work0200OffsetX": "100",
-        "work0300OffsetY": "200"
       }
     }
   },
   "tests": [
     {
-      "name": "Default basic test",
+      "name": "Default parameters panel",
       "setup": "default"
     },
     {
-      "name": "Trace stock LBRN only",
-      "setup": "workOffset",
+      "name": "Trace stock panel",
+      "setup": "default",
       "properties": {
         "work0100TraceStock": "1"
-      },
-      "posts": ["laserpost-lightburn"]
-    }
+      }
+    },
+    {
+      "name": "Work offset panel",
+      "setup": "default",
+      "properties": {
+        "work0200OffsetX": "100",
+        "work0300OffsetY": "200"
+      }
+      }
   ]
 }
