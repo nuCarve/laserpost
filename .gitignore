@@ -4,3 +4,4 @@ release/dist/
 *.svg
 *.failed
 *.txt
+tests/cnc/results/
