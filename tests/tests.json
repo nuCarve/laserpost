@@ -9,7 +9,7 @@
         "nointeraction": "--nointeraction",
         "timeout": ["--timeout", "1"]
       },
-      "cnc": "panel",
+      "cnc": "cover",
       "validate": [
         { "post": "laserpost-lightburn", "file": "cover-1.xml", "elements": ["LightBurnProject.Shape[*]", "LightBurnProject.CutSetting[*]"] },
         { "post": "laserpost-svg", "file": "cover-1.svg", "elements": ["svg[1] (no children?)"]},
@@ -23,18 +23,18 @@
   },
   "tests": [
     {
-      "name": "Default parameters panel",
+      "name": "Default parameters cover",
       "setup": "default"
     },
     {
-      "name": "Trace stock panel",
+      "name": "Trace stock cover",
       "setup": "default",
       "properties": {
         "work0100TraceStock": "1"
       }
     },
     {
-      "name": "Work offset panel",
+      "name": "Work offset cover",
       "setup": "default",
       "properties": {
         "work0200OffsetX": "100",
