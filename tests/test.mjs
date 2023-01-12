@@ -134,6 +134,7 @@ function mergeSetups(setup, parentSetup) {
   result.cnc = setup.cnc ?? parentSetup.cnc ?? '';
   result.properties = setup.properties ?? [];
   result.options = setup.options ?? {};
+  result.name = setup.name;
 
   // descend into child properties and transfer
   if (parentSetup.properties) {
@@ -187,9 +188,10 @@ function aggregateSetup(setupName, testSetups) {
  * @param setup Setup to use for the command line arguments
  * @param postNumber Index into which post should be generated
  * @param cmdOptions Options from the command line (tests, paths)
+ * @param cncPath Path to the transferred CNC file (in the test results folder)
  * @returns Array of command line options consistent with process.spawn
  */
-function buildPostCommand(setup, postNumber, cmdOptions) {
+function buildPostCommand(setup, postNumber, cmdOptions, cncPath) {
   // process all options
   const optionsArray = [];
   for (const option in setup.options) {
@@ -211,16 +213,52 @@ function buildPostCommand(setup, postNumber, cmdOptions) {
   return [
     ...optionsArray,
     `${path.resolve(cmdOptions.cpsPath, setup.posts[postNumber])}.cps`,
-    `${path.resolve(cmdOptions.cncPath, setup.cnc)}.cnc`,
+    `${path.resolve(cncPath, setup.cnc)}.cnc`,
   ];
 }
 
 /**
- * Executes a single Autodesk post operation
+ * Prepare the target test folder, and transfer the cnc file into the folder.  Returns the path to
+ * the folder that contains the transferred cnc file.  This is so that all artifacts from the test
+ * are gathered together.
+ *
+ * @param setup Setup to use for the command line arguments
+ * @param postNumber Index into which post should be generated
+ * @param cmdOptions Options from the command line (tests, paths)
+ * @returns String with path to the CNC folder.
+ */
+function prepResultsFolder(setup, postNumber, cmdOptions) {
+  // the target folder is <cncPath>/results/<post-name>/<test-name>
+  const testName = setup.name.toLowerCase().replace(/\W/g, '-').replace(/_+/g, '-');
+  const targetPath = path.resolve(cmdOptions.cncPath, 'results', setup.posts[postNumber], testName);
+
+  // make sure the directory exists
+  fs.mkdirSync(targetPath, { recursive: true });
+
+  // transfer the CNC file into this path
+  fs.copyFileSync(`${path.resolve(cmdOptions.cncPath, setup.cnc)}.cnc`, `${path.resolve(targetPath, setup.cnc)}.cnc`);
+
+  return targetPath;
+}
+
+/**
+ * Clears all contents from the target test folder, with recursion.  Executed prior to a test run
+ * start to have a fresh results space.
+ *
+ * @param cmdOptions Options from the command line (tests, paths)
+ */
+function clearResultsFolder(cmdOptions) {
+  const targetPath = path.resolve(cmdOptions.cncPath, 'results');
+  fs.rmSync(targetPath, { force: true, recursive: true });
+}
+
+/**
+ * Executes a single Autodesk post operation.  
  *
  * @param cmdOptions Options from the command line (tests, paths)
  * @param cmdArguments Command line arguments for the post processor (see buildPostCommand)
- * @returns `true` if successful, `false` if it fails to work. May terminate process on fatal errors.
+ * @returns `true` if successful, `false` if it fails to work. May terminate process on fatal
+ * errors.
  */
 function runPostTest(cmdOptions, cmdArguments) {
   // spawn the post-processor
@@ -281,9 +319,13 @@ function runTest(testSuite, testSetups, cmdOptions) {
   // if valid test, loop through all posts on the test and run each one
   if (valid) {
     for (let postIndex = 0; postIndex < setup.posts.length; ++postIndex) {
+      // prepare the test results folder
+      const cncPath = prepResultsFolder(setup, postIndex, cmdOptions);
+
+      // execute the test
       const passed = runPostTest(
         cmdOptions,
-        buildPostCommand(setup, postIndex, cmdOptions)
+        buildPostCommand(setup, postIndex, cmdOptions, cncPath)
       );
       if (passed) result.pass++;
       else result.fail++;
@@ -338,6 +380,9 @@ const filePaths = setupFilePaths();
 
 // load the test json file that defines the test cases
 const testSuites = loadJson(filePaths.testJsonPath);
+
+// clear out the prior test results folder
+clearResultsFolder(cmdOptions);
 
 // run the tests
 const summary = runTests(testSuites, cmdOptions);

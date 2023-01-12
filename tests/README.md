@@ -19,7 +19,19 @@ node tests/test.mjs -p="C:\Users\myname\AppData\Local\Autodesk\webdeploy\product
 All options:
 * `-p=<path to post executable>`: Path to the post executable.
 * `-c=<path to CNC intermediate files>`: Directory that contains the "cnc" files used for testing.  Defaults to `tests/cnc`.
-* `-s=<path to CPS source files>`: Directory that contains the post processor(s) to execute.  Defaults to `release/dist`.
+* `-s=<path to CPS source files>`: Directory that contains the post processor(s) to execute.
+  Defaults to `release/dist`.
+
+## Test artifacts
+
+A unique directory is created for each test execution, in a new `results` folder under the working
+CNC folder.  The default, for example, would be `tests/cnc/results`.  It is organized first by the
+name of the post (such as `tests/cnc/results/laserpost-lightburn`) followed by the name of the test
+(converted to lowercase, with dashes as separators).  For example, for the test called 'Test
+workspace offsets' for the 'laserpost-lightburn' CPS post, the directory would become
+`tests/cnc/results/laserpost-lightburn/test-workspace-offsets`.
+
+The artifacts folder is removed, including all contents, at the start of each test run.
 
 ## CNC intermediate files
 
