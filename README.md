@@ -18,27 +18,11 @@ Use the [GitHub issue tracker](https://github.com/nuCarve/laserpost/issues) to s
 
 ## Building
 
-To build LaserPost, you will need [`nodejs`](https://nodejs.org/en/) installed (must be >= node 18.11.0).  No external packages are used, so NPM is not required.
-
-Release configuration is defined in the `release.json` file, including global macros, the list of source files with conditional macros, and the list of target release to create (including macros and filename).  Running the release process will build all targets, placing the resulting file(s) into the `dist` folder.
-
-For example:
-
-```sh
-node release/release.mjs
-```
-
-This will pull all the various `js` files together into a single file per target, such as `release/dist/laserpost-lbrn.cps` and `release/dist/laserpost-svg.cps`.
-
-Since Fusion 360 needs the post located in a system specific directory in order for Fusion to detect the source change, you can also specify a path to the directory to store a duplicate of the generated file using the `-d <path>` option, such as on Windows a path might be similar to:
-
-```sh
-node release/release.mjs -d="C:\Users\myname\AppData\Local\Autodesk\Autodesk Fusion 360\32TABC6DD2N8Q\W.login\M\D23203423432806\CAMPosts"
-```
+If you wish to modify the source, or do your own local build, you must run a release process.  See the [README.md](release/README.md) file located in the `release` folder for information.
 
 ## Testing
 
-Automated system testing using the Autodesk CAM post processor is available.  See the [README.md](tests/README.md) file located in the `tests` folder.
+Automated system testing using the Autodesk CAM post processor is available.  See the [README.md](tests/README.md) file located in the `tests` folder for information.
 
 ## License
 

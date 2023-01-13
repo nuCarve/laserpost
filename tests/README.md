@@ -6,7 +6,17 @@
 Automated testing will execute the Autodesk `post` executable against a collection of
 premade intermediate `cnc` files, using the various LaserPost CPS post-processors with various
 property configuration values.  The various generated files are filtered (based on test specific
-rules) and then are compared against baseline snapshots.  Differences result in a test failure.  
+rules) and then are compared against baseline snapshots.  Differences result in a test failure. 
+
+Prior to use, you must execute `npm i` in the `tests` directory to pull in all NPM dependencies.
+
+```sh
+cd tests
+npm i
+cd ..
+```
+
+Then to execute the tests, from the root of the project, use:
 
 ```sh
 node tests/test.mjs

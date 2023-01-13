@@ -284,7 +284,7 @@ async function release(
  */
 async function parseArgs() {
   // decode the command line options
-  let duplicatePath = undefined;
+  let duplicatePath = process.env.AUTODESK_CAMPOSTS ?? undefined;
   const macros = [];
 
   for (let cmdIndex = 2; cmdIndex < process.argv.length; ++cmdIndex) {

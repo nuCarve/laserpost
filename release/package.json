@@ -1,0 +1,25 @@
+{
+  "name": "laserpost-release",
+  "version": "1.0.0",
+  "description": "Release manager for LaserPost post-processors",
+  "main": "release.js",
+  "type": "module",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/nucarve/laserpost.git"
+  },
+  "keywords": [
+    "laserpost"
+  ],
+  "author": "nuCarve",
+  "license": "MIT",
+  "bugs": {
+    "url": "https://github.com/nucarve/laserpost/issues"
+  },
+  "homepage": "https://github.com/nucarve/laserpost#readme",
+  "dependencies": {
+  }
+}
