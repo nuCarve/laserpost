@@ -21,7 +21,13 @@ Release configuration is defined in the `release.json` file, including global ma
 For example:
 
 ```sh
-node release/release.js
+npm start
+```
+
+or if you prefer, since "start" is perhaps confusing:
+
+```sh
+npm run build
 ```
 
 This will pull all the various `js` files together into a single file per target, such as `release/dist/laserpost-lbrn.cps` and `release/dist/laserpost-svg.cps`.
@@ -29,7 +35,7 @@ This will pull all the various `js` files together into a single file per target
 Since Fusion 360 needs the post located in a system specific directory in order for Fusion to detect the source change, you can also specify a path to the directory to store a duplicate of the generated file using the `-d <path>` option, such as on Windows a path might be similar to:
 
 ```sh
-node release/release.mjs -d="C:\Users\myname\AppData\Local\Autodesk\Autodesk Fusion 360\32TABC6DD2N8Q\W.login\M\D23203423432806\CAMPosts"
+npm start -- -d="C:\Users\myname\AppData\Local\Autodesk\Autodesk Fusion 360\32TABC6DD2N8Q\W.login\M\D23203423432806\CAMPosts"
 ```
 
 You can also set the environment variable `AUTODESK_CAMPOSTS` to the desired duplicate path, and that will be used as the default (and can be overridden with `-d`).

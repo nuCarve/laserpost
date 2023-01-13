@@ -1,0 +1,28 @@
+{
+  "name": "laserpost-tests",
+  "version": "1.0.0",
+  "description": "LaserPost post-processors",
+  "type": "module",
+  "scripts": {
+    "test": "node tests/test.js",
+    "postinstall": "cd tests && npm install && cd ../release && npm install",
+    "start": "node release/release.js",
+    "build": "node release/release.js",
+    "release": "node release/release.js"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/nucarve/laserpost.git"
+  },
+  "keywords": [
+    "laserpost"
+  ],
+  "author": "nuCarve",
+  "license": "MIT",
+  "bugs": {
+    "url": "https://github.com/nucarve/laserpost/issues"
+  },
+  "homepage": "https://github.com/nucarve/laserpost#readme",
+  "dependencies": {
+  }
+}

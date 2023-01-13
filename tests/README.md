@@ -19,7 +19,7 @@ cd ..
 Then to execute the tests, from the root of the project, use:
 
 ```sh
-node tests/test.mjs
+npm test
 ```
 
 This will attempt to run the Autodesk post-processor (`post.exe` or `post`, depending on your
@@ -28,7 +28,7 @@ set the environment variable `AUTODESK_POST` to the location of the post, add it
 specify a specific path using the `-pp` option:
 
 ```sh
-node tests/test.mjs -pp="C:\Users\myname\AppData\Local\Autodesk\webdeploy\production\212ef2a73b4faa7986fe0d205fb521fc68f5f11b\Applications\CAM360\post"
+npm test -- -pp="C:\Users\myname\AppData\Local\Autodesk\webdeploy\production\212ef2a73b4faa7986fe0d205fb521fc68f5f11b\Applications\CAM360\post"
 ```
 
 Use the option `-?` to see help for the currently available set of options.
