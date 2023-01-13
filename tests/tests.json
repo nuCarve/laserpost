@@ -40,12 +40,16 @@
           "file": "*.txt",
           "validator": "text",
           "filter": [
-            { "regex": "^Generated at: .*$", "replace": "Generated at: [DATE-REMOVED-TEST-FILTER]" }
+            {
+              "regex": "^Generated at: .*$",
+              "replace": "Generated at: [DATE-REMOVED-TEST-FILTER]"
+            }
           ]
         }
       },
       "properties": {
-        "work0100TraceStock": "0"
+        "-laserpost0500IncludeComments": "INCLUDE_COMMENTS_DEBUG",
+        "laserpost0300AlignmentMarks": "ALIGNMENT_MARK_CENTER_RIGHT"
       }
     }
   },
@@ -64,7 +68,7 @@
     {
       "name": "Work offset - cover",
       "setup": "default",
-      "Xproperties": {
+      "properties": {
         "work0200OffsetX": "100",
         "work0300OffsetY": "200"
       }
