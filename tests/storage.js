@@ -73,7 +73,7 @@ export function prepStorageFolders(setup, postNumber, cmdOptions) {
   const testName = setup.name
     .toLowerCase()
     .replace(/\W/g, '-')
-    .replace(/_+/g, '-');
+    .replace(/[_-]+/g, '-');
 
   // set up the cncPath
   const cncPath = path.resolve(
