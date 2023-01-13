@@ -16,19 +16,24 @@
           "file": "*.lbrn",
           "validator": "xpath",
           "xpath": [
-            {"query": "/LightBurnProject/@MirrorX", "required": true },
+            { "query": "/LightBurnProject/@MirrorX", "required": true },
             "/LightBurnProject/@MirrorY",
             "/LightBurnProject/CutSetting",
-            "/LightBurnProject/Shape"]
+            "/LightBurnProject/Shape"
+          ]
         },
         "svg-default": {
           "post": "laserpost-svg",
           "file": "*.svg",
           "validator": "xpath",
           "xpath": [
-            "/svg[@version='1.1']/(@width, @height, @viewbox)",
-            "/svg/g|/svg/path"
-          ]
+            "/svg:svg[@version='1.1']/@width",
+            "/svg:svg[@version='1.1']/@height",
+            "/svg:svg[@version='1.1']/@viewbox",
+            "/svg:svg/svg:g",
+            { "query": "/svg:svg/svg:path", "required": false }
+          ],
+          "namespaces": { "svg": "http://www.w3.org/2000/svg" }
         },
         "txt-default": {
           "post": "*",

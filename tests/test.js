@@ -38,6 +38,11 @@ import minimatch from 'minimatch';
 import xpath from 'xpath';
 import dom from 'xmldom-qsa';
 
+// define enum constants for cmdOptions.snapshotMode
+const SNAPSHOT_NO_WRITE = 'no-write';
+const SNAPSHOT_CREATE = 'create';
+const SNAPSHOT_RESET = 'reset';
+
 /**
  * Parse command line arguments.  See the "-?" implementation for details.
  *
@@ -50,6 +55,7 @@ function parseArgs() {
   let cncPath = 'tests/cnc';
   let postFilter = [];
   let verbose = false;
+  let snapshotMode = SNAPSHOT_NO_WRITE;
 
   const tests = [];
 
@@ -92,6 +98,15 @@ function parseArgs() {
             );
             console.log(`-v: Verbose mode (default is false)`);
             console.log(
+              `-s=<mode>: Snapshot storage mode ("reset", "create").  Default is never create a new snapshot.`
+            );
+            console.log(
+              `           "reset" will reset all executed test snapshots with latest snapshot."`
+            );
+            console.log(
+              `           "create" will allow creating new snapshots when none already exist."`
+            );
+            console.log(
               `-pp=<path>: Path to Autodesk post executable (default is env variable AUTODESK_POST, else "post")`
             );
             console.log(
@@ -129,6 +144,21 @@ function parseArgs() {
           case '-p':
             postFilter.push(splitEquals[1]);
             break;
+          case '-s':
+            switch (splitEquals[1][0].toLowerCase()) {
+              case 'r':
+                snapshotMode = SNAPSHOT_RESET;
+                break;
+              case 'c':
+                snapshotMode = SNAPSHOT_CREATE;
+                break;
+              default:
+                console.error(
+                  `Unknown snapshot create option "${splitEquals[1]}"; expected "reset" or "create"`
+                );
+                process.exit(-1);
+            }
+            break;
           case '-pp':
             postPath = splitEquals[1];
             break;
@@ -146,7 +176,15 @@ function parseArgs() {
     } else tests.push(process.argv[cmdIndex].toLowerCase());
   }
 
-  return { tests, postPath, cpsPath, cncPath, verbose, postFilter };
+  return {
+    tests,
+    postPath,
+    cpsPath,
+    cncPath,
+    verbose,
+    postFilter,
+    snapshotMode,
+  };
 }
 
 /**
@@ -291,22 +329,24 @@ function buildPostCommand(setup, postNumber, cmdOptions, cncPath) {
 }
 
 /**
- * Prepare the target test folder, and transfer the cnc file into the folder.  Returns the path to
- * the folder that contains the transferred cnc file.  This is so that all artifacts from the test
- * are gathered together.
+ * Prepare the storage folders, and transfer the cnc file into the test cnc folder.  Returns an
+ * object with the path to the cnc folder (cncPath) that contains the transferred cnc file and to
+ * the snapshot folder (snapshotPath).
  *
  * @param setup Setup to use for the command line arguments
  * @param postNumber Index into which post should be generated
  * @param cmdOptions Options from the command line (tests, paths)
- * @returns String with path to the CNC folder.
+ * @returns Object with cncPath and snapshotPath elements
  */
-function prepResultsFolder(setup, postNumber, cmdOptions) {
+function prepStorageFolders(setup, postNumber, cmdOptions) {
   // the target folder is <cncPath>/results/<post-name>/<test-name>
   const testName = setup.name
     .toLowerCase()
     .replace(/\W/g, '-')
     .replace(/_+/g, '-');
-  const targetPath = path.resolve(
+
+  // set up the cncPath
+  const cncPath = path.resolve(
     cmdOptions.cncPath,
     'results',
     setup.posts[postNumber],
@@ -314,15 +354,26 @@ function prepResultsFolder(setup, postNumber, cmdOptions) {
   );
 
   // make sure the directory exists
-  fs.mkdirSync(targetPath, { recursive: true });
+  fs.mkdirSync(cncPath, { recursive: true });
 
   // transfer the CNC file into this path
   fs.copyFileSync(
     `${path.resolve(cmdOptions.cncPath, setup.cnc)}.cnc`,
-    `${path.resolve(targetPath, setup.cnc)}.cnc`
+    `${path.resolve(cncPath, setup.cnc)}.cnc`
   );
 
-  return targetPath;
+  // set up the snapshotPath
+  const snapshotPath = path.resolve(
+    cmdOptions.cncPath,
+    'snapshots',
+    setup.posts[postNumber],
+    testName
+  );
+
+  // make sure the directory exists
+  fs.mkdirSync(snapshotPath, { recursive: true });
+
+  return { cncPath, snapshotPath };
 }
 
 /**
@@ -392,9 +443,16 @@ function runPostProcessor(cmdOptions, cmdArguments) {
  * @param postNumber Index into which post should be generated.
  * @param cmdOptions Options from the command line (tests, paths).
  * @param cncPath Path to the transferred CNC file (in the test results folder).
+ * @param snapshotPath Path to the snapshot folder (for the baseline snapshot to compare against)
  * @returns { pass: number, fail: number }
  */
-function validatePostResults(setup, postNumber, cmdOptions, cncPath) {
+function validatePostResults(
+  setup,
+  postNumber,
+  cmdOptions,
+  cncPath,
+  snapshotPath
+) {
   const result = { pass: 0, fail: 0 };
 
   // determine the post we used for this test
@@ -407,23 +465,21 @@ function validatePostResults(setup, postNumber, cmdOptions, cncPath) {
       // now see if any artifact files match the validator file pattern
       const files = fs.readdirSync(cncPath);
       for (const file of files)
-        if (minimatch(file, validator.file))
+        if (minimatch(file, validator.file)) {
+          let validatorResult = undefined;
+
           // we have a match - a validator and a file to validate
           switch (validator.validator) {
             case 'xpath':
-              const xpathResult = validateXPath(
+              validatorResult = validateXPath(
                 validator,
                 cncPath,
                 file,
                 cmdOptions
               );
-              if (xpathResult.success) result.pass++;
-              else result.fail++;
-              // console.log(`Snapshot:\n${xpathResult.snapshot}`);
               break;
             case 'text':
-              console.error('    TEXT validator not implemented');
-              result.fail++;
+              validatorResult = validateText(validator, cncPath, file, cmdOptions);
               break;
             default:
               console.error(
@@ -432,9 +488,86 @@ function validatePostResults(setup, postNumber, cmdOptions, cncPath) {
               result.fail++;
               break;
           }
+
+          // did we run a test?
+          if (validatorResult) {
+            // record the snapshot
+            fs.writeFileSync(
+              `${path.resolve(cncPath, key)}.snapshot`,
+              validatorResult.snapshot,
+              { encoding: 'utf-8' }
+            );
+
+            // run the snapshot compare / management
+            if (validatorResult.success) {
+              const success = snapshotCompare(key,
+                `${path.resolve(cncPath, key)}.snapshot`,
+                `${path.resolve(snapshotPath, key)}.snapshot`,
+                cmdOptions
+              );
+              if (success) result.pass++;
+              else result.fail++;
+            } else result.fail++;
+          } else result.fail++;
+        }
     }
   }
   return result;
+}
+
+/**
+ * Compare (and manage) snapshots, potentially capturing the new snapshot as current state depending
+ * on command line options.
+ *
+ * @param validatorName Name of the validator
+ * @param newSnapshotFile Path to the file that has the new snapshot test results
+ * @param baselineSnapshotFile Path to the baseline snapshot (for the baseline snapshot to compare against)
+ * @param cmdOptions Options from the command line (tests, paths).
+ * @returns Boolean with `true` on success, `false` on failure
+ */
+function snapshotCompare(validatorName, newSnapshotFile, baselineSnapshotFile, cmdOptions) {
+  // do we need to look at the baseline snapshot?
+  if (cmdOptions.snapshotMode != SNAPSHOT_RESET) {
+    // does the baseline snapshot file exist?
+    if (fs.existsSync(baselineSnapshotFile)) {
+      // do the compare
+      let newSnapshot = fs.readFileSync(newSnapshotFile, { encoding: 'utf-8' });
+      let baselineSnapshot = fs.readFileSync(baselineSnapshotFile, { encoding: 'utf-8' });
+
+      // reduce all whitespace
+      newSnapshot = newSnapshot.replace(/ +/g, ' ').trim();
+      baselineSnapshot = baselineSnapshot.replace(/ +/g, ' ').trim();
+
+      // compare
+      const snapshotsMatch = newSnapshot == baselineSnapshot;
+      if (snapshotsMatch && cmdOptions.verbose)
+        console.log(`      ${validatorName}: Snapshots match`);
+        
+      // do we have successful match?  If so, return success
+      if (snapshotsMatch) return true;
+
+      // not a match.  Do report failure?
+      if (cmdOptions.snapshotMode == SNAPSHOT_NO_WRITE) {
+        // todo: Look at finding a diff NPM module that can improve the output
+        // todo: Or consider forking out to a utility?
+        console.log(`      FAIL: ${validatorName}: Snapshots do not match`);
+        return false;
+      }
+      
+        console.log(`      ${validatorName}: Snapshot different; saving latest to baseline snapshot.`);
+    } else {
+      if (cmdOptions.snapshotMode == SNAPSHOT_NO_WRITE) {
+        console.log(`      ${validatorName}: Snapshot does not exist, but snapshot mode disallows creation (requires "-s=create")`);
+        return false;
+      }
+      console.log(`      ${validatorName}: Baseline snapshot does not exist; saving snapshot.`);
+    }
+  } else
+    console.log(`      ${validatorName}: Resetting snapshot to latest.`);
+
+  // overwrite the baseline snapshot with latest
+  fs.copyFileSync(newSnapshotFile, baselineSnapshotFile);
+  return true;
 }
 
 // set up global used by valiateXMLPathHandleError to track if an error has occured with the DOM
@@ -453,6 +586,25 @@ function validateXMLPathHandleError(type, message) {
 
   console.log(`      ${type}: ${message.replace(/\n/g, '\n      ')}`);
   validateXMLPathError = true;
+}
+/**
+ * Execute the XPath based validator.  The validator setup must include the `xpath` property, which
+ * can be set to a single xpath query, or an array of xpath queries.  The query can be a single string
+ * (in which case there must be a match or it will fail), or an object that can include { query:
+ * string, required: boolean } to to specify if the field is optional.
+ *
+ * @param validator - Validator object from the setup
+ * @param cncPath - Path to the cnc folder
+ * @param file - Filename being validated
+ * @param cmdOptions Options from the command line (tests, paths).
+ * @returns Object with { snapshot: string, success: boolean }
+ */
+function validateText(validator, cncPath, file, cmdOptions) {
+  // read the text file without changes as our snapshot
+  const snapshot = fs.readFileSync(path.resolve(cncPath, file), {
+    encoding: 'utf-8',
+  });
+  return { snapshot, success: true };
 }
 
 /**
@@ -520,7 +672,11 @@ function validateXPath(validator, cncPath, file, cmdOptions) {
       }):\n`;
 
       try {
-        const nodes = xpath.select(queryObject.query, xmlDoc);
+        // register any required namespaces
+        const select = xpath.useNamespaces(validator.namespaces);
+
+        // and execute the query
+        const nodes = select(queryObject.query, xmlDoc);
         if (nodes.length == 0 && queryObject.required) {
           console.log(
             `    Processing query "${queryObject.query}" (required):`
@@ -611,12 +767,12 @@ function runTest(testSuite, testSetups, cmdOptions) {
       console.log(`  Post: ${setup.posts[postIndex]}`);
 
       // prepare the test results folder
-      const cncPath = prepResultsFolder(setup, postIndex, cmdOptions);
+      const folders = prepStorageFolders(setup, postIndex, cmdOptions);
 
       // execute the test
       const passed = runPostProcessor(
         cmdOptions,
-        buildPostCommand(setup, postIndex, cmdOptions, cncPath)
+        buildPostCommand(setup, postIndex, cmdOptions, folders.cncPath)
       );
 
       // did we successfully run the post?
@@ -626,7 +782,8 @@ function runTest(testSuite, testSetups, cmdOptions) {
           setup,
           postIndex,
           cmdOptions,
-          cncPath
+          folders.cncPath,
+          folders.snapshotPath
         );
 
         if (validateResult.fail > 0) result.fail++;
