@@ -28,6 +28,7 @@
 
 import path from 'node:path';
 import cp from 'node:child_process';
+import chalk from 'chalk';
 
 /**
  * Build the command line arguments for the Autodesk post procesor
@@ -86,11 +87,11 @@ export function runPostProcessor(cmdOptions, cmdArguments) {
   // was the execution successful?
   if (result.status == 0) {
     if (cmdOptions.verbose) {
-      console.log(`Stdout: ${result.stdout}`);
-      console.log(`Stderr: ${result.stderr}`);
+      console.log(chalk.gray(`Stdout: ${result.stdout}`));
+      console.log(chalk.gray(`Stderr: ${result.stderr}`));
 
-      console.log(`\nCommand line executed:`);
-      console.log(`${cmdOptions.postPath} ${cmdArguments.join(' ')}`);
+      console.log(chalk.gray(`\nCommand line executed:`));
+      console.log(chalk.blue(`${cmdOptions.postPath} ${cmdArguments.join(' ')}`));
       console.log();
     }
     return true;
@@ -98,13 +99,13 @@ export function runPostProcessor(cmdOptions, cmdArguments) {
 
   // it failed - determine reason to decide if fatal or warning
   if (result.status == 1) {
-    console.log(`Post-processor did not execute:\n${result.stderr}`);
+    console.error(chalk.red(`Post-processor did not execute:\n${result.stderr}`));
   } else {
-    console.log(`Post ran, but had error ${result.status}: ${result.stderr}`);
+    console.error(chalk.red(`Post ran, but had error ${result.status}: ${result.stderr}`));
   }
   if (cmdOptions.verbose) {
-    console.log(`\nCommand line executed:`);
-    console.log(`${cmdOptions.postPath} ${cmdArguments.join(' ')}`);
+    console.log(chalk.gray(`\nCommand line executed:`));
+    console.log(chalk.blue(`${cmdOptions.postPath} ${cmdArguments.join(' ')}`));
     console.log();
   }
 

@@ -26,6 +26,7 @@
  *
  */
 
+import chalk from 'chalk';
 import { parseArgs } from "./cmdLine.js";
 import { loadJson, setupFilePaths, clearResultsFolder } from "./storage.js";
 import { runTests } from "./testValidate.js";
@@ -48,12 +49,14 @@ function main() {
 
   // run the tests & summarize results
   const summary = runTests(testSuites, cmdOptions);
-  console.log(
-    `Test run complete: ${summary.pass} of ${
+  const message = `Test run complete: ${summary.pass} of ${
       summary.pass + summary.fail
-    } tests passed`
-  );
-  if (summary.fail > 0) console.error(`WARNING: ${summary.fail} tests failed`);
+    } tests passed`;
+
+    if (summary.fail > 0) {
+      console.log(chalk.yellow(message));
+      console.error(chalk.red(`WARNING: ${summary.fail} tests failed`));
+    } else console.log(chalk.green(message));
 
   // pass back status to shell (-1: failure, 0: all tests passed, >0: number of failed tests)
   process.exit(summary.fail);

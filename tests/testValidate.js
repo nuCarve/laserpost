@@ -36,6 +36,7 @@ import { validateText } from "./validatorText.js";
 import { buildPostCommand, runPostProcessor } from "./runPost.js";
 import { prepStorageFolders } from "./storage.js";
 import { aggregateSetup, mergeSetups } from "./setup.js";
+import chalk from 'chalk';
 
 /**
  * Validates the results of a prior post execution.  Identifies the validators to use based on the
@@ -89,9 +90,9 @@ export function validatePostResults(
               );
               break;
             default:
-              console.error(
+              console.error(chalk.red(
                 `    Unknown validator "${validator.validator}" on "${key}" for "${file}".`
-              );
+              ));
               result.fail++;
               break;
           }
@@ -157,27 +158,27 @@ export function snapshotCompare(
       // do we have successful match?  If so, return success
       if (!changes) {
         if (cmdOptions.verbose)
-          console.log(`      ${validatorName}: Snapshots match`);
+          console.log(chalk.green(`      ${validatorName}: Snapshots match`));
 
         return true;
       }
 
       // not a match.  
-      console.log(`      FAIL: ${validatorName}: Snapshots do not match`);
+      console.log(chalk.red(`      FAIL ${validatorName}: Snapshots do not match`));
       console.log(`      ${changes.replace(/\n/g, '\n      ')}`);
       return false;
     } else {
       if (cmdOptions.snapshotMode == SNAPSHOT_NO_WRITE) {
-        console.log(
-          `      ${validatorName}: Snapshot does not exist, but snapshot mode disallows creation (requires "-s=create")`
-        );
+        console.log(chalk.red(
+          `      FAIL ${validatorName}: Snapshot does not exist, but snapshot mode disallows creation (requires "-s=create")`
+        ));
         return false;
       }
-      console.log(
+      console.log(chalk.yellow(
         `      ${validatorName}: Baseline snapshot does not exist; saving snapshot.`
-      );
+      ));
     }
-  } else console.log(`      ${validatorName}: Resetting snapshot to latest.`);
+  } else console.log(chalk.yellow(`      ${validatorName}: Resetting snapshot to latest.`));
 
   // overwrite the baseline snapshot with latest
   fs.copyFileSync(newSnapshotFile, baselineSnapshotFile);
@@ -199,11 +200,11 @@ export function runTest(testSuite, testSetups, cmdOptions) {
   // validate the setup
   let valid = true;
   if (!setup.cnc) {
-    console.warn(`  Invalid setup: No CNC defined.`);
+    console.warn(chalk.red(`  Invalid setup: No CNC defined.`));
     valid = false;
   }
   if (setup.posts.length == 0) {
-    console.warn(`  Invalid setup: No "posts" defined.`);
+    console.warn(chalk.red(`  Invalid setup: No "posts" defined.`));
     valid = false;
   }
 
@@ -227,10 +228,10 @@ export function runTest(testSuite, testSetups, cmdOptions) {
 
       // show test header if not already done
       if (!headerShown) {
-        console.log(`Test: "${testSuite.name}" (setup "${testSuite.setup}"):`);
+        console.log(chalk.blue(`Test: "${testSuite.name}" (setup "${testSuite.setup}"):`));
         headerShown = true;
       }
-      console.log(`  Post: ${setup.posts[postIndex]}`);
+      console.log(chalk.gray(`  Post: ${setup.posts[postIndex]}`));
 
       // prepare the test results folder
       const folders = prepStorageFolders(setup, postIndex, cmdOptions);
@@ -256,7 +257,7 @@ export function runTest(testSuite, testSetups, cmdOptions) {
         else result.pass++;
       } else result.fail++;
     }
-  } else console.warn('  TEST SKIPPED');
+  } else console.warn(chalk.yellow('  TEST SKIPPED'));
 
   return result;
 }

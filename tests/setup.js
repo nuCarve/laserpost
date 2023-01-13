@@ -26,6 +26,8 @@
  *
  */
 
+import chalk from 'chalk';
+
 
 /**
  * Merges setup information from the tests.json file (setup and test section) such that the top-most
@@ -100,7 +102,7 @@ export function aggregateSetup(setupName, testSetups) {
     }
     return setup;
   }
-  console.error(`Fatal: Unable to locate setup ${setupName}`);
+  console.error(chalk.red(`Fatal: Unable to locate setup ${setupName}`));
   process.exit(-1);
 }
 

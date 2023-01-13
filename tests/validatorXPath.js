@@ -30,6 +30,7 @@ import xpath from 'xpath';
 import dom from 'xmldom-qsa';
 import fs from 'node:fs';
 import path from 'node:path';
+import chalk from 'chalk';
 
 // set up global used by valiateXMLPathHandleError to track if an error has occured with the DOM
 let validateXMLPathError = false;
@@ -43,9 +44,9 @@ let validateXMLPathError = false;
  * @param message - String (multi-line supported) with the error message
  */
 export function validateXMLPathHandleError(type, message) {
-  if (!validateXMLPathError) console.log('    FAIL: XML file failed to parse:');
+  if (!validateXMLPathError) console.error(chalk.red('    FAIL: XML file failed to parse:'));
 
-  console.log(`      ${type}: ${message.replace(/\n/g, '\n      ')}`);
+  console.error(chalk.red(`      ${type}: ${message.replace(/\n/g, '\n      ')}`));
   validateXMLPathError = true;
 }
 /**
@@ -104,11 +105,11 @@ export function validateXPath(validator, cncPath, file, cmdOptions) {
           : { query: xpathQuery.query, required: xpathQuery.required ?? true };
 
       if (cmdOptions.verbose) {
-        console.log(
+        console.log(chalk.gray(
           `    Processing query "${queryObject.query}" (${
             queryObject.required ? 'required' : 'not required'
           }):`
-        );
+        ));
       }
       snapshot += `XPath query "${queryObject.query}" (${
         queryObject.required ? 'required' : 'not required'
@@ -121,19 +122,19 @@ export function validateXPath(validator, cncPath, file, cmdOptions) {
         // and execute the query
         const nodes = select(queryObject.query, xmlDoc);
         if (nodes.length == 0 && queryObject.required) {
-          console.log(
+          console.log(chalk.gray(
             `    Processing query "${queryObject.query}" (required):`
-          );
-          console.error(
+          ));
+          console.error(chalk.red(
             `      FAIL: Required query did not match any elements`
-          );
+          ));
           success = false;
           snapshot += `  FAIL: Required query did not match any elements.\n`;
           continue;
         }
 
         if (cmdOptions.verbose)
-          console.log(`      ${nodes.length} elements found`);
+          console.log(chalk.gray(`      ${nodes.length} elements max XPath query`));
 
         // add the results to the snapshot
         for (const node of nodes) {
@@ -142,17 +143,17 @@ export function validateXPath(validator, cncPath, file, cmdOptions) {
           if (snapshot.slice(-1) != '\n') snapshot += '\n';
         }
       } catch (ex) {
-        console.log(
+        console.error(chalk.red(
           `    FAIL: Failed to parse XPath query "${queryObject.query}"`
-        );
+        ));
         success = false;
         snapshot += `  FAIL: Failed to parse XPath query`;
       }
     }
   } else {
-    console.error(
+    console.error(chalk.red(
       `    FAIL: XPath validator setup missing required "xpath" property`
-    );
+    ));
     return {
       snapshot: `FAIL: XPath validator setup missing required "xpath" property`,
       success: false,

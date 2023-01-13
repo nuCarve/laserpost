@@ -26,6 +26,7 @@
  *
  */
 
+import chalk from 'chalk';
 import fs from 'node:fs';
 import path from 'node:path';
 
@@ -61,12 +62,12 @@ export function validateText(validator, cncPath, file, cmdOptions) {
             filter.replace
           );
         } catch (e) {
-          console.error(
+          console.error(chalk.red(
             `      FAIL: Regular expression ${filter} invalid.`
-          );        
-          console.error(
+          ));        
+          console.error(chalk.red(
             `      ${e}`
-          );
+          ));
           return false;
         }
       }
