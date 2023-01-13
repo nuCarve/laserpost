@@ -181,10 +181,10 @@ export function snapshotCompare(
 
       // not a match.
       console.log(
-        chalk.red(`      FAIL ${validatorName}: Snapshots do not match`)
+        chalk.red(`      FAIL ${validatorName}: Snapshots do not match (${path.basename(newSnapshotFile)})`)
       );
       console.log(`      ${changes.replace(/\n/g, '\n      ')}`);
-      return 'Snapshots do not match.';
+      return `Snapshots do not match (${path.basename(newSnapshotFile)}).`;
     } else {
       if (cmdOptions.snapshotMode == SNAPSHOT_NO_WRITE) {
         console.log(
