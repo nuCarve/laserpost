@@ -37,6 +37,7 @@ import cp from 'node:child_process';
 import minimatch from 'minimatch';
 import xpath from 'xpath';
 import dom from 'xmldom-qsa';
+import prettyDiff from './prettyDiff.js';
 
 // define enum constants for cmdOptions.snapshotMode
 const SNAPSHOT_NO_WRITE = 'no-write';
@@ -479,7 +480,12 @@ function validatePostResults(
               );
               break;
             case 'text':
-              validatorResult = validateText(validator, cncPath, file, cmdOptions);
+              validatorResult = validateText(
+                validator,
+                cncPath,
+                file,
+                cmdOptions
+              );
               break;
             default:
               console.error(
@@ -500,7 +506,8 @@ function validatePostResults(
 
             // run the snapshot compare / management
             if (validatorResult.success) {
-              const success = snapshotCompare(key,
+              const success = snapshotCompare(
+                key,
                 `${path.resolve(cncPath, key)}.snapshot`,
                 `${path.resolve(snapshotPath, key)}.snapshot`,
                 cmdOptions
@@ -525,45 +532,57 @@ function validatePostResults(
  * @param cmdOptions Options from the command line (tests, paths).
  * @returns Boolean with `true` on success, `false` on failure
  */
-function snapshotCompare(validatorName, newSnapshotFile, baselineSnapshotFile, cmdOptions) {
+function snapshotCompare(
+  validatorName,
+  newSnapshotFile,
+  baselineSnapshotFile,
+  cmdOptions
+) {
   // do we need to look at the baseline snapshot?
   if (cmdOptions.snapshotMode != SNAPSHOT_RESET) {
     // does the baseline snapshot file exist?
     if (fs.existsSync(baselineSnapshotFile)) {
-      // do the compare
-      let newSnapshot = fs.readFileSync(newSnapshotFile, { encoding: 'utf-8' });
-      let baselineSnapshot = fs.readFileSync(baselineSnapshotFile, { encoding: 'utf-8' });
+      // load both snapshots
+      const newSnapshot = fs.readFileSync(newSnapshotFile, {
+        encoding: 'utf-8',
+      });
+      const baselineSnapshot = fs.readFileSync(baselineSnapshotFile, {
+        encoding: 'utf-8',
+      });
 
-      // reduce all whitespace
-      newSnapshot = newSnapshot.replace(/ +/g, ' ').trim();
-      baselineSnapshot = baselineSnapshot.replace(/ +/g, ' ').trim();
+      // do a diff, which returns console-ready pretty formatting (or undefined if no diffs)
+      const changes = prettyDiff(baselineSnapshot, newSnapshot);
 
-      // compare
-      const snapshotsMatch = newSnapshot == baselineSnapshot;
-      if (snapshotsMatch && cmdOptions.verbose)
-        console.log(`      ${validatorName}: Snapshots match`);
-        
       // do we have successful match?  If so, return success
-      if (snapshotsMatch) return true;
+      if (!changes) {
+        if (cmdOptions.verbose)
+          console.log(`      ${validatorName}: Snapshots match`);
+
+        return true;
+      }
 
       // not a match.  Do report failure?
       if (cmdOptions.snapshotMode == SNAPSHOT_NO_WRITE) {
-        // todo: Look at finding a diff NPM module that can improve the output
-        // todo: Or consider forking out to a utility?
         console.log(`      FAIL: ${validatorName}: Snapshots do not match`);
+        console.log(`      ${changes.replace(/\n/g, '\n      ')}`);
         return false;
       }
-      
-        console.log(`      ${validatorName}: Snapshot different; saving latest to baseline snapshot.`);
+
+      console.log(
+        `      ${validatorName}: Snapshot different; saving latest to baseline snapshot.`
+      );
     } else {
       if (cmdOptions.snapshotMode == SNAPSHOT_NO_WRITE) {
-        console.log(`      ${validatorName}: Snapshot does not exist, but snapshot mode disallows creation (requires "-s=create")`);
+        console.log(
+          `      ${validatorName}: Snapshot does not exist, but snapshot mode disallows creation (requires "-s=create")`
+        );
         return false;
       }
-      console.log(`      ${validatorName}: Baseline snapshot does not exist; saving snapshot.`);
+      console.log(
+        `      ${validatorName}: Baseline snapshot does not exist; saving snapshot.`
+      );
     }
-  } else
-    console.log(`      ${validatorName}: Resetting snapshot to latest.`);
+  } else console.log(`      ${validatorName}: Resetting snapshot to latest.`);
 
   // overwrite the baseline snapshot with latest
   fs.copyFileSync(newSnapshotFile, baselineSnapshotFile);
