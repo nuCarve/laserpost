@@ -26,38 +26,8 @@
  *
  */
 
-import { parseArgs } from "./cmdLine.js";
-import { loadJson, setupFilePaths, clearResultsFolder } from "./storage.js";
-import { runTests } from "./testValidate.js";
+// define enum constants for cmdOptions.snapshotMode
+export const SNAPSHOT_NO_WRITE = 'no-write';
+export const SNAPSHOT_CREATE = 'create';
+export const SNAPSHOT_RESET = 'reset';
 
-/**
- * Automated test manager for LaserPost.  Execute with '-?' option to see command line help.
- */
-function main() {
-  // decode command line
-  const cmdOptions = parseArgs();
-
-  // build up file paths to access source and dist
-  const filePaths = setupFilePaths();
-
-  // load the test json file that defines the test cases
-  const testSuites = loadJson(filePaths.testsJsonPath);
-
-  // clear out the prior test results folder
-  clearResultsFolder(cmdOptions);
-
-  // run the tests & summarize results
-  const summary = runTests(testSuites, cmdOptions);
-  console.log(
-    `Test run complete: ${summary.pass} of ${
-      summary.pass + summary.fail
-    } tests passed`
-  );
-  if (summary.fail > 0) console.error(`WARNING: ${summary.fail} tests failed`);
-
-  // pass back status to shell (-1: failure, 0: all tests passed, >0: number of failed tests)
-  process.exit(summary.fail);
-}
-
-// launch main
-main();
