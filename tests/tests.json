@@ -38,7 +38,10 @@
         "txt-default": {
           "post": "*",
           "file": "*.txt",
-          "validator": "text"
+          "validator": "text",
+          "filter": [
+            { "regex": "^Generated at: .*$", "replace": "Generated at: [DATE-REMOVED-TEST-FILTER]" }
+          ]
         }
       },
       "properties": {

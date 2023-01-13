@@ -561,16 +561,10 @@ function snapshotCompare(
         return true;
       }
 
-      // not a match.  Do report failure?
-      if (cmdOptions.snapshotMode == SNAPSHOT_NO_WRITE) {
-        console.log(`      FAIL: ${validatorName}: Snapshots do not match`);
-        console.log(`      ${changes.replace(/\n/g, '\n      ')}`);
-        return false;
-      }
-
-      console.log(
-        `      ${validatorName}: Snapshot different; saving latest to baseline snapshot.`
-      );
+      // not a match.  
+      console.log(`      FAIL: ${validatorName}: Snapshots do not match`);
+      console.log(`      ${changes.replace(/\n/g, '\n      ')}`);
+      return false;
     } else {
       if (cmdOptions.snapshotMode == SNAPSHOT_NO_WRITE) {
         console.log(
@@ -607,10 +601,9 @@ function validateXMLPathHandleError(type, message) {
   validateXMLPathError = true;
 }
 /**
- * Execute the XPath based validator.  The validator setup must include the `xpath` property, which
- * can be set to a single xpath query, or an array of xpath queries.  The query can be a single string
- * (in which case there must be a match or it will fail), or an object that can include { query:
- * string, required: boolean } to to specify if the field is optional.
+ * Execute the text based validator.  The validator setup may include a "filter" property
+ * which is an array of `[{ regex: string, replace: string }, ...]` which will execute the regex
+ * (globally) and replace all matches with the `replace` string.
  *
  * @param validator - Validator object from the setup
  * @param cncPath - Path to the cnc folder
@@ -620,17 +613,45 @@ function validateXMLPathHandleError(type, message) {
  */
 function validateText(validator, cncPath, file, cmdOptions) {
   // read the text file without changes as our snapshot
-  const snapshot = fs.readFileSync(path.resolve(cncPath, file), {
+  let snapshot = fs.readFileSync(path.resolve(cncPath, file), {
     encoding: 'utf-8',
   });
+
+  // process filters if specified
+  if (validator.filter) {
+    // support a single object, or an array of objects
+    let filterArray = Array.isArray(validator.filter)
+      ? validator.filter
+      : [validator.filter];
+
+    // execute all filters
+    for (const filter of filterArray) {
+      try {
+        snapshot = snapshot.replace(
+          new RegExp(filter.regex, 'gm'),
+          filter.replace
+        );
+      } catch (e) {
+        console.error(
+          `      FAIL: Regular expression ${filter} invalid.`
+        );        
+        console.error(
+          `      ${e}`
+        );
+        return false;
+      }
+    }
+  }
   return { snapshot, success: true };
 }
 
 /**
  * Execute the XPath based validator.  The validator setup must include the `xpath` property, which
- * can be set to a single xpath query, or an array of xpath queries.  The query can be a single string
- * (in which case there must be a match or it will fail), or an object that can include { query:
- * string, required: boolean } to to specify if the field is optional.
+ * can be set to a single xpath query, or an array of xpath queries.  The query can be a single
+ * string (in which case there must be a match or it will fail), or an object that can include {
+ * query: string, required: boolean } to to specify if the field is optional.  The validator setup
+ * may also include an array of `namespaces` to define XML namespaces (`"namespaces": { "svg":
+ * "http://www.w3.org/2000/svg" }`).
  *
  * @param validator - Validator object from the setup
  * @param cncPath - Path to the cnc folder
