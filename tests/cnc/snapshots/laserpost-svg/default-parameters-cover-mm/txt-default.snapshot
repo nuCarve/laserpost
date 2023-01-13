@@ -7,11 +7,11 @@ Generated at: [DATE-REMOVED-TEST-FILTER]
 Program
   Name: UNNAMED
 Machine
-  Vendor: nuCarve
-  Model: LaserPost for LightBurn
+  Vendor: Autodesk
+  Model: CNC intermediate
 
 Layers:
   Layer 0 (Black): Logo, Brightness
-    Mode "fill" at power 20-30% (scale 100%) and 1.575 mm/sec using laser 1 (air on, Z offset 0, passes 1, z-step 0)
+    Mode "fill" at power 20-30% (scale 100%) and 40 mm/sec using laser 1 (air on, Z offset 0, passes 1, z-step 0)
   Layer 1 (Green): Holes, Outline
-    Mode "cut" at power 80-80% (scale 100%) and 1.181 mm/sec using laser 1 (air on, Z offset 0, passes 1, z-step 0)
+    Mode "cut" at power 80-80% (scale 100%) and 30 mm/sec using laser 1 (air on, Z offset 0, passes 1, z-step 0)

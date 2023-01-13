@@ -57,13 +57,13 @@ export function validateXMLPathHandleError(type, message) {
  * may also include an array of `namespaces` to define XML namespaces (`"namespaces": { "svg":
  * "http://www.w3.org/2000/svg" }`).
  *
+ * @param contents - Contents from the generated file
  * @param validator - Validator object from the setup
- * @param cncPath - Path to the cnc folder
  * @param file - Filename being validated
  * @param cmdOptions Options from the command line (tests, paths).
  * @returns Object with { snapshot: string, failure: string }
  */
-export function validateXPath(validator, cncPath, file, cmdOptions) {
+export function validateXPath(contents, validator, file, cmdOptions) {
   let snapshot = '';
   let failure = undefined;
 
@@ -73,11 +73,6 @@ export function validateXPath(validator, cncPath, file, cmdOptions) {
     const xpathArray = Array.isArray(validator.xpath)
       ? validator.xpath
       : [validator.xpath];
-
-    // load up the file into memory as a string
-    const xmlSource = fs.readFileSync(path.resolve(cncPath, file), {
-      encoding: 'utf-8',
-    });
 
     // set up the XML dom and parse the XML.  Note the use of the global variable
     // `validateXMLPathError` that is set to true in the `validateXMLPathHandleError` callbacks
@@ -90,7 +85,7 @@ export function validateXPath(validator, cncPath, file, cmdOptions) {
         error: (m) => validateXMLPathHandleError('Error', m),
         fatalError: (m) => validateXMLPathHandleError('Fatal error', m),
       },
-    }).parseFromString(xmlSource, 'application/xml');
+    }).parseFromString(contents, 'application/xml');
 
     // fail if we had a parsing problem
     if (validateXMLPathError)

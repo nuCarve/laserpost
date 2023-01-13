@@ -51,11 +51,12 @@ function onWriteHeader(layer) {
       xmlns_xlink: 'http://www.w3.org/1999/xlink',
       width: mmFormat(maxX + 1),
       height: mmFormat(maxY + 1),
-      viewbox: format("{minX} {minY} {maxX} {maxY}", {
+      viewbox: format('{minX} {minY} {maxX} {maxY}', {
         minX: 0,
         minY: 0,
         maxX: mmFormat(maxX + 1),
-        maxY: mmFormat(maxY + 1)})
+        maxY: mmFormat(maxY + 1),
+      }),
     },
     true
   );
@@ -75,10 +76,7 @@ function onWriteShapes(layer) {
 
   // create a group if there is more than one item in the layer, we are grouping by layer and
   // we are not redirecting
-  if (
-    projLayer.operationSets.length > 1 &&
-    projLayer.index != -1
-  ) {
+  if (projLayer.operationSets.length > 1 && projLayer.index != -1) {
     writeCommentLine(localize('Layer group: "{name}"'), {
       name: projLayer.name,
     });
@@ -175,10 +173,7 @@ function onWriteShapes(layer) {
   }
 
   // close the layer group if created
-  if (
-    projLayer.operationSets.length > 1 &&
-    projLayer.index != -1
-  ) {
+  if (projLayer.operationSets.length > 1 && projLayer.index != -1) {
     writeXMLClose();
   }
 }
@@ -199,7 +194,10 @@ function onWriteTrailer(layer) {
  */
 function onProjectComplete(redirect) {
   // determine if we include the setup notes file
-  const includeNotes = getProperty('laserpost0400IncludeNotes', INCLUDE_NOTES_DEFAULT);
+  const includeNotes = getProperty(
+    'laserpost0400IncludeNotes',
+    INCLUDE_NOTES_DEFAULT
+  );
   if (includeNotes != INCLUDE_NOTES_NONE && notes != '') {
     // determine if we should tell the user via a warning dialog that the notes are available
     let showNotesWarning = false;
@@ -373,7 +371,7 @@ function writeShapeEllipse(shape) {
   }
 
   const start = { x: shape.centerX, y: shape.centerY };
-  
+
   // construct the ellipse using two have arcs
   activePath.path +=
     (activePath.path == '' ? '' : ' ') +
@@ -424,7 +422,8 @@ function writeShapePath(shape) {
     const endXY = shape.vectors[primitive.end];
 
     if (currentPrimitive != primitive.start)
-      activePath.path += ' M ' + mmFormat(startXY.x) + ',' + mmFormat(startXY.y);
+      activePath.path +=
+        ' M ' + mmFormat(startXY.x) + ',' + mmFormat(startXY.y);
 
     if (primitive.type == PRIMITIVE_TYPE_LINE)
       activePath.path += ' L ' + mmFormat(endXY.x) + ',' + mmFormat(endXY.y);
@@ -543,10 +542,17 @@ function mmFormat(mm) {
 /**
  * Converts a generic string (with spaces, symbols, letters, etc) into an SVG-safe id string.  For
  * example, "Cut 32 holes, outline" becomes "laserpost_cut_32_holes_outline"
- * 
+ *
  * @param idString String to use to make into an id-safe string
  * @returns ID-safe string
  */
 function safeId(idString) {
-  return "laserpost_" + idString.toLowerCase().replace(/\W/g, '_').replace(/_+/g, '_');
+  return (
+    'laserpost_' +
+    idString
+      .toLowerCase()
+      .replace(/\W/g, '_')
+      .replace(/_+/g, '_')
+      .replace(/_?$/, '')
+  );
 }

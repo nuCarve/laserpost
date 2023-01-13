@@ -338,7 +338,7 @@ function dumpToolTable() {
           type: getToolTypeName(tool.type),
           pierce: tool.piercePower,
           cut: tool.cutPower,
-          kerf: tool.getKerfWidth(),
+          kerf: (unit == MM) ? tool.getKerfWidth() : tool.getKerfWidth() * 25.4,
           air: useAir ? localize('air on') : localize('air off'),
         }
       );

@@ -19,6 +19,9 @@ function onOpen() {
   // emit the the required file header (LightBurn crashes if there are too many comments
   // before the thumbnail)
   onFileCreate();
+
+  // include information about the document units
+  debugLog("Document units: {units}", { units: unit == MM ? "mm" : "inch" }, COMMENT_DEBUG);
 }
 
 /**
@@ -384,7 +387,7 @@ function onSection() {
       powerSource: powerSource,
       customCutSettingXML: customCutSettingXML,
       customCutSetting: parsedXML,
-      kerf: tool.getKerfWidth(),
+      kerf: (unit == MM) ? tool.getKerfWidth() : tool.getKerfWidth() * 25.4,
       paths: [],
     });
   } else {
@@ -400,7 +403,7 @@ function onSection() {
       zOffset: zOffset,
       passes: passes,
       zStep: zStep,
-      kerf: tool.getKerfWidth(),
+      kerf: (unit == MM) ? tool.getKerfWidth() : tool.getKerfWidth() * 25.4,
       // #if LBRN
       shuttleLaser1: shuttleLaser1Value,
       shuttleLaser2: shuttleLaser2Value,

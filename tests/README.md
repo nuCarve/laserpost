@@ -31,7 +31,15 @@ specify a specific path using the `-pp` option:
 npm test -- -pp="C:\Users\myname\AppData\Local\Autodesk\webdeploy\production\212ef2a73b4faa7986fe0d205fb521fc68f5f11b\Applications\CAM360\post"
 ```
 
-Use the option `-?` to see help for the currently available set of options.
+Use the option `-?` to see help for the currently available set of options.  Make sure to use the
+`npm` switch option when passing arguments that start with a `-` character by preceeding them with
+`--`.  For example, to run tests using the default post processor (either in your path, or from the
+`AUTODESK_POST` environment variable), but only for tests that contain the name "alignment" and only
+for the LightBurn post-processor:
+
+```sh
+npm test alignment -- -p=burn
+```
 
 ## CNC intermediate files
 

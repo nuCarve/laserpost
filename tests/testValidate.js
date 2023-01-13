@@ -35,12 +35,13 @@ import {
   SNAPSHOT_RESET,
   SNAPSHOT_CREATE,
 } from './globals.js';
+import chalk from 'chalk';
 import { validateXPath } from './validatorXPath.js';
 import { validateText } from './validatorText.js';
+import { validateRegex } from './validatorRegex.js';
 import { buildPostCommand, runPostProcessor } from './runPost.js';
 import { prepStorageFolders } from './storage.js';
 import { aggregateSetup, mergeSetups } from './setup.js';
-import chalk from 'chalk';
 
 /**
  * Validates the results of a prior post execution.  Identifies the validators to use based on the
@@ -75,36 +76,39 @@ export function validatePostResults(
         if (minimatch(file, validator.file)) {
           let validatorResult = undefined;
 
-          // we have a match - a validator and a file to validate
-          switch (validator.validator) {
-            case 'xpath':
-              validatorResult = validateXPath(
-                validator,
-                cncPath,
-                file,
-                cmdOptions
-              );
-              break;
-            case 'text':
-              validatorResult = validateText(
-                validator,
-                cncPath,
-                file,
-                cmdOptions
-              );
-              break;
-            default:
-              console.error(
-                chalk.red(
-                  `    Unknown validator "${validator.validator}" on "${key}" for "${file}".`
-                )
-              );
-              result.lastFailure = `Unknown validator "${validator.validator}" on "${key}" for "${file}".`;
-              result.fail++;
-              break;
+          // read in the file
+          let contents = fs.readFileSync(path.resolve(cncPath, file), {
+            encoding: 'utf-8',
+          });
+
+          // execute the generic regex validator (if requested)
+          if (validator.regex) {
+            validatorResult = runValidator(
+              'regex',
+              contents,
+              validator,
+              file,
+              cmdOptions
+            );
           }
 
-          // did we run a test?
+          // execute their specific requested validator
+          if (validator.validator) {
+            const result = runValidator(
+              validator.validator,
+              validatorResult ? validatorResult.snapshot : contents,
+              validator,
+              file,
+              cmdOptions
+            );
+            if (validatorResult) {
+              validatorResult.snapshot = result.snapshot;
+              validatorResult.failure =
+                result.failure ?? validatorResult.failure;
+            } else validatorResult = result;
+          }
+
+          // did we run any tests?
           if (validatorResult) {
             // record the snapshot
             fs.writeFileSync(
@@ -131,13 +135,52 @@ export function validatePostResults(
               result.fail++;
             }
           } else {
-            result.lastFailure = 'Validator failed to return any results.';
+            result.lastFailure = 'Validators failed to return any results.';
             result.fail++;
           }
         }
     }
   }
   return result;
+}
+
+/**
+ * Delegates to the type specific validator
+ * 
+ * @param validatorType - The name of the validator to execute
+ * @param contents - Contents from the generated file
+ * @param validator - Validator object from the setup
+ * @param file - Filename being validated
+ * @param cmdOptions Options from the command line (tests, paths).
+ * @returns Object with { snapshot: string, failure: string }
+*/
+function runValidator(validatorType, contents, validator, file, cmdOptions) {
+  // delegate to the appropriate validator
+  switch (validatorType) {
+    case 'xpath':
+      return validateXPath(
+        contents,
+        validator,
+        file,
+        cmdOptions
+      );
+    case 'text':
+      return validateText(
+        contents,
+        validator,
+        file,
+        cmdOptions
+      );
+    case 'regex':
+      return validateRegex(contents, validator, file, cmdOptions);
+    default:
+      console.error(
+        chalk.red(
+          `    Unknown validator "${validator.validator}" on "${key}" for "${file}".`
+        )
+      );
+      return { snapshot: contents, failure: `Unknown validator "${validator.validator}" on "${key}" for "${file}".` };
+  }
 }
 
 /**
@@ -181,7 +224,11 @@ export function snapshotCompare(
 
       // not a match.
       console.log(
-        chalk.red(`      FAIL ${validatorName}: Snapshots do not match (${path.basename(newSnapshotFile)})`)
+        chalk.red(
+          `      FAIL ${validatorName}: Snapshots do not match (${path.basename(
+            newSnapshotFile
+          )})`
+        )
       );
       console.log(`      ${changes.replace(/\n/g, '\n      ')}`);
       return `Snapshots do not match (${path.basename(newSnapshotFile)}).`;

@@ -31,48 +31,17 @@ import fs from 'node:fs';
 import path from 'node:path';
 
 /**
- * Execute the text based validator.  The validator setup may include a "filter" property
- * which is an array of `[{ regex: string, replace: string }, ...]` which will execute the regex
- * (globally) and replace all matches with the `replace` string.
+ * Execute the text based validator.  This doesn't do anything other than return the contents as
+ * the regex feature of the validator is executed for all validators.
  *
+ * @param contents - Contents from the generated file
  * @param validator - Validator object from the setup
- * @param cncPath - Path to the cnc folder
  * @param file - Filename being validated
  * @param cmdOptions Options from the command line (tests, paths).
  * @returns Object with { snapshot: string, failure: string }
  */
-export function validateText(validator, cncPath, file, cmdOptions) {
-    // read the text file without changes as our snapshot
-    let snapshot = fs.readFileSync(path.resolve(cncPath, file), {
-      encoding: 'utf-8',
-    });
-  
-    // process filters if specified
-    if (validator.filter) {
-      // support a single object, or an array of objects
-      let filterArray = Array.isArray(validator.filter)
-        ? validator.filter
-        : [validator.filter];
-  
-      // execute all filters
-      for (const filter of filterArray) {
-        try {
-          snapshot = snapshot.replace(
-            new RegExp(filter.regex, 'gm'),
-            filter.replace
-          );
-        } catch (e) {
-          console.error(chalk.red(
-            `      FAIL: Regular expression ${filter} invalid.`
-          ));        
-          console.error(chalk.red(
-            `      ${e}`
-          ));
-          return { snapshot, failure: `FAIL: Regular expression ${filter} invalid.`};
-        }
-      }
-    }
-    return { snapshot, failure: undefined };
-  }
+export function validateText(contents, validator, file, cmdOptions) {
+  return { snapshot: contents, failure: undefined };
+}
   
   

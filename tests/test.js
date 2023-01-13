@@ -60,8 +60,10 @@ function main() {
   if (result.fail > 0) {
     console.log(chalk.yellow(`\nSummary of failed tests:`));
     for (const summary of result.summary)
-      if (summary.lastFailure)
-        console.log(chalk.red(`  "${summary.test}" (post "${summary.post}"): ${summary.lastFailure}`));
+      if (summary.lastFailure) {
+        console.log(chalk.redBright(`  Post "${summary.post}" test "${summary.test}":`));
+        console.log(chalk.red(`    ${summary.lastFailure}`));
+      }
   }
 
   // draw attention to failures as the last line

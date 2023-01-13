@@ -9,7 +9,7 @@
         "nointeraction": "--nointeraction",
         "timeout": ["--timeout", "1"]
       },
-      "cnc": "cover",
+      "cnc": "cover-mm",
       "validators": {
         "lbrn-default": {
           "post": "laserpost-lightburn",
@@ -20,6 +20,12 @@
             "/LightBurnProject/@MirrorY",
             "/LightBurnProject/CutSetting",
             "/LightBurnProject/Shape"
+          ],
+          "regex": [
+            {
+              "regex": "DEBUG: Document units: (\\w+)",
+              "require": ["mm"]
+            }
           ]
         },
         "svg-default": {
@@ -39,7 +45,7 @@
           "post": "*",
           "file": "*.txt",
           "validator": "text",
-          "filter": [
+          "regex": [
             {
               "regex": "^Generated at: .*$",
               "replace": "Generated at: [DATE-REMOVED-TEST-FILTER]"
@@ -48,25 +54,32 @@
         }
       },
       "properties": {
-        "-laserpost0500IncludeComments": "INCLUDE_COMMENTS_DEBUG",
-        "laserpost0300AlignmentMarks": "ALIGNMENT_MARK_CENTER_RIGHT"
+        "laserpost0500IncludeComments": "INCLUDE_COMMENTS_DEBUG"
       }
+    },
+    "default-inch": {
+      "cnc": "cover-inch",
+      "setup": "default"
     }
   },
   "tests": [
     {
-      "name": "Default parameters - cover",
+      "name": "Default parameters - cover (mm)",
       "setup": "default"
     },
     {
-      "name": "Trace stock - cover",
+      "name": "Default parameters - cover (inch)",
+      "setup": "default-inch"
+    },
+    {
+      "name": "Trace stock - cover (mm)",
       "setup": "default",
       "properties": {
         "work0100TraceStock": "1"
       }
     },
     {
-      "name": "Work offset - cover",
+      "name": "Work offset - cover (mm)",
       "setup": "default",
       "properties": {
         "work0200OffsetX": "100",
