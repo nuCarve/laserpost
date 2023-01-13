@@ -8,12 +8,11 @@ You are welcome to download the software directly from this repo, but it may be 
 ## Building
 
 To build LaserPost, you will need [`nodejs and npm`](https://nodejs.org/en/) installed (must be >= node
-18.11.0).  Prior to running the build, you must run `npm i` from the `release` directory:
+18.11.0).  Prior to running the build, you must run `npm i` from the root directory (which will set
+up both release and test):
 
 ```sh
-cd release
 npm i
-cd ..
 ```
 
 Release configuration is defined in the `release.json` file, including global macros, the list of source files with conditional macros, and the list of target release to create (including macros and filename).  Running the release process will build all targets, placing the resulting file(s) into the `dist` folder.

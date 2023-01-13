@@ -8,12 +8,12 @@ premade intermediate `cnc` files, using the various LaserPost CPS post-processor
 property configuration values.  The various generated files are filtered (based on test specific
 rules) and then are compared against baseline snapshots.  Differences result in a test failure. 
 
-Prior to use, you must execute `npm i` in the `tests` directory to pull in all NPM dependencies.
+To build LaserPost, you will need [`nodejs and npm`](https://nodejs.org/en/) installed (must be >= node
+18.11.0).  Prior to running the build, you must run `npm i` from the root directory (which will set
+up both release and test):
 
 ```sh
-cd tests
 npm i
-cd ..
 ```
 
 Then to execute the tests, from the root of the project, use:
