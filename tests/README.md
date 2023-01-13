@@ -3,8 +3,10 @@
 
 # [LaserPost](https://nucarve.com/laserpost) Automated Testing
 
-Automated testing is done with a custom test tool that runs the Autodesk `post` executable against a collection of
-premade `cnc` files using the LaserPost post-processors.  The tests are located in the `tests` folder, with configuration defined by the `tests.json` file.  To run all tests, execute the command:
+Automated testing will execute the Autodesk `post` executable against a collection of
+premade intermediate `cnc` files, using the various LaserPost CPS post-processors with various
+property configuration values.  The various generated files are filtered (based on test specific
+rules) and then are compared against baseline snapshots.  Differences result in a test failure.  
 
 ```sh
 node tests/test.mjs
@@ -13,28 +15,13 @@ node tests/test.mjs
 This will attempt to run the Autodesk post-processor (`post.exe` or `post`, depending on your
 operating system).  If this cannot be found in your path, the tests will fail with errors.  You can
 set the environment variable `AUTODESK_POST` to the location of the post, add it to your path, or
-specify a specific path using the `-p` option:
+specify a specific path using the `-pp` option:
 
 ```sh
-node tests/test.mjs -p="C:\Users\myname\AppData\Local\Autodesk\webdeploy\production\212ef2a73b4faa7986fe0d205fb521fc68f5f11b\Applications\CAM360\post"
+node tests/test.mjs -pp="C:\Users\myname\AppData\Local\Autodesk\webdeploy\production\212ef2a73b4faa7986fe0d205fb521fc68f5f11b\Applications\CAM360\post"
 ```
 
-All options:
-* `-p=<path to post executable>`: Path to the post executable.
-* `-c=<path to CNC intermediate files>`: Directory that contains the "cnc" files used for testing.  Defaults to `tests/cnc`.
-* `-s=<path to CPS source files>`: Directory that contains the post processor(s) to execute.
-  Defaults to `release/dist`.
-
-## Test artifacts
-
-A unique directory is created for each test execution, in a new `results` folder under the working
-CNC folder.  The default, for example, would be `tests/cnc/results`.  It is organized first by the
-name of the post (such as `tests/cnc/results/laserpost-lightburn`) followed by the name of the test
-(converted to lowercase, with dashes as separators).  For example, for the test called 'Test
-workspace offsets' for the 'laserpost-lightburn' CPS post, the directory would become
-`tests/cnc/results/laserpost-lightburn/test-workspace-offsets`.
-
-The artifacts folder is removed, including all contents, at the start of each test run.
+Use the option `-?` to see help for the currently available set of options.
 
 ## CNC intermediate files
 
@@ -75,6 +62,33 @@ This concept of inheritance (overriding values) is consistent throughout, with t
 overridding with new options will add those options.  To remove an option, specify `null` as the
 value.  Options can be an array when multiple arguments are needed, such as `["-a", "32"]`.
 Properties are mapped to post-processor properties, and use a similar approach as options.
+
+When a test runs, the resulting `validators` define what how to manage the results of the execution
+so the results can be saved in a snapshot.  There are multiple validators, such as XPath and Text,
+that provide their own sets of features.  The XPath validator will always remove all
+comments from the file, and then further allows limiting the content to specific XPath queries to
+limit the scope of what is validated for any particular test.  The Text validator provides an option
+to filter (remove) content from the snapshot based on matching regular expressions.
+
+## Test artifacts
+
+A directory is created for each test execution, in the `results` folder under the working
+CNC folder.  The default, for example, would be `tests/cnc/results`.  It is organized first by the
+name of the post (such as `tests/cnc/results/laserpost-lightburn`) followed by the name of the test
+(converted to lowercase, with dashes as separators).  For example, for the test called 'Test
+workspace offsets' for the 'laserpost-lightburn' CPS post, the directory would become
+`tests/cnc/results/laserpost-lightburn/test-workspace-offsets`.
+
+The artifacts folder is removed, including all contents, at the start of each test run.
+
+## Test snapshots
+
+Similar to the `results` folder, the `snapshots` folder (in the same parent directory) contains all
+the accepted snapshot files (maintained in git).  If a post is changed that results in a failed
+snapshot comparison, the solutions are to either adjust the filters (see the `tests.json` file) to
+remove the difference from comparison, or to record a new snapshot (after it has been validated).
+See the `-?` command for the options to limit the scope of what tests are executed, and to specify
+to reset the snapshot contents.
 
 ## License
 
