@@ -30,12 +30,16 @@ import fs from 'node:fs';
 import path from 'node:path';
 import minimatch from 'minimatch';
 import prettyDiff from './prettyDiff.js';
-import { SNAPSHOT_NO_WRITE, SNAPSHOT_RESET, SNAPSHOT_CREATE } from './globals.js';
-import { validateXPath } from "./validatorXPath.js";
-import { validateText } from "./validatorText.js";
-import { buildPostCommand, runPostProcessor } from "./runPost.js";
-import { prepStorageFolders } from "./storage.js";
-import { aggregateSetup, mergeSetups } from "./setup.js";
+import {
+  SNAPSHOT_NO_WRITE,
+  SNAPSHOT_RESET,
+  SNAPSHOT_CREATE,
+} from './globals.js';
+import { validateXPath } from './validatorXPath.js';
+import { validateText } from './validatorText.js';
+import { buildPostCommand, runPostProcessor } from './runPost.js';
+import { prepStorageFolders } from './storage.js';
+import { aggregateSetup, mergeSetups } from './setup.js';
 import chalk from 'chalk';
 
 /**
@@ -47,7 +51,7 @@ import chalk from 'chalk';
  * @param cmdOptions Options from the command line (tests, paths).
  * @param cncPath Path to the transferred CNC file (in the test results folder).
  * @param snapshotPath Path to the snapshot folder (for the baseline snapshot to compare against)
- * @returns { pass: number, fail: number }
+ * @returns { pass: number, fail: number, lastFailure: string }
  */
 export function validatePostResults(
   setup,
@@ -56,7 +60,7 @@ export function validatePostResults(
   cncPath,
   snapshotPath
 ) {
-  const result = { pass: 0, fail: 0 };
+  const result = { pass: 0, fail: 0, lastFailure: undefined };
 
   // determine the post we used for this test
   const post = setup.posts[postNumber];
@@ -90,9 +94,12 @@ export function validatePostResults(
               );
               break;
             default:
-              console.error(chalk.red(
-                `    Unknown validator "${validator.validator}" on "${key}" for "${file}".`
-              ));
+              console.error(
+                chalk.red(
+                  `    Unknown validator "${validator.validator}" on "${key}" for "${file}".`
+                )
+              );
+              result.lastFailure = `Unknown validator "${validator.validator}" on "${key}" for "${file}".`;
               result.fail++;
               break;
           }
@@ -107,17 +114,26 @@ export function validatePostResults(
             );
 
             // run the snapshot compare / management
-            if (validatorResult.success) {
-              const success = snapshotCompare(
+            if (!validatorResult.failure) {
+              const failureMessage = snapshotCompare(
                 key,
                 `${path.resolve(cncPath, key)}.snapshot`,
                 `${path.resolve(snapshotPath, key)}.snapshot`,
                 cmdOptions
               );
-              if (success) result.pass++;
-              else result.fail++;
-            } else result.fail++;
-          } else result.fail++;
+              if (!failureMessage) result.pass++;
+              else {
+                result.lastFailure = failureMessage;
+                result.fail++;
+              }
+            } else {
+              result.lastFailure = validatorResult.failure;
+              result.fail++;
+            }
+          } else {
+            result.lastFailure = 'Validator failed to return any results.';
+            result.fail++;
+          }
         }
     }
   }
@@ -132,7 +148,7 @@ export function validatePostResults(
  * @param newSnapshotFile Path to the file that has the new snapshot test results
  * @param baselineSnapshotFile Path to the baseline snapshot (for the baseline snapshot to compare against)
  * @param cmdOptions Options from the command line (tests, paths).
- * @returns Boolean with `true` on success, `false` on failure
+ * @returns String with failure message, undefined means success
  */
 export function snapshotCompare(
   validatorName,
@@ -160,29 +176,38 @@ export function snapshotCompare(
         if (cmdOptions.verbose)
           console.log(chalk.green(`      ${validatorName}: Snapshots match`));
 
-        return true;
+        return undefined;
       }
 
-      // not a match.  
-      console.log(chalk.red(`      FAIL ${validatorName}: Snapshots do not match`));
+      // not a match.
+      console.log(
+        chalk.red(`      FAIL ${validatorName}: Snapshots do not match`)
+      );
       console.log(`      ${changes.replace(/\n/g, '\n      ')}`);
-      return false;
+      return 'Snapshots do not match.';
     } else {
       if (cmdOptions.snapshotMode == SNAPSHOT_NO_WRITE) {
-        console.log(chalk.red(
-          `      FAIL ${validatorName}: Snapshot does not exist, but snapshot mode disallows creation (requires "-s=create")`
-        ));
-        return false;
+        console.log(
+          chalk.red(
+            `      FAIL ${validatorName}: Snapshot does not exist, but snapshot mode disallows creation (requires "-s=create")`
+          )
+        );
+        return 'Snapshot does not exist (see "-s=create")';
       }
-      console.log(chalk.yellow(
-        `      ${validatorName}: Baseline snapshot does not exist; saving snapshot.`
-      ));
+      console.log(
+        chalk.yellow(
+          `      ${validatorName}: Baseline snapshot does not exist; saving snapshot.`
+        )
+      );
     }
-  } else console.log(chalk.yellow(`      ${validatorName}: Resetting snapshot to latest.`));
+  } else
+    console.log(
+      chalk.yellow(`      ${validatorName}: Resetting snapshot to latest.`)
+    );
 
   // overwrite the baseline snapshot with latest
   fs.copyFileSync(newSnapshotFile, baselineSnapshotFile);
-  return true;
+  return undefined;
 }
 
 /**
@@ -190,74 +215,100 @@ export function snapshotCompare(
  * @param testSuite Test suite object that the individual test that needs to be executed.
  * @param testSetups Object containing all test setups
  * @param cmdOptions Options from the command line (tests, paths)
- * @returns Object with { pass: number, fail: number } summarizing the executions (one per post defined)
+ * @returns Object with { pass: number, fail: number, summary: [{ test: string, post: string,
+ * lastFailure: string }] }
  */
 export function runTest(testSuite, testSetups, cmdOptions) {
   let setup = aggregateSetup(testSuite.setup, testSetups);
   setup = mergeSetups(testSuite, setup);
   let headerShown = false;
 
-  // validate the setup
-  let valid = true;
-  if (!setup.cnc) {
-    console.warn(chalk.red(`  Invalid setup: No CNC defined.`));
-    valid = false;
-  }
-  if (setup.posts.length == 0) {
-    console.warn(chalk.red(`  Invalid setup: No "posts" defined.`));
-    valid = false;
-  }
+  const result = { pass: 0, fail: 0, summary: [] };
 
-  const result = { pass: 0, fail: 0 };
+  for (let postIndex = 0; postIndex < setup.posts.length; ++postIndex) {
+    // validate the setup
+    let invalidSetup = undefined;
+    if (!setup.cnc) invalidSetup = `Invalid setup: No CNC defined.`;
+    if (setup.posts.length == 0)
+      invalidSetup = `Invalid setup: No "posts" defined.`;
 
-  // if valid test, loop through all posts on the test and run each one
-  if (valid) {
-    for (let postIndex = 0; postIndex < setup.posts.length; ++postIndex) {
-      // if using post filter(s), make sure the post matches
-      if (cmdOptions.postFilter.length > 0) {
-        let matchPost = false;
-        for (const filter of cmdOptions.postFilter)
-          if (
-            setup.posts[postIndex].toLowerCase().includes(filter.toLowerCase())
-          ) {
-            matchPost = true;
-            break;
-          }
-        if (!matchPost) continue;
-      }
+    if (invalidSetup) {
+      // invalid setup - so populate the failure details and loop
+      result.fail++;
+      result.summary.push({
+        test: setup.name,
+        post: setup.posts[postIndex],
+        lastFailure: invalidSetup,
+      });
+      continue;
+    }
 
-      // show test header if not already done
-      if (!headerShown) {
-        console.log(chalk.blue(`Test: "${testSuite.name}" (setup "${testSuite.setup}"):`));
-        headerShown = true;
-      }
-      console.log(chalk.gray(`  Post: ${setup.posts[postIndex]}`));
+    // if using post filter(s), make sure the post matches
+    if (cmdOptions.postFilter.length > 0) {
+      let matchPost = false;
+      for (const filter of cmdOptions.postFilter)
+        if (
+          setup.posts[postIndex].toLowerCase().includes(filter.toLowerCase())
+        ) {
+          matchPost = true;
+          break;
+        }
+      if (!matchPost) continue;
+    }
 
-      // prepare the test results folder
-      const folders = prepStorageFolders(setup, postIndex, cmdOptions);
+    // show test header if not already done
+    if (!headerShown) {
+      console.log(
+        chalk.blue(`Test: "${testSuite.name}" (setup "${testSuite.setup}"):`)
+      );
+      headerShown = true;
+    }
+    console.log(chalk.gray(`  Post: ${setup.posts[postIndex]}`));
 
-      // execute the test
-      const passed = runPostProcessor(
+    // prepare the test results folder
+    const folders = prepStorageFolders(setup, postIndex, cmdOptions);
+
+    // execute the test
+    const passed = runPostProcessor(
+      cmdOptions,
+      buildPostCommand(setup, postIndex, cmdOptions, folders.cncPath)
+    );
+
+    // did we successfully run the post?
+    if (passed) {
+      // validate the post results
+      const validateResult = validatePostResults(
+        setup,
+        postIndex,
         cmdOptions,
-        buildPostCommand(setup, postIndex, cmdOptions, folders.cncPath)
+        folders.cncPath,
+        folders.snapshotPath
       );
 
-      // did we successfully run the post?
-      if (passed) {
-        // validate the post results
-        const validateResult = validatePostResults(
-          setup,
-          postIndex,
-          cmdOptions,
-          folders.cncPath,
-          folders.snapshotPath
-        );
-
-        if (validateResult.fail > 0) result.fail++;
-        else result.pass++;
-      } else result.fail++;
+      if (validateResult.fail > 0) {
+        result.fail++;
+        result.summary.push({
+          test: setup.name,
+          post: setup.posts[postIndex],
+          lastFailure: validateResult.lastFailure,
+        });
+      } else {
+        result.pass++;
+        result.summary.push({
+          test: setup.name,
+          post: setup.posts[postIndex],
+          lastFailure: undefined,
+        });
+      }
+    } else {
+      result.fail++;
+      result.summary.push({
+        test: setup.name,
+        post: setup.posts[postIndex],
+        lastFailure: 'Post-processor failed to execute.',
+      });
     }
-  } else console.warn(chalk.yellow('  TEST SKIPPED'));
+  }
 
   return result;
 }
@@ -267,10 +318,11 @@ export function runTest(testSuite, testSetups, cmdOptions) {
  *
  * @param testSuites Object with all possible test suites
  * @param cmdOptions Options from the command line (tests, paths)
- * @returns Object with { pass: number, fail: number }
+ * @returns Object with { pass: number, fail: number, summary: [{ test: string, post: string,
+ * lastFailure: string }] }
  */
 export function runTests(testSuites, cmdOptions) {
-  const summary = { pass: 0, fail: 0 };
+  const summary = { pass: 0, fail: 0, summary: [] };
 
   // loop for all defined tests
   for (const testSuite of testSuites.tests) {
@@ -291,6 +343,7 @@ export function runTests(testSuites, cmdOptions) {
       const result = runTest(testSuite, testSuites.setups, cmdOptions);
       summary.pass += result.pass;
       summary.fail += result.fail;
+      summary.summary.push(...result.summary);
     }
   }
   return summary;

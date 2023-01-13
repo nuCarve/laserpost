@@ -51,20 +51,20 @@
   },
   "tests": [
     {
-      "name": "Default parameters cover",
+      "name": "Default parameters - cover",
       "setup": "default"
     },
     {
-      "name": "Trace stock cover",
+      "name": "Trace stock - cover",
       "setup": "default",
       "properties": {
         "work0100TraceStock": "1"
       }
     },
     {
-      "name": "Work offset cover",
+      "name": "Work offset - cover",
       "setup": "default",
-      "properties": {
+      "Xproperties": {
         "work0200OffsetX": "100",
         "work0300OffsetY": "200"
       }

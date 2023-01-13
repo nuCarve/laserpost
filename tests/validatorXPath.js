@@ -61,11 +61,11 @@ export function validateXMLPathHandleError(type, message) {
  * @param cncPath - Path to the cnc folder
  * @param file - Filename being validated
  * @param cmdOptions Options from the command line (tests, paths).
- * @returns Object with { snapshot: string, success: boolean }
+ * @returns Object with { snapshot: string, failure: string }
  */
 export function validateXPath(validator, cncPath, file, cmdOptions) {
   let snapshot = '';
-  let success = true;
+  let failure = undefined;
 
   // make sure we have a valid xpath specification
   if (validator.xpath) {
@@ -94,7 +94,7 @@ export function validateXPath(validator, cncPath, file, cmdOptions) {
 
     // fail if we had a parsing problem
     if (validateXMLPathError)
-      return { snapshot: `XML parse failure`, success: false };
+      return { snapshot: `Unable to parse XML file`, failure: `Unable to parse XML file` };
 
     // process the queries
     for (const xpathQuery of xpathArray) {
@@ -128,8 +128,8 @@ export function validateXPath(validator, cncPath, file, cmdOptions) {
           console.error(chalk.red(
             `      FAIL: Required query did not match any elements`
           ));
-          success = false;
-          snapshot += `  FAIL: Required query did not match any elements.\n`;
+          failure = `Required query "${queryObject.query}" did not match any elements.`;
+          snapshot += `  FAIL: Required query "${queryObject.query}" did not match any elements.\n`;
           continue;
         }
 
@@ -146,18 +146,18 @@ export function validateXPath(validator, cncPath, file, cmdOptions) {
         console.error(chalk.red(
           `    FAIL: Failed to parse XPath query "${queryObject.query}"`
         ));
-        success = false;
-        snapshot += `  FAIL: Failed to parse XPath query`;
+        failure = `Failed to parse XPath query "${queryObject.query}".`;
+        snapshot += `  FAIL: Failed to parse XPath query "${queryObject.query}".`;
       }
     }
   } else {
     console.error(chalk.red(
-      `    FAIL: XPath validator setup missing required "xpath" property`
+      `    FAIL: XPath validator setup missing required "xpath" property.`
     ));
     return {
-      snapshot: `FAIL: XPath validator setup missing required "xpath" property`,
-      success: false,
+      snapshot: `FAIL: XPath validator setup missing required "xpath" property.`,
+      failure: `XPath validator setup missing required "xpath" property.`,
     };
   }
-  return { snapshot, success };
+  return { snapshot, failure };
 }

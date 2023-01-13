@@ -27,9 +27,9 @@
  */
 
 import chalk from 'chalk';
-import { parseArgs } from "./cmdLine.js";
-import { loadJson, setupFilePaths, clearResultsFolder } from "./storage.js";
-import { runTests } from "./testValidate.js";
+import { parseArgs } from './cmdLine.js';
+import { loadJson, setupFilePaths, clearResultsFolder } from './storage.js';
+import { runTests } from './testValidate.js';
 
 /**
  * Automated test manager for LaserPost.  Execute with '-?' option to see command line help.
@@ -47,19 +47,29 @@ function main() {
   // clear out the prior test results folder
   clearResultsFolder(cmdOptions);
 
-  // run the tests & summarize results
-  const summary = runTests(testSuites, cmdOptions);
-  const message = `Test run complete: ${summary.pass} of ${
-      summary.pass + summary.fail
-    } tests passed`;
+  // run the tests and give top level summary
+  const result = runTests(testSuites, cmdOptions);
+  const message = `Test run complete: ${result.pass} of ${
+    result.pass + result.fail
+  } tests passed`;
+  if (result.fail > 0) {
+    console.log(chalk.yellow(message));
+  } else console.log(chalk.green(message));
 
-    if (summary.fail > 0) {
-      console.log(chalk.yellow(message));
-      console.error(chalk.red(`WARNING: ${summary.fail} tests failed`));
-    } else console.log(chalk.green(message));
+  // display any failed test executions
+  if (result.fail > 0) {
+    console.log(chalk.yellow(`\nSummary of failed tests:`));
+    for (const summary of result.summary)
+      if (summary.lastFailure)
+        console.log(chalk.red(`  "${summary.test}" (post "${summary.post}"): ${summary.lastFailure}`));
+  }
+
+  // draw attention to failures as the last line
+  if (result.fail > 0) 
+    console.error(chalk.bgRed(`\nWARNING: ${result.fail} tests failed`));
 
   // pass back status to shell (-1: failure, 0: all tests passed, >0: number of failed tests)
-  process.exit(summary.fail);
+  process.exit(result.fail);
 }
 
 // launch main

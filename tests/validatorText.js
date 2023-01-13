@@ -39,7 +39,7 @@ import path from 'node:path';
  * @param cncPath - Path to the cnc folder
  * @param file - Filename being validated
  * @param cmdOptions Options from the command line (tests, paths).
- * @returns Object with { snapshot: string, success: boolean }
+ * @returns Object with { snapshot: string, failure: string }
  */
 export function validateText(validator, cncPath, file, cmdOptions) {
     // read the text file without changes as our snapshot
@@ -68,11 +68,11 @@ export function validateText(validator, cncPath, file, cmdOptions) {
           console.error(chalk.red(
             `      ${e}`
           ));
-          return false;
+          return { snapshot, failure: `FAIL: Regular expression ${filter} invalid.`};
         }
       }
     }
-    return { snapshot, success: true };
+    return { snapshot, failure: undefined };
   }
   
   
