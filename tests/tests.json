@@ -101,12 +101,30 @@
       "cnc": "cover-mm"
     },
     {
-      "name": "Marker TR",
+      "name": "Marker top-right",
       "comment": "Alignment marker set to top-right",
       "setup": "all",
       "cnc": "cover-mm",
       "properties": {
         "laserpost0300AlignmentMarks": "ALIGNMENT_MARK_TOP_RIGHT"
+      }
+    },
+    {
+      "name": "Marker center-right",
+      "comment": "Alignment marker set to center",
+      "setup": "all",
+      "cnc": "cover-mm",
+      "properties": {
+        "laserpost0300AlignmentMarks": "ALIGNMENT_MARK_CENTER_RIGHT"
+      }
+    },
+    {
+      "name": "Marker bottom-right",
+      "comment": "Alignment marker set to bottom",
+      "setup": "all",
+      "cnc": "cover-mm",
+      "properties": {
+        "laserpost0300AlignmentMarks": "ALIGNMENT_MARK_BOTTOM_RIGHT"
       }
     }
   ]
