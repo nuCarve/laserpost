@@ -1,0 +1,143 @@
+XPath query "/LightBurnProject/CutSetting" (required):
+<CutSetting type="Cut">
+      <index Value="0"/>
+      <name Value="Holes, Outline"/>
+      <minPower Value="80"/>
+      <maxPower Value="80"/>
+      <minPower2 Value="80"/>
+      <maxPower2 Value="80"/>
+      <speed Value="30"/>
+      <priority Value="1"/>
+      <runBlower Value="1"/>
+      <zOffset Value="0"/>
+      <numPasses Value="1"/>
+      <zPerPass Value="0"/>
+      <enableLaser1 Value="1"/>
+      <enableLaser2 Value="0"/>
+    </CutSetting>
+XPath query "/LightBurnProject/Shape" (required):
+<Shape Type="Group">
+      <XForm>1 0 0 1 0 0</XForm>
+      <Children>
+        <!-- Operation: Holes -->
+        <Shape Type="Group">
+          <XForm>1 0 0 1 0 0</XForm>
+          <Children>
+            <Shape Type="Path" CutIndex="0">
+              <XForm>1 0 0 1 0 0</XForm>
+              <V vx="149.571" vy="10.821"/>
+              <V vx="149.092" vy="10.965"/>
+              <P T="L" p0="0" p1="1"/>
+            </Shape>
+            <Shape Type="Ellipse" CutIndex="0" Rx="1.33" Ry="1.33">
+              <XForm>1 0 0 1 150 10</XForm>
+            </Shape>
+            <Shape Type="Path" CutIndex="0">
+              <XForm>1 0 0 1 0 0</XForm>
+              <V vx="149.092" vy="10.965"/>
+              <V vx="149.207" vy="10.479"/>
+              <P T="L" p0="0" p1="1"/>
+            </Shape>
+            <Shape Type="Path" CutIndex="0">
+              <XForm>1 0 0 1 0 0</XForm>
+              <V vx="83.017" vy="54.75"/>
+              <V vx="83.45" vy="55"/>
+              <P T="L" p0="0" p1="1"/>
+            </Shape>
+            <Shape Type="Ellipse" CutIndex="0" Rx="3.45" Ry="3.45">
+              <XForm>1 0 0 1 80 55</XForm>
+            </Shape>
+            <Shape Type="Path" CutIndex="0">
+              <XForm>1 0 0 1 0 0</XForm>
+              <V vx="83.45" vy="55"/>
+              <V vx="83.017" vy="55.25"/>
+              <P T="L" p0="0" p1="1"/>
+            </Shape>
+            <Shape Type="Path" CutIndex="0">
+              <XForm>1 0 0 1 0 0</XForm>
+              <V vx="149.108" vy="100.25"/>
+              <V vx="148.675" vy="100"/>
+              <P T="L" p0="0" p1="1"/>
+            </Shape>
+            <Shape Type="Ellipse" CutIndex="0" Rx="1.32" Ry="1.32">
+              <XForm>1 0 0 1 150 100</XForm>
+            </Shape>
+            <Shape Type="Path" CutIndex="0">
+              <XForm>1 0 0 1 0 0</XForm>
+              <V vx="148.675" vy="100"/>
+              <V vx="149.108" vy="99.75"/>
+              <P T="L" p0="0" p1="1"/>
+            </Shape>
+            <Shape Type="Path" CutIndex="0">
+              <XForm>1 0 0 1 0 0</XForm>
+              <V vx="10.429" vy="99.179"/>
+              <V vx="10.908" vy="99.035"/>
+              <P T="L" p0="0" p1="1"/>
+            </Shape>
+            <Shape Type="Ellipse" CutIndex="0" Rx="1.32" Ry="1.32">
+              <XForm>1 0 0 1 10 100</XForm>
+            </Shape>
+            <Shape Type="Path" CutIndex="0">
+              <XForm>1 0 0 1 0 0</XForm>
+              <V vx="10.908" vy="99.035"/>
+              <V vx="10.793" vy="99.521"/>
+              <P T="L" p0="0" p1="1"/>
+            </Shape>
+            <Shape Type="Path" CutIndex="0">
+              <XForm>1 0 0 1 0 0</XForm>
+              <V vx="10.259" vy="10.889"/>
+              <V vx="10.014" vy="11.325"/>
+              <P T="L" p0="0" p1="1"/>
+            </Shape>
+            <Shape Type="Ellipse" CutIndex="0" Rx="1.32" Ry="1.32">
+              <XForm>1 0 0 1 10 10</XForm>
+            </Shape>
+            <Shape Type="Path" CutIndex="0">
+              <XForm>1 0 0 1 0 0</XForm>
+              <V vx="10.014" vy="11.325"/>
+              <V vx="9.759" vy="10.894"/>
+              <P T="L" p0="0" p1="1"/>
+            </Shape>
+          </Children>
+        </Shape>
+        <!-- Operation: Outline -->
+        <Shape Type="Group">
+          <XForm>1 0 0 1 0 0</XForm>
+          <Children>
+            <Shape Type="Path" CutIndex="0">
+              <XForm>1 0 0 1 0 0</XForm>
+              <V vx="9.75" vy="105.483"/>
+              <V vx="10" vy="105.05"/>
+              <P T="L" p0="0" p1="1"/>
+            </Shape>
+            <Shape Type="Path" CutIndex="0">
+              <XForm>1 0 0 1 0 0</XForm>
+              <V vx="10" vy="105.05" c1x="7.211" c1y="105.05"/>
+              <V vx="150" vy="105.05" c0x="152.787" c0y="105.05"/>
+              <V vx="155.05" vy="100" c1x="155.05" c1y="102.787"/>
+              <V vx="155.05" vy="10" c0x="155.05" c0y="8.661"/>
+              <V vx="153.571" vy="6.429" c0x="152.624" c0y="5.482" c1x="154.518" c1y="7.376"/>
+              <V vx="150" vy="4.95" c1x="151.339" c1y="4.95"/>
+              <V vx="10" vy="4.95" c0x="7.211" c0y="4.95"/>
+              <V vx="4.95" vy="10" c1x="4.95" c1y="7.211"/>
+              <V vx="4.95" vy="100" c0x="4.95" c0y="102.789"/>
+              <P T="L" p0="0" p1="1"/>
+              <P T="B" p0="1" p1="2"/>
+              <P T="L" p0="2" p1="3"/>
+              <P T="B" p0="3" p1="4"/>
+              <P T="B" p0="4" p1="5"/>
+              <P T="L" p0="5" p1="6"/>
+              <P T="B" p0="6" p1="7"/>
+              <P T="L" p0="7" p1="8"/>
+              <P T="B" p0="8" p1="0"/>
+            </Shape>
+            <Shape Type="Path" CutIndex="0">
+              <XForm>1 0 0 1 0 0</XForm>
+              <V vx="10" vy="105.05"/>
+              <V vx="10.25" vy="105.483"/>
+              <P T="L" p0="0" p1="1"/>
+            </Shape>
+          </Children>
+        </Shape>
+      </Children>
+    </Shape>

@@ -1,0 +1,28 @@
+XPath query "/LightBurnProject/CutSetting" (required):
+<CutSetting type="Cut">
+      <index Value="0"/>
+      <name Value="Stock outline"/>
+      <minPower Value="100"/>
+      <maxPower Value="100"/>
+      <minPower2 Value="100"/>
+      <maxPower2 Value="100"/>
+      <speed Value="100"/>
+      <priority Value="2"/>
+      <runBlower Value="1"/>
+      <zOffset Value="0"/>
+      <numPasses Value="1"/>
+      <zPerPass Value="0"/>
+      <doOutput Value="0"/>
+    </CutSetting>
+XPath query "/LightBurnProject/Shape" (required):
+<Shape Type="Path" CutIndex="0">
+      <XForm>1 0 0 1 0 0</XForm>
+      <V vx="160" vy="110"/>
+      <V vx="0" vy="110"/>
+      <V vx="0" vy="0"/>
+      <V vx="160" vy="0"/>
+      <P T="L" p0="0" p1="1"/>
+      <P T="L" p0="1" p1="2"/>
+      <P T="L" p0="2" p1="3"/>
+      <P T="L" p0="3" p1="0"/>
+    </Shape>
