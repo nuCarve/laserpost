@@ -85,6 +85,23 @@
           ]
         }
       }
+    },
+    "marker": {
+      "comment": "Alignment Marker testing, snaps only the specific layer and shapes",
+      "setup": "baseline",
+      "validators": {
+        "lbrn": {
+          "xpath": [
+            { "query": "/LightBurnProject/CutSetting[3]", "required": true },
+            { "query": "/LightBurnProject/Shape[6]", "required": true }
+          ]
+        },
+        "svg": {
+          "xpath": [
+            { "query": "/svg:svg/svg:g[5]", "required": true }
+          ]
+        }
+      }
     }
   },
   "tests": [
@@ -103,7 +120,7 @@
     {
       "name": "Marker top-right",
       "comment": "Alignment marker set to top-right",
-      "setup": "all",
+      "setup": "marker",
       "cnc": "cover-mm",
       "properties": {
         "laserpost0300AlignmentMarks": "ALIGNMENT_MARK_TOP_RIGHT"
@@ -112,7 +129,7 @@
     {
       "name": "Marker center-right",
       "comment": "Alignment marker set to center",
-      "setup": "all",
+      "setup": "marker",
       "cnc": "cover-mm",
       "properties": {
         "laserpost0300AlignmentMarks": "ALIGNMENT_MARK_CENTER_RIGHT"
@@ -121,7 +138,7 @@
     {
       "name": "Marker bottom-right",
       "comment": "Alignment marker set to bottom",
-      "setup": "all",
+      "setup": "marker",
       "cnc": "cover-mm",
       "properties": {
         "laserpost0300AlignmentMarks": "ALIGNMENT_MARK_BOTTOM_RIGHT"
