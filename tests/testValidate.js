@@ -111,18 +111,21 @@ export function validatePostResults(
           // did we run any tests?
           if (validatorResult) {
             // record the snapshot
+            const snapshotFile = path.resolve(cncPath, path.basename(file, path.extname(file)) + '.snapshot');
             fs.writeFileSync(
-              `${path.resolve(cncPath, key)}.snapshot`,
+              snapshotFile,
               validatorResult.snapshot,
               { encoding: 'utf-8' }
             );
 
             // run the snapshot compare / management
             if (!validatorResult.failure) {
+              const targetSnapshotFile = path.resolve(snapshotPath, path.basename(file, path.extname(file)) + '.snapshot');
+
               const failureMessage = snapshotCompare(
                 key,
-                `${path.resolve(cncPath, key)}.snapshot`,
-                `${path.resolve(snapshotPath, key)}.snapshot`,
+                snapshotFile,
+                targetSnapshotFile,
                 cmdOptions
               );
               if (!failureMessage) result.pass++;
