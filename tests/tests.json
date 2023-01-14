@@ -99,6 +99,15 @@
       "comment": "Default properties on cover-mm file",
       "setup": "all",
       "cnc": "cover-mm"
+    },
+    {
+      "name": "Marker TR",
+      "comment": "Alignment marker set to top-right",
+      "setup": "all",
+      "cnc": "cover-mm",
+      "properties": {
+        "laserpost0300AlignmentMarks": "ALIGNMENT_MARK_TOP_RIGHT"
+      }
     }
   ]
 }

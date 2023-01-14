@@ -21,7 +21,11 @@ function onOpen() {
   onFileCreate();
 
   // include information about the document units
-  debugLog("Document units: {units}", { units: unit == MM ? "mm" : "inch" }, COMMENT_DEBUG);
+  debugLog(
+    'Document units: {units}',
+    { units: unit == MM ? 'mm' : 'inch' },
+    COMMENT_DEBUG
+  );
 }
 
 /**
@@ -263,7 +267,9 @@ function onSection() {
 
   // determine the air setting.
   let useAir = true;
-  switch (getProperty('op0200UseAir', USE_AIR_DEFAULT)) {
+  let airAssistProperty = currentSection.getProperty('op0200UseAir');
+  airAssistProperty = airAssistProperty ? airAssistProperty : USE_AIR_DEFAULT;
+  switch (airAssistProperty) {
     case USE_AIR_OFF:
       useAir = false;
       break;
@@ -279,10 +285,7 @@ function onSection() {
   }
 
   // set up the group - using the shared group name if specified, else a new empty group
-  const groupName = currentSection.getProperty(
-    'op0800GroupName',
-    GROUP_NAME_DEFAULT
-  );
+  const groupName = currentSection.getProperty('op0800GroupName');
   if (groupName == '') groupName = undefined;
 
   currentGroup = getGroupByName(groupName, {
@@ -291,34 +294,30 @@ function onSection() {
   });
 
   // collect settings from the user via operation properties
-  const powerScale = currentSection.getProperty(
-    'op0400PowerScale',
-    POWER_SCALE_DEFAULT
-  );
-  let opLayerMode = currentSection.getProperty(
-    'op0100LayerMode',
-    LAYER_MODE_DEFAULT
-  );
+  let powerScale = currentSection.getProperty('op0400PowerScale');
+  powerScale = powerScale ? powerScale : POWER_SCALE_DEFAULT;
+  let opLayerMode = currentSection.getProperty('op0100LayerMode');
+  opLayerMode = opLayerMode ? opLayerMode : LAYER_MODE_DEFAULT;
   if (opLayerMode == LAYER_MODE_INHERIT) {
     // select fill based on the cutting mode
     if (currentSection.getJetMode() == JET_MODE_ETCHING)
       opLayerMode = LAYER_MODE_FILL;
     else opLayerMode = LAYER_MODE_LINE;
   }
-  const customCutSettingXML = currentSection.getProperty(
-    'op0900CustomCutSettingXML',
-    CUSTOM_CUT_SETTING_XML_DEFAULT
+  let customCutSettingXML = currentSection.getProperty(
+    'op0900CustomCutSettingXML'
   );
-  let laserEnable = currentSection.getProperty(
-    'op0300LaserEnable',
-    LASER_ENABLE_DEFAULT
-  );
-  const zOffset = currentSection.getProperty('op0500ZOffset', Z_OFFSET_DEFAULT);
-  const passes = currentSection.getProperty('op0600Passes', PASS_COUNT_DEFAULT);
-  const zStep = currentSection.getProperty(
-    'op0700ZStep',
-    Z_STEP_PER_PASS_DEFAULT
-  );
+  customCutSettingXML = customCutSettingXML
+    ? customCutSettingXML
+    : CUSTOM_CUT_SETTING_XML_DEFAULT;
+  let laserEnable = currentSection.getProperty('op0300LaserEnable');
+  laserEnable = laserEnable ? laserEnable : LASER_ENABLE_DEFAULT;
+  let zOffset = currentSection.getProperty('op0500ZOffset');
+  zOffset = zOffset ? zOffset : Z_OFFSET_DEFAULT;
+  let passes = currentSection.getProperty('op0600Passes');
+  passes = passes ? passes : PASS_COUNT_DEFAULT;
+  let zStep = currentSection.getProperty('op0700ZStep');
+  zStep = zStep ? zStep : Z_STEP_PER_PASS_DEFAULT;
 
   // if laser enable set to inherit from tool, get value from the tool's pierce time
   if (laserEnable == LASER_ENABLE_TOOL) {
@@ -387,7 +386,7 @@ function onSection() {
       powerSource: powerSource,
       customCutSettingXML: customCutSettingXML,
       customCutSetting: parsedXML,
-      kerf: (unit == MM) ? tool.getKerfWidth() : tool.getKerfWidth() * 25.4,
+      kerf: unit == MM ? tool.getKerfWidth() : tool.getKerfWidth() * 25.4,
       paths: [],
     });
   } else {
@@ -403,7 +402,7 @@ function onSection() {
       zOffset: zOffset,
       passes: passes,
       zStep: zStep,
-      kerf: (unit == MM) ? tool.getKerfWidth() : tool.getKerfWidth() * 25.4,
+      kerf: unit == MM ? tool.getKerfWidth() : tool.getKerfWidth() * 25.4,
       // #if LBRN
       shuttleLaser1: shuttleLaser1Value,
       shuttleLaser2: shuttleLaser2Value,

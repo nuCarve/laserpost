@@ -216,7 +216,7 @@ function onWriteShapes(layer) {
     // if we grouped these operations, close the group now
     if (
       opGroup.operations.length > 1 &&
-      getProperty('lightburn0500GroupOperations')
+      getProperty('laserpost0200GroupShapes', GROUP_SHAPES_DEFAULT)
     ) {
       writeXMLClose();
       writeXMLClose();
