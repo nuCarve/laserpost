@@ -67,6 +67,24 @@
       "properties": {
         "laserpost0500IncludeComments": "INCLUDE_COMMENTS_DEBUG"
       }
+    },
+    "all": {
+      "comment": "Maintains all relevant properties from artifacts.",
+      "setup": "baseline",
+      "validators": {
+        "lbrn": {
+          "xpath": [
+            { "query": "/LightBurnProject/CutSetting", "required": true },
+            { "query": "/LightBurnProject/Shape", "required": true }
+          ]
+        },
+        "svg": {
+          "xpath": [
+            { "query": "/svg:svg/svg:g", "required": true },
+            { "query": "/svg:svg/svg:path", "required": false }
+          ]
+        }
+      }
     }
   },
   "tests": [
