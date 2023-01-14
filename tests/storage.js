@@ -29,6 +29,8 @@
 import fs from 'node:fs';
 import path from 'node:path';
 import * as url from 'node:url';
+import { SNAPSHOT_RESET } from './globals.js';
+import chalk from 'chalk';
 
 /**
  * Loads the tests.json file
@@ -108,12 +110,21 @@ export function prepStorageFolders(setup, postNumber, cmdOptions) {
 }
 
 /**
- * Clears all contents from the target test folder, with recursion.  Executed prior to a test run
- * start to have a fresh results space.
+ * Clears all contents from the target test folder, with recursion.  Also clears out all snapshots
+ * if the test is resetting snapshots and there are no test filters (meaning, all known tests will
+ * be getting a fresh snapshot). Executed prior to a test run start to have a fresh results space.
  *
  * @param cmdOptions Options from the command line (tests, paths)
  */
 export function clearResultsFolder(cmdOptions) {
-  const targetPath = path.resolve(cmdOptions.cncPath, 'results');
-  fs.rmSync(targetPath, { force: true, recursive: true });
+  // clear out the results folder
+  const resultsPath = path.resolve(cmdOptions.cncPath, 'results');
+  fs.rmSync(resultsPath, { force: true, recursive: true });
+
+  // if no test filters and resetting all snapshots, clear out the snapshots folder
+  if (cmdOptions.tests.length == 0 && cmdOptions.snapshotMode === SNAPSHOT_RESET) {
+    console.log(chalk.yellow(`No test filters and reset requested; clearing all contents in the snapshot folder.`));
+    const snapshotPath = path.resolve(cmdOptions.cncPath, 'snapshots');
+    fs.rmSync(snapshotPath, { force: true, recursive: true });
+  }
 }
