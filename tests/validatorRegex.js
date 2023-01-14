@@ -74,7 +74,7 @@ export function validateRegex(contents, validator, file, cmdOptions) {
         ? filter.require
         : [filter.require];
 
-      const match = result.snapshot.match(new RegExp(filter.regex));
+      const match = result.snapshot.match(new RegExp(filter.regex, "m"));
       if (match) {
         if (requireArray.length != match.length - 1) {
           // error - incorrect number of matches

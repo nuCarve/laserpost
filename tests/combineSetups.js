@@ -28,10 +28,10 @@
 
 import chalk from 'chalk';
 
-
 /**
  * Merges setup information from the tests.json file (setup and test section) such that the top-most
- * setup wins on conflicts (to allow for overriding settings)
+ * setup wins on conflicts (to allow for overriding settings).  Descends deeper into the validators
+ * setup to merge at the property level within a validator.
  *
  * @param setup Setup object (most current, top level)
  * @param parentSetup Setup object from the parent (items are included only if not overriden by setup)
@@ -40,7 +40,8 @@ import chalk from 'chalk';
 export function mergeSetups(setup, parentSetup) {
   const result = {};
 
-  // transfer over properties from parent unless overridden
+  // define a result setup that duplicates defaults from our setup first, and then our parent setup
+  // if the property is not defined
   result.posts = setup.posts ?? parentSetup.posts ?? [];
   result.cnc = setup.cnc ?? parentSetup.cnc ?? '';
   result.properties = setup.properties ?? [];
@@ -65,15 +66,49 @@ export function mergeSetups(setup, parentSetup) {
     }
   }
 
-  // descent into child validators and transfer
+  // descend into child validators and transfer
   if (parentSetup.validators) {
     for (const parentValidator in parentSetup.validators) {
+      // If nothing our our new setup, transfer over whatever the parent has
       if (
         !setup.validators ||
         !setup.validators.hasOwnProperty(parentValidator)
-      )
+      ) {
         result.validators[parentValidator] =
           parentSetup.validators[parentValidator];
+      } else {
+        // descend one more level - to allow overridding of individual properties such as
+        // post, file, validator (and validator specific props like regex and xpath)
+        for (const parentValidatorProp in parentSetup.validators[
+          parentValidator
+        ]) {
+          // if our setup doesn't have the property, transfer it over from parent
+          if (
+            !setup.validators[parentValidator].hasOwnProperty(
+              parentValidatorProp
+            )
+          ) {
+            result.validators[parentValidator][parentValidatorProp] =
+              parentSetup.validators[parentValidator][parentValidatorProp];
+          } else {
+            // is this an array?  If so, merge at the array level
+            if (
+              Array.isArray(
+                setup.validators[parentValidator][parentValidatorProp]
+              ) &&
+              Array.isArray(
+                result.validators[parentValidator][parentValidatorProp]
+              )
+            ) {
+              // make a new array that is the parent array first, then our result array
+              result.validators[parentValidator][parentValidatorProp] = [
+                ...parentSetup.validators[parentValidator][parentValidatorProp],
+                ...result.validators[parentValidator][parentValidatorProp],
+              ];
+            }
+          }
+        }
+      }
     }
   }
 
@@ -105,4 +140,3 @@ export function aggregateSetup(setupName, testSetups) {
   console.error(chalk.red(`Fatal: Unable to locate setup ${setupName}`));
   process.exit(-1);
 }
-

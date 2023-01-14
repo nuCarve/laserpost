@@ -41,7 +41,7 @@ import { validateText } from './validatorText.js';
 import { validateRegex } from './validatorRegex.js';
 import { buildPostCommand, runPostProcessor } from './runPost.js';
 import { prepStorageFolders } from './storage.js';
-import { aggregateSetup, mergeSetups } from './setup.js';
+import { aggregateSetup, mergeSetups } from './combineSetups.js';
 
 /**
  * Validates the results of a prior post execution.  Identifies the validators to use based on the
@@ -236,7 +236,7 @@ export function snapshotCompare(
       if (cmdOptions.snapshotMode == SNAPSHOT_NO_WRITE) {
         console.log(
           chalk.red(
-            `      FAIL ${validatorName}: Snapshot does not exist, but snapshot mode disallows creation (requires "-s=create")`
+            `      FAIL ${validatorName}: Snapshot does not exist, but snapshot mode disallows creation (see "-s=create")`
           )
         );
         return 'Snapshot does not exist (see "-s=create")';

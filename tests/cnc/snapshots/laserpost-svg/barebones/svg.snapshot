@@ -1,0 +1,2 @@
+XPath query "/svg:svg/@version" (required):
+ version="1.1"
