@@ -35,7 +35,8 @@
         }
       },
       "properties": {
-        "laserpost0500IncludeComments": "INCLUDE_COMMENTS_DEBUG"
+        "laserpost0500IncludeComments": "INCLUDE_COMMENTS_DEBUG",
+        "includeTimestamp": "false"
       }
     },
     "barebones": {
@@ -49,19 +50,6 @@
         },
         "svg": {
           "xpath": [{ "query": "/svg:svg/@version", "required": true }]
-        },
-        "txt": {
-          "regex": [
-            {
-              "comment": "Clear out everything except the 'generated at' comment",
-              "regex": "[\\s\\S]+^(Generated at: .*)$[\\s\\S]+",
-              "replace": "Generated at: [DATE-REMOVED]"
-            },
-            {
-              "regex": "^Generated at: (.*)$",
-              "require": "[DATE-REMOVED]"
-            }
-          ]
         }
       },
       "properties": {

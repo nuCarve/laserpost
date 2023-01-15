@@ -24,7 +24,7 @@
 <!-- DEBUG:     #0: "Outer through, Center through" 80-80% power at 30 mm/min, index=0, priority=0, layerMode=line, laserEnable=laser2 -->
 <!-- DEBUG:     #1: "Top hex etch" 80-80% power at 30 mm/min, index=1, priority=1, layerMode=fill, laserEnable=laser1 -->
 <!-- DEBUG:     #2: "Bottom rounded vaporize" 80-80% power at 30 mm/min, index=2, priority=2, layerMode=line, laserEnable=laser1 -->
-<!-- DEBUG:   Layer #0: "All layers" (4 operation sets): -->
+<!-- DEBUG:   Layer #0: "Outer through, Center through" (2 operation sets): -->
 <!-- DEBUG:     Operation group #0: -->
 <!-- DEBUG:       Operation #0: "Outer through" -->
 <!-- DEBUG:         Shape groups: -->
@@ -37,11 +37,13 @@
 <!-- DEBUG:           Shape (type=path, layer=0, powerScale=100, vectors=2) -->
 <!-- DEBUG:           Shape (type=path, layer=0, powerScale=100, vectors=5) -->
 <!-- DEBUG:           Shape (type=path, layer=0, powerScale=100, vectors=2) -->
-<!-- DEBUG:     Operation group #2: -->
+<!-- DEBUG:   Layer #1: "Top hex etch" (1 operation sets): -->
+<!-- DEBUG:     Operation group #0: -->
 <!-- DEBUG:       Operation #0: "Top hex etch" -->
 <!-- DEBUG:         Shape groups: -->
 <!-- DEBUG:           Shape (type=path, layer=1, powerScale=100, vectors=7) -->
-<!-- DEBUG:     Operation group #3: -->
+<!-- DEBUG:   Layer #2: "Bottom rounded vaporize" (1 operation sets): -->
+<!-- DEBUG:     Operation group #0: -->
 <!-- DEBUG:       Operation #0: "Bottom rounded vaporize" -->
 <!-- DEBUG:         Shape groups: -->
 <!-- DEBUG:           Shape (type=path, layer=2, powerScale=100, vectors=8) -->
@@ -50,7 +52,6 @@
 <!-- Visit https://nucarve.com/laserpost for software, instructions and instructional videos. -->
 
 <!-- File: UNNAMED.svg -->
-<!-- Generated at: Sun Jan 15 2023 09:37:19 GMT-0500 (Eastern Standard Time) -->
 
 <!-- Program -->
 <!--   Name: UNNAMED -->
@@ -59,6 +60,18 @@
 <!--   Model: LaserPost for LightBurn -->
 
 <!-- Layers: -->
+<!--   Layer 0 (Black): Outer through, Center through -->
+<!--     Mode "cut" at power 80-80% (scale 100%) and 30 mm/sec using laser 2 (air on, Z offset 0, passes 1, z-step 0) -->
+<!--   Layer 1 (Green): Top hex etch -->
+<!--     Mode "fill" at power 80-80% (scale 100%) and 30 mm/sec using laser 1 (air on, Z offset 0, passes 1, z-step 0) -->
+<!--   Layer 2 (Blue): Bottom rounded vaporize -->
+<!--     Mode "cut" at power 80-80% (scale 100%) and 30 mm/sec using laser 1 (air on, Z offset 0, passes 1, z-step 0) -->
+<!--   Layer 0 (Black): Outer through, Center through -->
+<!--     Mode "cut" at power 80-80% (scale 100%) and 30 mm/sec using laser 2 (air on, Z offset 0, passes 1, z-step 0) -->
+<!--   Layer 1 (Green): Top hex etch -->
+<!--     Mode "fill" at power 80-80% (scale 100%) and 30 mm/sec using laser 1 (air on, Z offset 0, passes 1, z-step 0) -->
+<!--   Layer 2 (Blue): Bottom rounded vaporize -->
+<!--     Mode "cut" at power 80-80% (scale 100%) and 30 mm/sec using laser 1 (air on, Z offset 0, passes 1, z-step 0) -->
 <!--   Layer 0 (Black): Outer through, Center through -->
 <!--     Mode "cut" at power 80-80% (scale 100%) and 30 mm/sec using laser 2 (air on, Z offset 0, passes 1, z-step 0) -->
 <!--   Layer 1 (Green): Top hex etch -->
