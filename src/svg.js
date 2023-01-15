@@ -73,11 +73,18 @@ function onWriteHeader(layer) {
  */
 function onWriteShapes(layer) {
   const projLayer = project.layers[layer];
-  const useGroups = !!getProperty('laserpost0200GroupShapes', GROUP_SHAPES_DEFAULT);
+  const useGroups = !!getProperty(
+    'laserpost0200GroupShapes',
+    GROUP_SHAPES_DEFAULT
+  );
 
   // create a group if there is more than one item in the layer, we are grouping by layer and
   // we are not redirecting (and using grouping)
-  if (projLayer.operationSets.length > 1 && projLayer.index != -1 && useGroups) {
+  if (
+    projLayer.operationSets.length > 1 &&
+    projLayer.index != -1 &&
+    useGroups
+  ) {
     writeCommentLine(localize('Layer group: "{name}"'), {
       name: projLayer.name,
     });
@@ -126,11 +133,10 @@ function onWriteShapes(layer) {
         name: operation.operationName,
       });
 
-      // do we need to group shapes within our operation?
-      if (
-        operation.shapeSets.length > 1 &&
-        useGroups
-      ) {
+      // add groups around operations if allowed (note: we do not look at number of shape sets,
+      // because those generally all get merged into one 'path' element, but having the grouping
+      // helps because it adds the 'desc' property)
+      if (useGroups) {
         writeXML('g', { id: safeId(operation.operationName) }, true);
         writeXML('desc', {
           content: format(localize('Operation: {name}'), {
@@ -158,21 +164,19 @@ function onWriteShapes(layer) {
       closeShapePath();
 
       // if we grouped the shapes, close the group
-      if (
-        operation.shapeSets.length > 1 && useGroups
-      )
-        writeXMLClose();
+      if (useGroups) writeXMLClose();
     }
 
     // if we grouped these operations, close the group now
-    if (
-      opGroup.operations.length > 1 && useGroups
-    )
-      writeXMLClose();
+    if (opGroup.operations.length > 1 && useGroups) writeXMLClose();
   }
 
   // close the layer group if created
-  if (projLayer.operationSets.length > 1 && projLayer.index != -1 && useGroups) {
+  if (
+    projLayer.operationSets.length > 1 &&
+    projLayer.index != -1 &&
+    useGroups
+  ) {
     writeXMLClose();
   }
 }

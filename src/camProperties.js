@@ -75,9 +75,18 @@ properties = {
     type: 'enum',
     values: [
       { title: localize('None'), id: ALIGNMENT_MARK_NONE },
-      { title: localize('Aligned to stock upper-right'), id: ALIGNMENT_MARK_UPPER_RIGHT },
-      { title: localize('Aligned to stock center-right'), id: ALIGNMENT_MARK_CENTER_RIGHT },
-      { title: localize('Aligned to stock lower-right'), id: ALIGNMENT_MARK_LOWER_RIGHT },
+      {
+        title: localize('Aligned to stock upper-right'),
+        id: ALIGNMENT_MARK_UPPER_RIGHT,
+      },
+      {
+        title: localize('Aligned to stock center-right'),
+        id: ALIGNMENT_MARK_CENTER_RIGHT,
+      },
+      {
+        title: localize('Aligned to stock lower-right'),
+        id: ALIGNMENT_MARK_LOWER_RIGHT,
+      },
     ],
     value: ALIGNMENT_MARK_DEFAULT,
     scope: 'post',
@@ -415,4 +424,16 @@ properties = {
     enabled: 'cutting',
   },
   // #endif
+
+  //
+  // hidden settings, used by automated test
+  //
+  includeTimestamp: {
+    title: 'Include timestamp',
+    description:
+      'Used by automated testing to disable inclusion of timestamp in generated files.',
+    type: 'boolean',
+    value: true,
+    visible: false,
+  },
 };

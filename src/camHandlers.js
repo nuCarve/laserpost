@@ -54,8 +54,9 @@ function generateProjectNotes(layerIndex) {
       file: project.layers[0].filename,
     });
 
-  // include timestamp
-  appendNote(localize('Generated at: {date}'), { date: new Date().toString() });
+  // include timestamp (unless disabled)
+  if (getProperty("includeTimestamp", true)) 
+    appendNote(localize('Generated at: {date}'), { date: new Date().toString() });
   appendNote('');
 
   // if we have a program name/comment, add it to the file as comments and in notes
