@@ -1,5 +1,28 @@
 ***** 
-*****  XPath query "/svg:svg/svg:g[2]" (required)
+***** LaserPost automated testing snapshot
+***** See https://github.com/nucarve/laserpost for information.
+***** 
+***** Snapshot:
+*****   Post: laserpost-svg
+*****   Setup: Marker lower-right
+*****   File: op-1-defaults.svg
+***** 
+***** Properties:
+*****   laserpost0300AlignmentMarks: ALIGNMENT_MARK_LOWER_RIGHT
+*****   laserpost0500IncludeComments: INCLUDE_COMMENTS_DEBUG
+*****   includeTimestamp: false
+***** 
+***** Options:
+*****   quiet: "--quiet"
+*****   nobackup: "--nobackup"
+*****   noeditor: "--noeditor"
+*****   nointeraction: "--nointeraction"
+*****   timeout: ["--timeout","1"]
+***** 
+***** Validators:
+*****   XPath validator:
+*****     Query: "/svg:svg/svg:g[2]"
+*****     Match: required
 ***** 
 <g id="laserpost_alignment_mark" xmlns="http://www.w3.org/2000/svg">
     <desc>Operation: Alignment mark</desc>

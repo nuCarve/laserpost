@@ -1,5 +1,32 @@
 ***** 
-*****  XPath query "/LightBurnProject/CutSetting" (required)
+***** LaserPost automated testing snapshot
+***** See https://github.com/nucarve/laserpost for information.
+***** 
+***** Snapshot:
+*****   Post: laserpost-lightburn
+*****   Setup: Org file layer no group
+*****   File: op-4-cut-modes.lbrn
+***** 
+***** Properties:
+*****   laserpost0100Organization: ORGANIZATION_BY_LAYER_FILE
+*****   laserpost0200GroupShapes: false
+*****   laserpost0500IncludeComments: INCLUDE_COMMENTS_DEBUG
+*****   includeTimestamp: false
+***** 
+***** Options:
+*****   quiet: "--quiet"
+*****   nobackup: "--nobackup"
+*****   noeditor: "--noeditor"
+*****   nointeraction: "--nointeraction"
+*****   timeout: ["--timeout","1"]
+***** 
+***** Validators:
+*****   XPath validator:
+*****     Query: "/LightBurnProject/CutSetting"
+*****     Match: required
+*****   XPath validator:
+*****     Query: "/LightBurnProject/Shape"
+*****     Match: required
 ***** 
 <CutSetting type="Cut">
     <index Value="0"/>
@@ -17,9 +44,6 @@
     <enableLaser1 Value="0"/>
     <enableLaser2 Value="1"/>
   </CutSetting>
-***** 
-*****  XPath query "/LightBurnProject/Shape" (required)
-***** 
 <Shape Type="Path" CutIndex="0">
     <XForm>1 0 0 1 0 0</XForm>
     <V vx="1.483" vy="101.25"/>

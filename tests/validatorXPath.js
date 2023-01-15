@@ -35,17 +35,17 @@ import { MATCH_FORBIDDEN, MATCH_OPTIONAL, MATCH_REQUIRED, SNAPSHOT_COMMENT_LINE_
 let validateXMLPathError = false;
 
 /**
- * Handler for XMLDOM errors.  Called via callback when the DOM experiences an error.  Outputs the
- * errors to the console, and sets the global `validateXMLPathError` to `true` to provide the error
+ * Handler for XMLDOM errors.  Called via callback when the DOM experiences an error.  Updates the
+ * failure diagnostics, and sets the global `validateXMLPathError` to `true` to provide the error
  * back to the calling code.
  *
  * @param type - String with the type of error (such as "Error")
  * @param message - String (multi-line supported) with the error message
+ * @param contents - Contents object with { snapshot: string, failure: [string], header: [string] }
  */
-export function validateXMLPathHandleError(type, message) {
-  if (!validateXMLPathError) console.error(chalk.red('    FAIL: XML file failed to parse:'));
-
-  console.error(chalk.red(`      ${type}: ${message.replace(/\n/g, '\n      ')}`));
+export function validateXMLPathHandleError(type, message, contents) {
+  if (!validateXMLPathError) contents.failure.push('FAIL: XML file failed to parse:');
+  contents.failure.push(`      ${type}: ${message.replace(/\n/g, '\n      ')}`);
   validateXMLPathError = true;
 }
 /**
@@ -55,15 +55,16 @@ export function validateXMLPathHandleError(type, message) {
  * match: "required|optional|forbidden" }.  The validator setup may also include an array of
  * `namespaces` to define XML namespaces (`"namespaces": { "svg": "http://www.w3.org/2000/svg" }`).
  *
- * @param contents - Contents from the generated file
+ * @param contents - Contents object with { snapshot: string, failure: [string], header: [string] }
  * @param validator - Validator object from the setup
  * @param file - Filename being validated
  * @param cmdOptions Options from the command line (tests, paths).
  * @returns Object with { snapshot: string, failure: string }
  */
 export function validateXPath(contents, validator, file, cmdOptions) {
-  let snapshot = '';
-  let failure = undefined;
+  // cache the snapshot and clear the contents.snapshot as we will form a new content body
+  const originalSnapshot = contents.snapshot;
+  contents.snapshot = '';
 
   // make sure we have a valid xpath specification
   if (validator.xpath) {
@@ -79,15 +80,16 @@ export function validateXPath(contents, validator, file, cmdOptions) {
     const xmlDoc = new dom.DOMParser({
       locator: {},
       errorHandler: {
-        warning: (m) => validateXMLPathHandleError('Warning', m),
-        error: (m) => validateXMLPathHandleError('Error', m),
-        fatalError: (m) => validateXMLPathHandleError('Fatal error', m),
+        warning: (m) => validateXMLPathHandleError('Warning', m, contents),
+        error: (m) => validateXMLPathHandleError('Error', m, contents),
+        fatalError: (m) => validateXMLPathHandleError('Fatal error', m, contents),
       },
-    }).parseFromString(contents, 'application/xml');
+    }).parseFromString(originalSnapshot, 'application/xml');
 
-    // fail if we had a parsing problem
+    // fail if we had a parsing problem (validateXMLPathHandleError will have updated failure info
+    // in contents)
     if (validateXMLPathError)
-      return { snapshot: `Unable to parse XML file`, failure: `Unable to parse XML file` };
+      return;
 
     // process the queries
     for (const xpathQuery of xpathArray) {
@@ -97,18 +99,10 @@ export function validateXPath(contents, validator, file, cmdOptions) {
           ? { query: xpathQuery, match: MATCH_REQUIRED }
           : { query: xpathQuery.query, match: xpathQuery.match?.toLowerCase() ?? MATCH_REQUIRED };
 
-      if (cmdOptions.verbose) {
-        console.log(chalk.gray(
-          `    Processing query "${queryObject.query}" (${
-            queryObject.match
-          }):`
-        ));
-      }
-      snapshot += `${SNAPSHOT_COMMENT_LINE_HEADER}\n`;
-      snapshot += `${SNAPSHOT_COMMENT_LINE_HEADER} XPath query "${queryObject.query}" (${
-        queryObject.match 
-      })\n`;
-      snapshot += `${SNAPSHOT_COMMENT_LINE_HEADER}\n`;
+      // add this query to the header
+      contents.header.push(`  XPath validator:`);
+      contents.header.push(`    Query: "${queryObject.query}"`);
+      contents.header.push(`    Match: ${queryObject.match}`);
 
       switch (queryObject.match) {
         case MATCH_REQUIRED:
@@ -116,14 +110,7 @@ export function validateXPath(contents, validator, file, cmdOptions) {
         case MATCH_OPTIONAL:
           break;
         default:
-          console.log(chalk.gray(
-            `    Processing query "${queryObject.query}:`
-          ));
-          console.error(chalk.red(
-            `      FAIL: Unknown "match" value of "${queryObject.match}".`
-          ));
-          failure = `Unknown "match" value of "${queryObject.match}".`;
-          snapshot += `  FAIL: Unknown "match" value of "${queryObject.match}".\n`;
+          contents.failure.push(`Unknown "match" value of "${queryObject.match}".`);
           continue;
       }
 
@@ -134,53 +121,24 @@ export function validateXPath(contents, validator, file, cmdOptions) {
         // and execute the query
         const nodes = select(queryObject.query, xmlDoc);
         if (nodes.length == 0 && queryObject.match == MATCH_REQUIRED) {
-          console.log(chalk.gray(
-            `    Processing query "${queryObject.query}" (required):`
-          ));
-          console.error(chalk.red(
-            `      FAIL: Required query did not match any elements`
-          ));
-          failure = `Required query "${queryObject.query}" did not match any elements.`;
-          snapshot += `  FAIL: Required query "${queryObject.query}" did not match any elements.\n`;
+          contents.failure.push(`Required query "${queryObject.query}" did not match any elements.`);
           continue;
         }
         if (nodes.length != 0 && queryObject.match == MATCH_FORBIDDEN) {
-          console.log(chalk.gray(
-            `    Processing query "${queryObject.query}" (forbidden):`
-          ));
-          console.error(chalk.red(
-            `      FAIL: Forbidden query matched ${nodes.length} elements`
-          ));
-          failure = `Forbidden query "${queryObject.query}" matched ${nodes.length} elements.`;
-          snapshot += `  FAIL: Forbidden query "${queryObject.query}" match ${nodes.length} elements.\n`;
+          contents.failure.push(`Forbidden query "${queryObject.query}" matched ${nodes.length} elements.`);
           continue;
         }
 
-        if (cmdOptions.verbose)
-          console.log(chalk.gray(`      ${nodes.length} elements max XPath query`));
-
         // add the results to the snapshot
         for (const node of nodes) {
-          snapshot += node.toString();
+          contents.snapshot += node.toString();
           // make sure snapshot has a newline at the end
-          if (snapshot.slice(-1) != '\n') snapshot += '\n';
+          if (contents.snapshot.slice(-1) != '\n') contents.snapshot += '\n';
         }
       } catch (ex) {
-        console.error(chalk.red(
-          `    FAIL: Failed to parse XPath query "${queryObject.query}"`
-        ));
-        failure = `Failed to parse XPath query "${queryObject.query}".`;
-        snapshot += `  FAIL: Failed to parse XPath query "${queryObject.query}".`;
+        contents.failure.push(`Failed to parse XPath query "${queryObject.query}".`);
       }
     }
-  } else {
-    console.error(chalk.red(
-      `    FAIL: XPath validator setup missing required "xpath" property.`
-    ));
-    return {
-      snapshot: `FAIL: XPath validator setup missing required "xpath" property.`,
-      failure: `XPath validator setup missing required "xpath" property.`,
-    };
-  }
-  return { snapshot, failure };
+  } else
+    contents.failure.push(`XPath validator setup missing required "xpath" property.`);
 }

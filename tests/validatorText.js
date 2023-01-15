@@ -31,17 +31,17 @@ import fs from 'node:fs';
 import path from 'node:path';
 
 /**
- * Execute the text based validator.  This doesn't do anything other than return the contents as
- * the regex feature of the validator is executed for all validators.
+ * Execute the text based validator.  This doesn't do anything as the regex feature of the validator
+ * is executed for all validators.
  *
- * @param contents - Contents from the generated file
+ * @param contents - Contents object with { snapshot: string, failure: [string], header: [string] }
  * @param validator - Validator object from the setup
  * @param file - Filename being validated
  * @param cmdOptions Options from the command line (tests, paths).
- * @returns Object with { snapshot: string, failure: string }
+ * @param contents - Contents object with { snapshot: string, failure: [string], header: [string] }
  */
 export function validateText(contents, validator, file, cmdOptions) {
-  return { snapshot: contents, failure: undefined };
+  contents.header.push('  Text validator (raw copy of file)');
 }
   
   

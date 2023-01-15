@@ -1,7 +1,31 @@
 ***** 
-*****  XPath query "/svg:svg/svg:g" (optional)
+***** LaserPost automated testing snapshot
+***** See https://github.com/nucarve/laserpost for information.
 ***** 
+***** Snapshot:
+*****   Post: laserpost-svg
+*****   Setup: Org file layer no group
+*****   File: UNNAMED-1.svg
 ***** 
-*****  XPath query "/svg:svg/svg:path" (optional)
+***** Properties:
+*****   laserpost0100Organization: ORGANIZATION_BY_LAYER_FILE
+*****   laserpost0200GroupShapes: false
+*****   laserpost0500IncludeComments: INCLUDE_COMMENTS_DEBUG
+*****   includeTimestamp: false
+***** 
+***** Options:
+*****   quiet: "--quiet"
+*****   nobackup: "--nobackup"
+*****   noeditor: "--noeditor"
+*****   nointeraction: "--nointeraction"
+*****   timeout: ["--timeout","1"]
+***** 
+***** Validators:
+*****   XPath validator:
+*****     Query: "/svg:svg/svg:g"
+*****     Match: optional
+*****   XPath validator:
+*****     Query: "/svg:svg/svg:path"
+*****     Match: optional
 ***** 
 <path id="laserpost_top_hex_etch_1" d=" M 381.937,173.74 L 414.463,154.961 L 414.463,117.165 L 381.732,98.268 L 349,117.165 L 349,154.961 L 381.732,173.858 L 381.937,173.74" stroke="none" fill="#000000" fill-mode="evenodd" xmlns="http://www.w3.org/2000/svg"/>

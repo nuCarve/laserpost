@@ -1,5 +1,31 @@
 ***** 
-*****  XPath query "/LightBurnProject/CutSetting[2]" (required)
+***** LaserPost automated testing snapshot
+***** See https://github.com/nucarve/laserpost for information.
+***** 
+***** Snapshot:
+*****   Post: laserpost-lightburn
+*****   Setup: Marker center-right
+*****   File: op-1-defaults.lbrn
+***** 
+***** Properties:
+*****   laserpost0300AlignmentMarks: ALIGNMENT_MARK_CENTER_RIGHT
+*****   laserpost0500IncludeComments: INCLUDE_COMMENTS_DEBUG
+*****   includeTimestamp: false
+***** 
+***** Options:
+*****   quiet: "--quiet"
+*****   nobackup: "--nobackup"
+*****   noeditor: "--noeditor"
+*****   nointeraction: "--nointeraction"
+*****   timeout: ["--timeout","1"]
+***** 
+***** Validators:
+*****   XPath validator:
+*****     Query: "/LightBurnProject/CutSetting[2]"
+*****     Match: required
+*****   XPath validator:
+*****     Query: "/LightBurnProject/Shape[3]"
+*****     Match: required
 ***** 
 <CutSetting type="Cut">
     <index Value="1"/>
@@ -16,9 +42,6 @@
     <zPerPass Value="0"/>
     <doOutput Value="0"/>
   </CutSetting>
-***** 
-*****  XPath query "/LightBurnProject/Shape[3]" (required)
-***** 
 <Shape Type="Group">
     <XForm>1 0 0 1 0 0</XForm>
     <Children>

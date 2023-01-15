@@ -1,5 +1,32 @@
 ***** 
-*****  XPath query "/svg:svg/svg:g" (optional)
+***** LaserPost automated testing snapshot
+***** See https://github.com/nucarve/laserpost for information.
+***** 
+***** Snapshot:
+*****   Post: laserpost-svg
+*****   Setup: Org op group
+*****   File: op-4-cut-modes.svg
+***** 
+***** Properties:
+*****   laserpost0100Organization: ORGANIZATION_BY_OPERATION
+*****   laserpost0200GroupShapes: true
+*****   laserpost0500IncludeComments: INCLUDE_COMMENTS_DEBUG
+*****   includeTimestamp: false
+***** 
+***** Options:
+*****   quiet: "--quiet"
+*****   nobackup: "--nobackup"
+*****   noeditor: "--noeditor"
+*****   nointeraction: "--nointeraction"
+*****   timeout: ["--timeout","1"]
+***** 
+***** Validators:
+*****   XPath validator:
+*****     Query: "/svg:svg/svg:g"
+*****     Match: optional
+*****   XPath validator:
+*****     Query: "/svg:svg/svg:path"
+*****     Match: optional
 ***** 
 <g id="laserpost_outer_through" xmlns="http://www.w3.org/2000/svg">
     <desc>Operation: Outer through</desc>
@@ -17,6 +44,3 @@
     <desc>Operation: Bottom rounded vaporize</desc>
     <path id="laserpost_bottom_rounded_vaporize_1" d=" M 570.52,535.367 L 570.52,533.48 L 570.52,533.102 L 230.551,533.102 C 209.796,533.102 192.945,549.953 192.945,570.709 L 192.945,646.11 L 532.913,646.11 C 553.683,646.11 570.52,629.273 570.52,608.504 L 570.52,535.367" stroke="#2b63a3" stroke-width="0.378" fill="none"/>
   </g>
-***** 
-*****  XPath query "/svg:svg/svg:path" (optional)
-***** 

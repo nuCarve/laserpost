@@ -1,5 +1,31 @@
 ***** 
-*****  XPath query "/svg:svg/svg:g" (optional)
+***** LaserPost automated testing snapshot
+***** See https://github.com/nucarve/laserpost for information.
+***** 
+***** Snapshot:
+*****   Post: laserpost-svg
+*****   Setup: Orientation Right LL-LL
+*****   File: complex-ll-right.svg
+***** 
+***** Properties:
+*****   machine0050Orientation: MACHINE_ORIENTATION_UPPER_RIGHT
+*****   laserpost0500IncludeComments: INCLUDE_COMMENTS_DEBUG
+*****   includeTimestamp: false
+***** 
+***** Options:
+*****   quiet: "--quiet"
+*****   nobackup: "--nobackup"
+*****   noeditor: "--noeditor"
+*****   nointeraction: "--nointeraction"
+*****   timeout: ["--timeout","1"]
+***** 
+***** Validators:
+*****   XPath validator:
+*****     Query: "/svg:svg/svg:g"
+*****     Match: optional
+*****   XPath validator:
+*****     Query: "/svg:svg/svg:path"
+*****     Match: optional
 ***** 
 <g id="laserpost_etch_top_and_left" xmlns="http://www.w3.org/2000/svg">
     <desc>Operation: Etch top and left</desc>
@@ -13,6 +39,3 @@
     <desc>Operation: Cut outline</desc>
     <path id="laserpost_cut_outline_1" d=" M 360.191,304.316 L 361.136,305.953 M 361.136,305.953 L 362.646,305.953 L 362.646,3.969 L 22.866,3.969 L 22.866,305.953 L 361.136,305.953 M 361.136,305.953 L 362.081,304.316" stroke="#178837" stroke-width="0.378" fill="none"/>
   </g>
-***** 
-*****  XPath query "/svg:svg/svg:path" (optional)
-***** 

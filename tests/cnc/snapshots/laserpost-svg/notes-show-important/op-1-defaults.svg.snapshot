@@ -1,3 +1,28 @@
 ***** 
-*****  XPath query "/nothing" (forbidden)
+***** LaserPost automated testing snapshot
+***** See https://github.com/nucarve/laserpost for information.
+***** 
+***** Snapshot:
+*****   Post: laserpost-svg
+*****   Setup: Notes show important
+*****   File: op-1-defaults.svg
+***** 
+***** Properties:
+*****   laserpost0400IncludeNotes: INCLUDE_NOTES_SHOW_IMPORTANT
+*****   laserpost0500IncludeComments: INCLUDE_COMMENTS_DEBUG
+*****   includeTimestamp: false
+***** 
+***** Options:
+*****   quiet: "--quiet"
+*****   nobackup: "--nobackup"
+*****   noeditor: "--noeditor"
+*****   nointeraction: "--nointeraction"
+*****   timeout: ["--timeout","1"]
+***** 
+***** Validators:
+*****   RegEx validator:
+*****     Regular expression: "(Job setup information has been generated)"
+*****   XPath validator:
+*****     Query: "/nothing"
+*****     Match: forbidden
 ***** 

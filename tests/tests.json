@@ -25,13 +25,7 @@
         "txt": {
           "post": "*",
           "file": "*.txt",
-          "validator": "text",
-          "regex": [
-            {
-              "regex": "^Generated at: .*$",
-              "replace": "Generated at: [DATE-REMOVED]"
-            }
-          ]
+          "validator": "text"
         }
       },
       "properties": {

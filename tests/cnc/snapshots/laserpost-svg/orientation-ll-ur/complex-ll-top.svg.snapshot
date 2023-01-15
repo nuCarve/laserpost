@@ -1,5 +1,31 @@
 ***** 
-*****  XPath query "/svg:svg/svg:g" (optional)
+***** LaserPost automated testing snapshot
+***** See https://github.com/nucarve/laserpost for information.
+***** 
+***** Snapshot:
+*****   Post: laserpost-svg
+*****   Setup: Orientation LL-UR
+*****   File: complex-ll-top.svg
+***** 
+***** Properties:
+*****   machine0050Orientation: MACHINE_ORIENTATION_UPPER_RIGHT
+*****   laserpost0500IncludeComments: INCLUDE_COMMENTS_DEBUG
+*****   includeTimestamp: false
+***** 
+***** Options:
+*****   quiet: "--quiet"
+*****   nobackup: "--nobackup"
+*****   noeditor: "--noeditor"
+*****   nointeraction: "--nointeraction"
+*****   timeout: ["--timeout","1"]
+***** 
+***** Validators:
+*****   XPath validator:
+*****     Query: "/svg:svg/svg:g"
+*****     Match: optional
+*****   XPath validator:
+*****     Query: "/svg:svg/svg:path"
+*****     Match: optional
 ***** 
 <g id="laserpost_holes" xmlns="http://www.w3.org/2000/svg">
     <desc>Operation: Holes</desc>
@@ -17,6 +43,3 @@
     <desc>Operation: Outline</desc>
     <path id="laserpost_outline_1" d=" M 567.874,398.676 L 566.929,397.039 M 566.929,397.039 L 37.795,397.039 C 27.261,397.039 18.709,388.487 18.709,377.953 L 18.709,37.795 C 18.709,32.733 20.72,27.878 24.299,24.299 C 27.878,20.72 32.733,18.709 37.795,18.709 L 566.929,18.709 C 577.47,18.709 586.016,27.254 586.016,37.795 L 586.016,377.953 C 586.016,388.494 577.47,397.039 566.929,397.039 M 566.929,397.039 L 565.984,398.676" stroke="#178837" stroke-width="0.378" fill="none"/>
   </g>
-***** 
-*****  XPath query "/svg:svg/svg:path" (optional)
-***** 

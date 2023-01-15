@@ -1,3 +1,26 @@
 ***** 
-*****  XPath query "/LightBurnProject/Notes" (forbidden)
+***** LaserPost automated testing snapshot
+***** See https://github.com/nucarve/laserpost for information.
+***** 
+***** Snapshot:
+*****   Post: laserpost-lightburn
+*****   Setup: Notes none
+*****   File: op-1-defaults.lbrn
+***** 
+***** Properties:
+*****   laserpost0400IncludeNotes: INCLUDE_NOTES_NONE
+*****   laserpost0500IncludeComments: INCLUDE_COMMENTS_DEBUG
+*****   includeTimestamp: false
+***** 
+***** Options:
+*****   quiet: "--quiet"
+*****   nobackup: "--nobackup"
+*****   noeditor: "--noeditor"
+*****   nointeraction: "--nointeraction"
+*****   timeout: ["--timeout","1"]
+***** 
+***** Validators:
+*****   XPath validator:
+*****     Query: "/LightBurnProject/Notes"
+*****     Match: forbidden
 ***** 

@@ -42,6 +42,7 @@ import { validateRegex } from './validatorRegex.js';
 import { buildPostCommand, runPostProcessor } from './runPost.js';
 import { prepStorageFolders } from './storage.js';
 import { aggregateSetup, mergeSetups } from './combineSetups.js';
+import { SNAPSHOT_COMMENT_LINE_HEADER } from './globals.js';
 
 /**
  * Validates the results of a prior post execution.  Identifies the validators to use based on the
@@ -62,7 +63,7 @@ export function validatePostResults(
   snapshotPath
 ) {
   const result = { pass: 0, fail: 0, lastFailure: undefined };
-
+  
   // determine the post we used for this test
   const post = setup.posts[postNumber];
 
@@ -74,16 +75,37 @@ export function validatePostResults(
       const files = fs.readdirSync(cncPath);
       for (const file of files)
         if (minimatch(file, validator.file)) {
-          let validatorResult = undefined;
-
           // read in the file
-          let contents = fs.readFileSync(path.resolve(cncPath, file), {
+          let document = fs.readFileSync(path.resolve(cncPath, file), {
             encoding: 'utf-8',
           });
 
+          // set up our contents object
+          const contents = { snapshot: document, failure: [], header: [] };
+
+          // prepare the header with information about the snapshot
+          contents.header.push('');
+          contents.header.push('LaserPost automated testing snapshot');
+          contents.header.push('See https://github.com/nucarve/laserpost for information.')
+          contents.header.push('');
+          contents.header.push(`Snapshot:`);
+          contents.header.push(`  Post: ${validator.post}`);
+          contents.header.push(`  Setup: ${setup.name}`);
+          contents.header.push(`  File: ${file}`);
+          contents.header.push('');
+          contents.header.push('Properties:');
+          for (const propertyKey in setup.properties)
+            contents.header.push(`  ${propertyKey}: ${setup.properties[propertyKey]}`)
+          contents.header.push('');
+          contents.header.push('Options:');
+          for (const optionsKey in setup.options)
+            contents.header.push(`  ${optionsKey}: ${JSON.stringify(setup.options[optionsKey])}`);
+          contents.header.push('');
+          contents.header.push('Validators:');
+
           // execute the generic regex validator (if requested)
           if (validator.regex) {
-            validatorResult = runValidator(
+            runValidator(
               'regex',
               contents,
               validator,
@@ -94,60 +116,63 @@ export function validatePostResults(
 
           // execute their specific requested validator
           if (validator.validator) {
-            const result = runValidator(
+            runValidator(
               validator.validator,
-              validatorResult ? validatorResult.snapshot : contents,
+              contents,
               validator,
               file,
               cmdOptions
             );
-
-            if (validatorResult) {
-              validatorResult.snapshot = result.snapshot;
-              validatorResult.failure =
-                result.failure ?? validatorResult.failure;
-            } else validatorResult = result;
           }
 
-          // did we run any tests?
-          if (validatorResult) {
-            // record the snapshot
-            const snapshotFile = path.resolve(cncPath, file + '.snapshot');
-            fs.writeFileSync(snapshotFile, validatorResult.snapshot, {
-              encoding: 'utf-8',
-            });
+          // handle the failures - to the header and to the console
+          if (contents.failure.length > 0) {
+            contents.header.push('');
+            contents.header.push('Validation failures:');
+            console.error(chalk.red(`Validation failures:`));
+            for (const failure of contents.failure) {
+              contents.header.push('  ' + failure);
+              console.error(chalk.red('      ' + failure));
+            }
+          }
 
-            // run the snapshot compare / management
-            const targetSnapshotFile = path.resolve(
-              snapshotPath,
-              file + '.snapshot'
-            );
-            const artifactFile = path.resolve(cncPath, file);
-            const targetArtifactFile = path.resolve(snapshotPath, file);
+          // format the header for output to the snapshot file
+          contents.header.push('');
+          const formattedHeader = SNAPSHOT_COMMENT_LINE_HEADER + contents.header.join('\n' + SNAPSHOT_COMMENT_LINE_HEADER) + '\n';
 
-            const failureMessage = snapshotCompare(
-              key,
-              snapshotFile,
-              targetSnapshotFile,
-              artifactFile,
-              targetArtifactFile,
-              cmdOptions
-            );
+          // record the snapshot
+          const snapshotFile = path.resolve(cncPath, file + '.snapshot');
+          fs.writeFileSync(snapshotFile, formattedHeader + contents.snapshot, {
+            encoding: 'utf-8',
+          });
 
-            // if no prior errors, look at our snapshot failure (this let's prior failures win as the
-            // snapshot isn't important when failures have happened)
-            if (!validatorResult.failure && failureMessage)
-              validatorResult.failure = failureMessage;
+          // run the snapshot compare / management
+          const targetSnapshotFile = path.resolve(
+            snapshotPath,
+            file + '.snapshot'
+          );
+          const artifactFile = path.resolve(cncPath, file);
+          const targetArtifactFile = path.resolve(snapshotPath, file);
 
-            // summarize our failure
-            if (validatorResult.failure) {
-              result.lastFailure = validatorResult.failure;
-              result.fail++;
-            } else result.pass++;
-          } else {
-            result.lastFailure = 'Validators failed to return any results.';
+          const failureMessage = snapshotCompare(
+            key,
+            snapshotFile,
+            targetSnapshotFile,
+            artifactFile,
+            targetArtifactFile,
+            cmdOptions
+          );
+
+          // if no prior errors, look at our snapshot failure (this let's prior failures win as the
+          // snapshot isn't important when failures have happened)
+          if (!contents.failure.length == 0 && failureMessage)
+            contents.failure.push(failureMessage);
+
+          // summarize our failure
+          if (contents.failure.length > 0) {
+            result.lastFailure = contents.failure[contents.failure.length - 1];
             result.fail++;
-          }
+          } else result.pass++;
         }
     }
   }
@@ -158,7 +183,7 @@ export function validatePostResults(
  * Delegates to the type specific validator
  *
  * @param validatorType - The name of the validator to execute
- * @param contents - Contents from the generated file
+ * @param contents - Contents object with { snapshot: string, failure: [string], header: [string] }
  * @param validator - Validator object from the setup
  * @param file - Filename being validated
  * @param cmdOptions Options from the command line (tests, paths).
@@ -168,21 +193,17 @@ function runValidator(validatorType, contents, validator, file, cmdOptions) {
   // delegate to the appropriate validator
   switch (validatorType) {
     case 'xpath':
-      return validateXPath(contents, validator, file, cmdOptions);
+      validateXPath(contents, validator, file, cmdOptions);
+      break;
     case 'text':
-      return validateText(contents, validator, file, cmdOptions);
+      validateText(contents, validator, file, cmdOptions);
+      break;
     case 'regex':
-      return validateRegex(contents, validator, file, cmdOptions);
+      validateRegex(contents, validator, file, cmdOptions);
+      break;
     default:
-      console.error(
-        chalk.red(
-          `    Unknown validator "${validator.validator}" on "${key}" for "${file}".`
-        )
-      );
-      return {
-        snapshot: contents,
-        failure: `Unknown validator "${validator.validator}" on "${key}" for "${file}".`,
-      };
+      contents.failure.push(`Unknown validator "${validator.validator}" on "${key}" for "${file}".`);
+      break;
   }
 }
 
@@ -211,12 +232,17 @@ export function snapshotCompare(
     // does the baseline snapshot file exist?
     if (fs.existsSync(baselineSnapshotFile)) {
       // load both snapshots
-      const newSnapshot = fs.readFileSync(newSnapshotFile, {
+      let newSnapshot = fs.readFileSync(newSnapshotFile, {
         encoding: 'utf-8',
       });
-      const baselineSnapshot = fs.readFileSync(baselineSnapshotFile, {
+      let baselineSnapshot = fs.readFileSync(baselineSnapshotFile, {
         encoding: 'utf-8',
       });
+
+      // remove all lines that are snapshot comments
+      const snapshotFilter = (item) => !item.startsWith(SNAPSHOT_COMMENT_LINE_HEADER);
+      newSnapshot = newSnapshot.split('\n').filter(snapshotFilter).join('\n');
+      baselineSnapshot = baselineSnapshot.split('\n').filter(snapshotFilter).join('\n');
 
       // do a diff, which returns console-ready pretty formatting (or undefined if no diffs)
       const changes = prettyDiff(baselineSnapshot, newSnapshot);
@@ -256,7 +282,7 @@ export function snapshotCompare(
     }
   } else
     console.log(
-      chalk.yellow(`      ${validatorName}: Resetting snapshot to latest.`)
+      chalk.yellow(`      ${validatorName}: Resetting snapshot ${path.basename(newSnapshotFile)} to latest.`)
     );
 
   // overwrite the baseline snapshot with latest, and copy over the artifact
@@ -275,25 +301,25 @@ export function snapshotCompare(
  * lastFailure: string }] }
  */
 export function runTest(testSuite, testSetups, cmdOptions) {
-  let setup = aggregateSetup(testSuite.setup, testSetups);
-  setup = mergeSetups(testSuite, setup);
+  const aggregatedSetups = aggregateSetup(testSuite.setup, testSetups);
+  const mergedSetups = mergeSetups(testSuite, aggregatedSetups);
   let headerShown = false;
 
   const result = { pass: 0, fail: 0, summary: [] };
 
-  for (let postIndex = 0; postIndex < setup.posts.length; ++postIndex) {
+  for (let postIndex = 0; postIndex < mergedSetups.posts.length; ++postIndex) {
     // validate the setup
     let invalidSetup = undefined;
-    if (!setup.cnc) invalidSetup = `Invalid setup: No CNC defined.`;
-    if (setup.posts.length == 0)
+    if (!mergedSetups.cnc) invalidSetup = `Invalid setup: No CNC defined.`;
+    if (mergedSetups.posts.length == 0)
       invalidSetup = `Invalid setup: No "posts" defined.`;
 
-    if (invalidSetup) {
+      if (invalidSetup) {
       // invalid setup - so populate the failure details and loop
       result.fail++;
       result.summary.push({
-        test: setup.name,
-        post: setup.posts[postIndex],
+        test: mergedSetups.name,
+        post: mergedSetups.posts[postIndex],
         lastFailure: invalidSetup,
       });
       continue;
@@ -304,7 +330,7 @@ export function runTest(testSuite, testSetups, cmdOptions) {
       let matchPost = false;
       for (const filter of cmdOptions.postFilter)
         if (
-          setup.posts[postIndex].toLowerCase().includes(filter.toLowerCase())
+          mergedSetups.posts[postIndex].toLowerCase().includes(filter.toLowerCase())
         ) {
           matchPost = true;
           break;
@@ -319,22 +345,22 @@ export function runTest(testSuite, testSetups, cmdOptions) {
       );
       headerShown = true;
     }
-    console.log(chalk.gray(`  Post: ${setup.posts[postIndex]}`));
+    console.log(chalk.gray(`  Post: ${mergedSetups.posts[postIndex]}`));
 
     // prepare the test results folder
-    const folders = prepStorageFolders(setup, postIndex, cmdOptions);
+    const folders = prepStorageFolders(mergedSetups, postIndex, cmdOptions);
 
     // execute the test
     const passed = runPostProcessor(
       cmdOptions,
-      buildPostCommand(setup, postIndex, cmdOptions, folders.cncPath)
+      buildPostCommand(mergedSetups, postIndex, cmdOptions, folders.cncPath)
     );
 
     // did we successfully run the post?
     if (passed) {
       // validate the post results
       const validateResult = validatePostResults(
-        setup,
+        mergedSetups,
         postIndex,
         cmdOptions,
         folders.cncPath,
@@ -344,23 +370,23 @@ export function runTest(testSuite, testSetups, cmdOptions) {
       if (validateResult.fail > 0) {
         result.fail++;
         result.summary.push({
-          test: setup.name,
-          post: setup.posts[postIndex],
+          test: mergedSetups.name,
+          post: mergedSetups.posts[postIndex],
           lastFailure: validateResult.lastFailure,
         });
       } else {
         result.pass++;
         result.summary.push({
-          test: setup.name,
-          post: setup.posts[postIndex],
+          test: mergedSetups.name,
+          post: mergedSetups.posts[postIndex],
           lastFailure: undefined,
         });
       }
     } else {
       result.fail++;
       result.summary.push({
-        test: setup.name,
-        post: setup.posts[postIndex],
+        test: mergedSetups.name,
+        post: mergedSetups.posts[postIndex],
         lastFailure: 'Post-processor failed to execute.',
       });
     }

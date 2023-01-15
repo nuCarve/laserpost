@@ -47,7 +47,7 @@ export function mergeSetups(setup, parentSetup) {
   result.machine = setup.machine ?? parentSetup.machine ?? undefined;
   result.properties = setup.properties ?? [];
   result.options = setup.options ?? {};
-  result.validators = setup.validators ?? {};
+  result.validators = setup.validators ? JSON.parse(JSON.stringify(setup.validators)) : {};
   result.name = setup.name;
 
   // descend into child properties and transfer

@@ -26,25 +26,19 @@
  *
  */
 
-import chalk from 'chalk';
-import { SNAPSHOT_COMMENT_LINE_HEADER } from './globals.js';
-
 /**
  * Execute the regex based validator.  Supports the 'regex' property with the expression to match,
  * and the 'replace' property (text to replace the match with in the original content stream), 
  * the 'require' property (which is string or an array, with one element for each matching parameter, such as
  * { regex: "Document mode: (\w+)", require: ["inch"] }), and the 'forbidden' property (boolean).
  *
- * @param contents - Contents from the generated file
+ * @param contents - Contents object with { snapshot: string, failure: [string], header: [string] }
  * @param validator - Validator object from the setup
  * @param file - Filename being validated
  * @param cmdOptions Options from the command line (tests, paths).
- * @returns Object with { snapshot: string, failure: string }
  */
 export function validateRegex(contents, validator, file, cmdOptions) {
-  let result = { snapshot: contents, failure: undefined };
-  let header = [SNAPSHOT_COMMENT_LINE_HEADER];
-
+  // unify validator.regex to an array
   let regexArray = Array.isArray(validator.regex)
     ? validator.regex
     : [validator.regex];
@@ -54,36 +48,28 @@ export function validateRegex(contents, validator, file, cmdOptions) {
     let expression;
 
     // describe this regex
-    header.push(`Regular expression: "${filter.regex}"`);
+    contents.header.push('  RegEx validator:');
+    contents.header.push(`    Regular expression: "${filter.regex}"`);
 
     // set up the regex expression
     try {
       expression = new RegExp(filter.regex, 'gm');
     } catch (e) {
-      console.error(
-        chalk.red(`      FAIL: Regular expression "${filter.regex}" invalid.`)
-      );
-      console.error(chalk.red(`      ${e}`));
-      result.failure = `FAIL: Regular expression "${filter.regex}" invalid.`;
+      contents.failure.push(`FAIL: Regular expression "${filter.regex}" invalid.`);
+      contents.failure.push(`      error: ${e}`);
     }
 
     // handle the "replace" use case
     if (filter.replace) {
-      header.push(`  Replace: ${filter.replace}`);
-      result.snapshot = result.snapshot.replace(expression, filter.replace);
+      contents.header.push(`    Replace: ${filter.replace}`);
+      contents.snapshot = contents.snapshot.replace(expression, filter.replace);
     }
 
     // handle theh "forbidden" use case
     if (filter.forbidden) {
-      const match = result.snapshot.match(new RegExp(filter.regex, "m"));
+      const match = contents.snapshot.match(new RegExp(filter.regex, "m"));
       if (match) {
-        // error - matched when it was forbidden
-        console.error(
-          chalk.red(
-            `      FAIL: Regular expression "${filter.regex}" is "forbidden" yet matched ${match.length} items.`
-          )
-        );
-        result.failure = `FAIL: Regular expression "${filter.regex}" is "forbidden" yet matched ${match.length} items.`;
+        contents.failure.push(`FAIL: Regular expression "${filter.regex}" is "forbidden" yet matched ${match.length} items.`);
         continue;
       }
     }
@@ -94,16 +80,10 @@ export function validateRegex(contents, validator, file, cmdOptions) {
         ? filter.require
         : [filter.require];
 
-      const match = result.snapshot.match(new RegExp(filter.regex, "m"));
+      const match = contents.snapshot.match(new RegExp(filter.regex, "m"));
       if (match) {
         if (requireArray.length != match.length - 1) {
-          // error - incorrect number of matches
-          console.error(
-            chalk.red(
-              `      FAIL: Regular expression "${filter.regex}" parameters are inconsistent with "require" properties.`
-            )
-          );
-          result.failure = `FAIL: Regular expression "${filter.regex}" parameters are inconsistent with "require" properties.`;
+          contents.failure.push(`FAIL: Regular expression "${filter.regex}" parameters are inconsistent with "require" properties.`);
           continue;
         }
         for (
@@ -111,46 +91,24 @@ export function validateRegex(contents, validator, file, cmdOptions) {
           requireIndex < requireArray.length;
           ++requireIndex
         ) {
-          header.push(`  Match (${requireIndex + 1}): ${requireArray[requireIndex]}`);
+          contents.header.push(`    Match (${requireIndex + 1}): ${requireArray[requireIndex]}`);
 
           if (
             requireArray[requireIndex].toLowerCase() !=
             match[requireIndex + 1].toLowerCase()
           ) {
-            // error - regex matches but incorrect value 
-            console.error(
-              chalk.red(
-                `      FAIL: "require" regular expression "${
-                  filter.regex
-                }" had "${match[requireIndex + 1]}" when expecting "${
-                  requireArray[requireIndex]
-                }".`
-              )
-            );
-            result.failure = `FAIL: "require" regular expression "${
+            contents.failure.push(`FAIL: "require" regular expression "${
               filter.regex
             }" had "${match[requireIndex + 1]}" when expecting "${
               requireArray[requireIndex]
-            }".`;
+            }".`);
             continue;
           }
         }
       } else {
-        // error - element does not match
-        console.error(
-          chalk.red(
-            `      FAIL: "require" regular expression "${filter.regex}" failed to find a match.`
-          )
-        );
-        result.failure = `FAIL: "require" regular expression "${filter.regex}" failed to find a match.`;
+        contents.failure.push(`FAIL: "require" regular expression "${filter.regex}" failed to find a match.`);
         continue;
       }
     }
   }
-
-  // adjust the result with a header
-  header.push('');
-  result.snapshot = `${header.join(`\n${SNAPSHOT_COMMENT_LINE_HEADER}`)}\n${result.snapshot}`;
-
-  return result;
 }
