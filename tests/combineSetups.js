@@ -44,6 +44,7 @@ export function mergeSetups(setup, parentSetup) {
   // if the property is not defined
   result.posts = setup.posts ?? parentSetup.posts ?? [];
   result.cnc = setup.cnc ?? parentSetup.cnc ?? '';
+  result.machine = setup.machine ?? parentSetup.machine ?? undefined;
   result.properties = setup.properties ?? [];
   result.options = setup.options ?? {};
   result.validators = setup.validators ?? {};

@@ -40,27 +40,30 @@ import chalk from 'chalk';
  * @returns Array of command line options consistent with process.spawn
  */
 export function buildPostCommand(setup, postNumber, cmdOptions, cncPath) {
+  const parameters = [];
+
   // process all options
-  const optionsArray = [];
   for (const option in setup.options) {
     const entry = setup.options[option];
 
     if (entry)
-      if (typeof entry === 'string') optionsArray.push(entry);
-      else optionsArray.push(...entry);
+      if (typeof entry === 'string') parameters.push(entry);
+      else parameters.push(...entry);
   }
 
+  // add machine if specified
+  if (setup.machine)
+    parameters.push('--machine', path.resolve(cmdOptions.cncPath, setup.machine + '.mch'));
+
   // process all properties
-  const propertiesArray = [];
   for (const property in setup.properties) {
     const value = setup.properties[property];
 
-    if (value !== null) propertiesArray.push(`--property`, property, value);
+    if (value !== null) parameters.push(`--property`, property, value);
   }
 
   return [
-    ...optionsArray,
-    ...propertiesArray,
+    ...parameters,
     `${path.resolve(cmdOptions.cpsPath, setup.posts[postNumber])}.cps`,
     `${path.resolve(cncPath, setup.cnc)}.cnc`,
   ];
