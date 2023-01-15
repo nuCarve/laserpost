@@ -17,13 +17,13 @@ function onTranslateSetup() {
   );
 
   if (
-    orientation == MACHINE_ORIENTATION_BOTTOM_RIGHT ||
-    orientation == MACHINE_ORIENTATION_TOP_RIGHT
+    orientation == MACHINE_ORIENTATION_BOTTOM_LEFT ||
+    orientation == MACHINE_ORIENTATION_TOP_LEFT
   )
     project.translate.x = true;
   if (
-    orientation == MACHINE_ORIENTATION_TOP_LEFT ||
-    orientation == MACHINE_ORIENTATION_TOP_RIGHT
+    orientation == MACHINE_ORIENTATION_BOTTOM_LEFT ||
+    orientation == MACHINE_ORIENTATION_BOTTOM_RIGHT
   )
     project.translate.y = true;
 }
@@ -37,11 +37,9 @@ function onTranslateSetup() {
  * @param layer Layer (cutSetting) being generated (-1 for all layers)
  */
 function onFileCreate(layer) {
-  // locate the first section and extract the stock origin information to define the LightBurn mirror X/Y header
-  const section = getSection(0);
   let mirror;
 
-  switch (getProperty('machine0500Orientation', MACHINE_ORIENTATION_DEFAULT)) {
+  switch (getProperty('machine0050Orientation', MACHINE_ORIENTATION_DEFAULT)) {
     case MACHINE_ORIENTATION_BOTTOM_LEFT:
       mirror = {
         x: false,
