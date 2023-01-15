@@ -83,18 +83,18 @@ const USE_AIR_DEFAULT = USE_AIR_ASSIST_GAS;
 
 // enum to alignment marks
 const ALIGNMENT_MARK_NONE = 'mark-none';
-const ALIGNMENT_MARK_TOP_RIGHT = 'mark-top-right';
+const ALIGNMENT_MARK_UPPER_RIGHT = 'mark-upper-right';
 const ALIGNMENT_MARK_CENTER_RIGHT = 'mark-center-right';
-const ALIGNMENT_MARK_BOTTOM_RIGHT = 'mark-bottom-right';
+const ALIGNMENT_MARK_LOWER_RIGHT = 'mark-lower-right';
 const ALIGNMENT_MARK_DEFAULT = ALIGNMENT_MARK_NONE;
 
 // #if LBRN
 // machine orientation
-const MACHINE_ORIENTATION_TOP_LEFT = 'top-left';
-const MACHINE_ORIENTATION_TOP_RIGHT = 'top-right';
-const MACHINE_ORIENTATION_BOTTOM_LEFT = 'bottom-left';
-const MACHINE_ORIENTATION_BOTTOM_RIGHT = 'bottom-right';
-const MACHINE_ORIENTATION_DEFAULT = MACHINE_ORIENTATION_TOP_RIGHT;
+const MACHINE_ORIENTATION_UPPER_LEFT = 'upper-left';
+const MACHINE_ORIENTATION_UPPER_RIGHT = 'upper-right';
+const MACHINE_ORIENTATION_LOWER_LEFT = 'lower-left';
+const MACHINE_ORIENTATION_LOWER_RIGHT = 'lower-right';
+const MACHINE_ORIENTATION_DEFAULT = MACHINE_ORIENTATION_UPPER_RIGHT;
 // #endif
 
 // define the name of the groups used with no putput, including the stock outline border, the

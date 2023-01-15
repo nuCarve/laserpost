@@ -47,7 +47,7 @@ function groupsToProject() {
   populateFilesAndPath();
 
   // transform the coordinate space
-  transformCoordinateSpace();
+  translateCoordinateSpace();
 
   // dump the project to comments to assist with debugging problems
   dumpProject();
@@ -481,13 +481,13 @@ function scanSegmentForClosure(startIndex, endIndex, operation) {
 }
 
 /**
- * Transforms the coordinate space according to the project.mirror property.  See the `transform`
- * method for details on this property and how transformations work.  This method walks all the
- * elements of the project to ensure all coordinates are transformed.  Must be executed after all
+ * Translates the coordinate space according to the project.mirror property.  See the `translate`
+ * method for details on this property and how translations work.  This method walks all the
+ * elements of the project to ensure all coordinates are translated.  Must be executed after all
  * segments have been generated (including alignment marks) to ensure all coordinates are correctly
- * transformed.
+ * translated.
  */
-function transformCoordinateSpace() {
+function translateCoordinateSpace() {
   // process all layers
   for (let layerIndex = 0; layerIndex < project.layers.length; ++layerIndex) {
     const layer = project.layers[layerIndex];
@@ -519,7 +519,7 @@ function transformCoordinateSpace() {
           // handle ellipse versus path
           if (shape.type == SHAPE_TYPE_ELLIPSE) {
             // ellipse
-            const transformed = transform({
+            const transformed = translate({
               x: shape.centerX,
               y: shape.centerY,
             });
@@ -534,9 +534,9 @@ function transformCoordinateSpace() {
             ) {
               const vector = shape.vectors[vectorIndex];
 
-              vector = transform(vector);
-              const transformC0 = transform({ x: vector.c0x, y: vector.c0y });
-              const transformC1 = transform({ x: vector.c1x, y: vector.c1y });
+              vector = translate(vector);
+              const transformC0 = translate({ x: vector.c0x, y: vector.c0y });
+              const transformC1 = translate({ x: vector.c1x, y: vector.c1y });
               vector.c0x = transformC0.x;
               vector.c0y = transformC0.y;
               vector.c1x = transformC1.x;
@@ -550,7 +550,7 @@ function transformCoordinateSpace() {
 }
 
 /**
- * Perform transformation of coordinates to match the desired coordinate space.  Uses the project.translate
+ * Perform translation of coordinates to match the desired coordinate space.  Uses the project.translate
  * and project.box properties to define the transformation, as well as applies the offsets from the
  * workspace post properties.
  *
@@ -568,7 +568,7 @@ function transformCoordinateSpace() {
  * @param xy Object with `x` and `y` properties to translate.  Values `undefined` and returned likewise.
  * @returns Object with same properties, but translated according to project.box
  */
-function transform(xy) {
+function translate(xy) {
   workspaceOffsets = {
     x: getProperty('work0200OffsetX', OFFSET_X_AXIS_DEFAULT),
     y: getProperty('work0300OffsetY', OFFSET_Y_AXIS_DEFAULT),
@@ -587,8 +587,9 @@ function transform(xy) {
     xy.y += workspaceOffsets.y;
 
   if (project.translate.reflect) {
-    xy.x = xy.x !== undefined ? xy.y : undefined;
-    xy.y = xy.y !== undefined ? xy.x : undefined;
+    const originalX = xy.x;
+    xy.x = xy.y;
+    xy.y = originalX;
   }
 
   return xy;
@@ -1235,13 +1236,13 @@ function createAlignmentMark() {
     const markCenterX = stock.maxX + markGap + markRadius;
     let markCenterY;
     switch (alignmentMark) {
-      case ALIGNMENT_MARK_TOP_RIGHT:
+      case ALIGNMENT_MARK_UPPER_RIGHT:
         markCenterY = stock.maxY - markRadius;
         break;
       case ALIGNMENT_MARK_CENTER_RIGHT:
         markCenterY = (stock.maxY - stock.minY) / 2 + stock.minY;
         break;
-      case ALIGNMENT_MARK_BOTTOM_RIGHT:
+      case ALIGNMENT_MARK_LOWER_RIGHT:
         markCenterY = markRadius;
         break;
     }

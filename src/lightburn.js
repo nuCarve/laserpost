@@ -16,16 +16,30 @@ function onTranslateSetup() {
     MACHINE_ORIENTATION_DEFAULT
   );
 
+  project.translate.x = true;
+  project.translate.y = true;
   if (
-    orientation == MACHINE_ORIENTATION_BOTTOM_LEFT ||
-    orientation == MACHINE_ORIENTATION_TOP_LEFT
+    orientation == MACHINE_ORIENTATION_LOWER_LEFT ||
+    orientation == MACHINE_ORIENTATION_UPPER_LEFT
   )
-    project.translate.x = true;
+    project.translate.x = false;
   if (
-    orientation == MACHINE_ORIENTATION_BOTTOM_LEFT ||
-    orientation == MACHINE_ORIENTATION_BOTTOM_RIGHT
+    orientation == MACHINE_ORIENTATION_LOWER_LEFT ||
+    orientation == MACHINE_ORIENTATION_LOWER_RIGHT
   )
-    project.translate.y = true;
+    project.translate.y = false;
+
+  // this is a rotate left 90 degrees
+  // project.translate.reflect = true;
+  // project.translate.y = !project.translate.y;
+
+  // this is a rotate right 90 degrees
+  // project.translate.reflect = true;
+  // project.translate.x = !project.translate.x;
+
+  // this is a rotate 180 degrees
+  // project.translate.x = !project.translate.x;
+  // project.translate.y = !project.translate.y;
 }
 
 /**
@@ -40,25 +54,26 @@ function onFileCreate(layer) {
   let mirror;
 
   switch (getProperty('machine0050Orientation', MACHINE_ORIENTATION_DEFAULT)) {
-    case MACHINE_ORIENTATION_BOTTOM_LEFT:
+    case MACHINE_ORIENTATION_LOWER_LEFT:
       mirror = {
         x: false,
         y: false,
       };
       break;
-    case MACHINE_ORIENTATION_BOTTOM_RIGHT:
+    case MACHINE_ORIENTATION_LOWER_RIGHT:
       mirror = {
         x: true,
         y: false,
       };
       break;
-    case MACHINE_ORIENTATION_TOP_LEFT:
+    case MACHINE_ORIENTATION_UPPER_LEFT:
       mirror = {
         x: false,
         y: true,
       };
       break;
-    case MACHINE_ORIENTATION_TOP_RIGHT:
+    case MACHINE_ORIENTATION_UPPER_RIGHT:
+    default:
       mirror = {
         x: true,
         y: true,
@@ -235,7 +250,10 @@ function onWriteShapes(layer) {
  * @param layer Layer (cutSetting) being generated (-1 for all layers)
  */
 function onWriteTrailer(layer) {
-  const includeNotes = getProperty('laserpost0400IncludeNotes', INCLUDE_NOTES_DEFAULT);
+  const includeNotes = getProperty(
+    'laserpost0400IncludeNotes',
+    INCLUDE_NOTES_DEFAULT
+  );
   if (includeNotes != INCLUDE_NOTES_NONE && notes != '') {
     // determine if we cause LightBurn to show notes on file load
     let showOnLoad = false;
