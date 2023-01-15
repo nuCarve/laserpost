@@ -92,12 +92,12 @@
       "validators": {
         "lbrn": {
           "xpath": [
-            { "query": "/LightBurnProject/CutSetting[3]", "required": true },
-            { "query": "/LightBurnProject/Shape[6]", "required": true }
+            { "query": "/LightBurnProject/CutSetting[2]", "required": true },
+            { "query": "/LightBurnProject/Shape[3]", "required": true }
           ]
         },
         "svg": {
-          "xpath": [{ "query": "/svg:svg/svg:g[5]", "required": true }]
+          "xpath": [{ "query": "/svg:svg/svg:g[2]", "required": true }]
         }
       }
     }
@@ -107,83 +107,172 @@
       "name": "Barebones",
       "comment": "Test for basic operation without much content validation",
       "setup": "barebones",
-      "cnc": "cover-mm"
+      "cnc": "op-1-defaults"
     },
     {
       "name": "Default properties",
-      "comment": "Default properties on cover-mm file",
+      "comment": "Default properties on op-1-defaults file",
       "setup": "all",
-      "cnc": "cover-mm"
+      "cnc": "op-1-defaults"
     },
     {
-      "name": "Marker top-right",
-      "comment": "Alignment marker set to top-right",
+      "name": "Marker upper-right",
+      "comment": "Alignment marker set to upper-right",
       "setup": "marker",
-      "cnc": "cover-mm",
+      "cnc": "op-1-defaults",
       "properties": {
-        "laserpost0300AlignmentMarks": "ALIGNMENT_MARK_TOP_RIGHT"
+        "laserpost0300AlignmentMarks": "ALIGNMENT_MARK_UPPER_RIGHT"
       }
     },
     {
       "name": "Marker center-right",
-      "comment": "Alignment marker set to center",
+      "comment": "Alignment marker set to center-right",
       "setup": "marker",
-      "cnc": "cover-mm",
+      "cnc": "op-1-defaults",
       "properties": {
         "laserpost0300AlignmentMarks": "ALIGNMENT_MARK_CENTER_RIGHT"
       }
     },
     {
-      "name": "Marker bottom-right",
-      "comment": "Alignment marker set to bottom",
+      "name": "Marker lower-right",
+      "comment": "Alignment marker set to lower-right",
       "setup": "marker",
-      "cnc": "cover-mm",
+      "cnc": "op-1-defaults",
       "properties": {
-        "laserpost0300AlignmentMarks": "ALIGNMENT_MARK_BOTTOM_RIGHT"
+        "laserpost0300AlignmentMarks": "ALIGNMENT_MARK_LOWER_RIGHT"
       }
     },
     {
-      "name": "Group by operation",
+      "name": "Group operation no shape",
       "comment": "Group by operation, full compare",
       "setup": "all",
-      "cnc": "cover-mm",
+      "cnc": "op-4-cut-modes",
       "properties": {
-        "laserpost0100Grouping": "GROUPING_BY_OPERATION"
+        "laserpost0100Grouping": "GROUPING_BY_OPERATION",
+        "laserpost0200GroupShapes": "false"
       }
     },
     {
-      "name": "Group by layer",
+      "name": "Group operation shape",
+      "comment": "Group by operation, full compare",
+      "setup": "all",
+      "cnc": "op-4-cut-modes",
+      "properties": {
+        "laserpost0100Grouping": "GROUPING_BY_OPERATION",
+        "laserpost0200GroupShapes": "true"
+      }
+    },
+    {
+      "name": "Group layer no shape",
       "comment": "Group by layer, full compare",
       "setup": "all",
-      "cnc": "cover-mm",
+      "cnc": "op-4-cut-modes",
       "properties": {
-        "laserpost0100Grouping": "GROUPING_BY_LAYER"
+        "laserpost0100Grouping": "GROUPING_BY_LAYER",
+        "laserpost0200GroupShapes": "false"
       }
     },
     {
-      "name": "Group by layer file",
-      "comment": "Group by layer file, full compare",
+      "name": "Group layer shape",
+      "comment": "Group by layer, full compare",
       "setup": "all",
-      "cnc": "cover-mm",
+      "cnc": "op-4-cut-modes",
       "properties": {
-        "laserpost0100Grouping": "GROUPING_BY_LAYER_FILE"
+        "laserpost0100Grouping": "GROUPING_BY_LAYER",
+        "laserpost0200GroupShapes": "true"
       }
+    },
+    {
+      "name": "Group file no shape",
+      "comment": "Group by layer file, full compare - with alignment mark testing for each layer file",
+      "setup": "all",
+      "cnc": "op-4-cut-modes",
+      "validators": {
+        "lbrn": {
+          "regex": [
+            { "regex": "Operation: Alignment (mark)", "require": "mark" }
+          ]
+        },
+        "svg": {
+          "regex": [
+            { "regex": "Operation: Alignment (mark)", "require": "mark" }
+          ]
+        }
+      },
+      "properties": {
+        "laserpost0100Grouping": "GROUPING_BY_LAYER_FILE",
+        "laserpost0300AlignmentMarks": "ALIGNMENT_MARK_UPPER_RIGHT",
+        "laserpost0200GroupShapes": "false"
+      }
+    },
+    {
+      "name": "Group file shapes",
+      "comment": "Group by layer file, full compare - with alignment mark testing for each layer file",
+      "setup": "all",
+      "cnc": "op-4-cut-modes",
+      "validators": {
+        "lbrn": {
+          "regex": [
+            { "regex": "Operation: Alignment (mark)", "require": "mark" }
+          ]
+        },
+        "svg": {
+          "regex": [
+            { "regex": "Operation: Alignment (mark)", "require": "mark" }
+          ]
+        }
+      },
+      "properties": {
+        "laserpost0100Grouping": "GROUPING_BY_LAYER_FILE",
+        "laserpost0300AlignmentMarks": "ALIGNMENT_MARK_UPPER_RIGHT",
+        "laserpost0200GroupShapes": "true"
+      }
+    },
+    {
+      "name": "Orientation LL-LL",
+      "comment": "Model complex-ll-top, verify not rotated and LBRN not dirty w/ll orientation",
+      "setup": "all",
+      "cnc": "complex-ll-top",
+      "properties": { "machine0050Orientation": "MACHINE_ORIENTATION_LOWER_LEFT" }
+    },
+    {
+      "name": "Orientation LL-UL",
+      "comment": "Model complex-ll-top, verify not rotated and LBRN not dirty w/ul orientation",
+      "setup": "all",
+      "cnc": "complex-ll-top",
+      "properties": { "machine0050Orientation": "MACHINE_ORIENTATION_UPPER_LEFT" }
+    },
+    {
+      "name": "Orientation LL-LR",
+      "comment": "Model complex-ll-top, verify not rotated and LBRN not dirty w/lr orientation",
+      "setup": "all",
+      "cnc": "complex-ll-top",
+      "properties": { "machine0050Orientation": "MACHINE_ORIENTATION_LOWER_RIGHT" }
+    },
+    {
+      "name": "Orientation LL-UR",
+      "comment": "Model complex-ll-top, verify not rotated and LBRN not dirty w/ur orientation",
+      "setup": "all",
+      "cnc": "complex-ll-top",
+      "properties": { "machine0050Orientation": "MACHINE_ORIENTATION_UPPER_RIGHT" }
+    },
+    {
+      "name": "Orientation Right LL-LL",
+      "comment": "Model complex-ll-right, verify not rotated and LBRN not dirty w/ur orientation",
+      "setup": "all",
+      "cnc": "complex-ll-right",
+      "properties": { "machine0050Orientation": "MACHINE_ORIENTATION_UPPER_RIGHT" }
     }
   ],
   "to-do": [
-    "    IN PROGRESS: laserpost0100Grouping:",
-    " thought: should we verify that each has an alignment mark?",
-    "    { title: localize('Group by operation'), id: GROUPING_BY_OPERATION },",
-    "    { title: localize('Group by layer'), id: GROUPING_BY_LAYER },",
-    "    { title: localize('File per layer'), id: GROUPING_BY_LAYER_FILE },",
     "laserpost0200GroupShapes:",
     "  type: 'boolean',",
     "  value: GROUP_SHAPES_DEFAULT,",
     "laserpost0300AlignmentMarks:",
     "    { title: localize('None'), id: ALIGNMENT_MARK_NONE },",
-    "    { title: localize('Aligned to stock top-right'), id: ALIGNMENT_MARK_TOP_RIGHT },",
+    "    { title: localize('Aligned to stock upper-right'), id: ALIGNMENT_MARK_UPPER_RIGHT },",
     "    { title: localize('Aligned to stock center-right'), id: ALIGNMENT_MARK_CENTER_RIGHT },",
-    "    { title: localize('Aligned to stock bottom-right'), id: ALIGNMENT_MARK_BOTTOM_RIGHT },",
+    "    { title: localize('Aligned to stock lower-right'), id: ALIGNMENT_MARK_LOWER_RIGHT },",
     "laserpost0400IncludeNotes:",
     "    { title: localize('Disable'), id: INCLUDE_NOTES_NONE },",
     "    // #if LBRN",
@@ -234,10 +323,10 @@
     "",
     "// #if LBRN",
     "machine0050Orientation:",
-    "    { title: localize('Top left'), id: MACHINE_ORIENTATION_TOP_LEFT },",
-    "    { title: localize('Top right'), id: MACHINE_ORIENTATION_TOP_RIGHT },",
-    "    { title: localize('Bottom left'), id: MACHINE_ORIENTATION_BOTTOM_LEFT },",
-    "    { title: localize('Bottom right'), id: MACHINE_ORIENTATION_BOTTOM_RIGHT },",
+    "    { title: localize('Upper left'), id: MACHINE_ORIENTATION_UPPER_LEFT },",
+    "    { title: localize('Upper right'), id: MACHINE_ORIENTATION_UPPER_RIGHT },",
+    "    { title: localize('Lower left'), id: MACHINE_ORIENTATION_LOWER_LEFT },",
+    "    { title: localize('Lower right'), id: MACHINE_ORIENTATION_LOWER_RIGHT },",
     "// #endif",
     "machine0100SpeedUnits:",
     "    { title: localize('mm/sec'), id: SPEED_UNITS_MMPS },",

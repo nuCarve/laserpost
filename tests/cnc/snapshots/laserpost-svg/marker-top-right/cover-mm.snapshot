@@ -1,5 +1,0 @@
-XPath query "/svg:svg/svg:g[5]" (required):
-<g id="laserpost_alignment_mark" xmlns="http://www.w3.org/2000/svg">
-    <desc>Operation: Alignment mark</desc>
-    <path id="laserpost_alignment_mark_1" d="M 604.724,18.898 A 18.898,18.898 0 0 1 642.52,18.898 A 18.898,18.898 0 0 1 604.724,18.898 M 623.622,37.795 L 623.622,0 M 604.724,18.898 L 642.52,18.898" stroke="#2b63a3" stroke-width="0.378" fill="none"/>
-  </g>

@@ -1,0 +1,9 @@
+XPath query "/svg:svg/svg:g" (required):
+<g id="laserpost_bottom_rounded_vaporize" xmlns="http://www.w3.org/2000/svg">
+      <desc>Layer group: "Bottom rounded vaporize"</desc>
+      <!-- Operation: Bottom rounded vaporize -->
+      <path id="laserpost_bottom_rounded_vaporize_1" d=" M 570.52,535.367 L 570.52,533.48 L 570.52,533.102 L 230.551,533.102 C 209.796,533.102 192.945,549.953 192.945,570.709 L 192.945,646.11 L 532.913,646.11 C 553.683,646.11 570.52,629.273 570.52,608.504 L 570.52,535.367" stroke="#000000" stroke-width="0.378" fill="none"/>
+      <!-- Operation: Alignment mark -->
+      <path id="laserpost_alignment_mark_1" d="M 763.465,18.898 A 18.898,18.898 0 0 1 801.26,18.898 A 18.898,18.898 0 0 1 763.465,18.898 M 782.362,37.795 L 782.362,0 M 763.465,18.898 L 801.26,18.898" stroke="#991209" stroke-width="0.378" fill="none"/>
+    </g>
+XPath query "/svg:svg/svg:path" (not required):
