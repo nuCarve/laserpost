@@ -31,9 +31,9 @@ import { SNAPSHOT_COMMENT_LINE_HEADER } from './globals.js';
 
 /**
  * Execute the regex based validator.  Supports the 'regex' property with the expression to match,
- * and the 'replace' property (text to replace the match with in the original content stream), and
- * the 'require' property (which is an array, with one element for each matching parameter, such as
- * { regex: "Document mode: (\w+)", require: ["inch"] })
+ * and the 'replace' property (text to replace the match with in the original content stream), 
+ * the 'require' property (which is string or an array, with one element for each matching parameter, such as
+ * { regex: "Document mode: (\w+)", require: ["inch"] }), and the 'forbidden' property (boolean).
  *
  * @param contents - Contents from the generated file
  * @param validator - Validator object from the setup
