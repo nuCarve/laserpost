@@ -101,6 +101,7 @@ export function validatePostResults(
               file,
               cmdOptions
             );
+
             if (validatorResult) {
               validatorResult.snapshot = result.snapshot;
               validatorResult.failure =
@@ -111,36 +112,38 @@ export function validatePostResults(
           // did we run any tests?
           if (validatorResult) {
             // record the snapshot
-            const snapshotFile = path.resolve(cncPath, path.basename(file, path.extname(file)) + '.snapshot');
-            fs.writeFileSync(
-              snapshotFile,
-              validatorResult.snapshot,
-              { encoding: 'utf-8' }
-            );
+            const snapshotFile = path.resolve(cncPath, file + '.snapshot');
+            fs.writeFileSync(snapshotFile, validatorResult.snapshot, {
+              encoding: 'utf-8',
+            });
 
             // run the snapshot compare / management
-            if (!validatorResult.failure) {
-              const targetSnapshotFile = path.resolve(snapshotPath, path.basename(file, path.extname(file)) + '.snapshot');
-              const artifactFile = path.resolve(cncPath, file);
-              const targetArtifactFile = path.resolve(snapshotPath, file);
+            const targetSnapshotFile = path.resolve(
+              snapshotPath,
+              file + '.snapshot'
+            );
+            const artifactFile = path.resolve(cncPath, file);
+            const targetArtifactFile = path.resolve(snapshotPath, file);
 
-              const failureMessage = snapshotCompare(
-                key,
-                snapshotFile,
-                targetSnapshotFile,
-                artifactFile,
-                targetArtifactFile,
-                cmdOptions
-              );
-              if (!failureMessage) result.pass++;
-              else {
-                result.lastFailure = failureMessage;
-                result.fail++;
-              }
-            } else {
+            const failureMessage = snapshotCompare(
+              key,
+              snapshotFile,
+              targetSnapshotFile,
+              artifactFile,
+              targetArtifactFile,
+              cmdOptions
+            );
+
+            // if no prior errors, look at our snapshot failure (this let's prior failures win as the
+            // snapshot isn't important when failures have happened)
+            if (!validatorResult.failure && failureMessage)
+              validatorResult.failure = failureMessage;
+
+            // summarize our failure
+            if (validatorResult.failure) {
               result.lastFailure = validatorResult.failure;
               result.fail++;
-            }
+            } else result.pass++;
           } else {
             result.lastFailure = 'Validators failed to return any results.';
             result.fail++;
@@ -153,31 +156,21 @@ export function validatePostResults(
 
 /**
  * Delegates to the type specific validator
- * 
+ *
  * @param validatorType - The name of the validator to execute
  * @param contents - Contents from the generated file
  * @param validator - Validator object from the setup
  * @param file - Filename being validated
  * @param cmdOptions Options from the command line (tests, paths).
  * @returns Object with { snapshot: string, failure: string }
-*/
+ */
 function runValidator(validatorType, contents, validator, file, cmdOptions) {
   // delegate to the appropriate validator
   switch (validatorType) {
     case 'xpath':
-      return validateXPath(
-        contents,
-        validator,
-        file,
-        cmdOptions
-      );
+      return validateXPath(contents, validator, file, cmdOptions);
     case 'text':
-      return validateText(
-        contents,
-        validator,
-        file,
-        cmdOptions
-      );
+      return validateText(contents, validator, file, cmdOptions);
     case 'regex':
       return validateRegex(contents, validator, file, cmdOptions);
     default:
@@ -186,7 +179,10 @@ function runValidator(validatorType, contents, validator, file, cmdOptions) {
           `    Unknown validator "${validator.validator}" on "${key}" for "${file}".`
         )
       );
-      return { snapshot: contents, failure: `Unknown validator "${validator.validator}" on "${key}" for "${file}".` };
+      return {
+        snapshot: contents,
+        failure: `Unknown validator "${validator.validator}" on "${key}" for "${file}".`,
+      };
   }
 }
 
@@ -198,7 +194,7 @@ function runValidator(validatorType, contents, validator, file, cmdOptions) {
  * @param newSnapshotFile Path to the file that has the new snapshot test results
  * @param baselineSnapshotFile Path to the baseline snapshot (for the baseline snapshot to compare against)
  * @param sourceArtifactFile Path to the source artifact file
- * @param targetArtifactFile Path to copy the source artifact file to, if a snapshot is recorded  
+ * @param targetArtifactFile Path to copy the source artifact file to, if a snapshot is recorded
  * @param cmdOptions Options from the command line (tests, paths).
  * @returns String with failure message, undefined means success
  */

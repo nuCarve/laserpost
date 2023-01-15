@@ -28,9 +28,8 @@
 
 import xpath from 'xpath';
 import dom from 'xmldom-qsa';
-import fs from 'node:fs';
-import path from 'node:path';
 import chalk from 'chalk';
+import { MATCH_FORBIDDEN, MATCH_OPTIONAL, MATCH_REQUIRED, SNAPSHOT_COMMENT_LINE_HEADER } from './globals.js';
 
 // set up global used by valiateXMLPathHandleError to track if an error has occured with the DOM
 let validateXMLPathError = false;
@@ -52,10 +51,9 @@ export function validateXMLPathHandleError(type, message) {
 /**
  * Execute the XPath based validator.  The validator setup must include the `xpath` property, which
  * can be set to a single xpath query, or an array of xpath queries.  The query can be a single
- * string (in which case there must be a match or it will fail), or an object that can include {
- * query: string, required: boolean } to to specify if the field is optional.  The validator setup
- * may also include an array of `namespaces` to define XML namespaces (`"namespaces": { "svg":
- * "http://www.w3.org/2000/svg" }`).
+ * string (which defaults 'match' to 'required'), or an object that can include { query: string,
+ * match: "required|optional|forbidden" }.  The validator setup may also include an array of
+ * `namespaces` to define XML namespaces (`"namespaces": { "svg": "http://www.w3.org/2000/svg" }`).
  *
  * @param contents - Contents from the generated file
  * @param validator - Validator object from the setup
@@ -93,22 +91,41 @@ export function validateXPath(contents, validator, file, cmdOptions) {
 
     // process the queries
     for (const xpathQuery of xpathArray) {
-      // unify the query to be an object with { query, required } values
+      // unify the query to be an object with { query, match } values
       let queryObject =
         typeof xpathQuery === 'string'
-          ? { query: xpathQuery, required: true }
-          : { query: xpathQuery.query, required: xpathQuery.required ?? true };
+          ? { query: xpathQuery, match: MATCH_REQUIRED }
+          : { query: xpathQuery.query, match: xpathQuery.match?.toLowerCase() ?? MATCH_REQUIRED };
 
       if (cmdOptions.verbose) {
         console.log(chalk.gray(
           `    Processing query "${queryObject.query}" (${
-            queryObject.required ? 'required' : 'not required'
+            queryObject.match
           }):`
         ));
       }
-      snapshot += `XPath query "${queryObject.query}" (${
-        queryObject.required ? 'required' : 'not required'
-      }):\n`;
+      snapshot += `${SNAPSHOT_COMMENT_LINE_HEADER}\n`;
+      snapshot += `${SNAPSHOT_COMMENT_LINE_HEADER} XPath query "${queryObject.query}" (${
+        queryObject.match 
+      })\n`;
+      snapshot += `${SNAPSHOT_COMMENT_LINE_HEADER}\n`;
+
+      switch (queryObject.match) {
+        case MATCH_REQUIRED:
+        case MATCH_FORBIDDEN:
+        case MATCH_OPTIONAL:
+          break;
+        default:
+          console.log(chalk.gray(
+            `    Processing query "${queryObject.query}:`
+          ));
+          console.error(chalk.red(
+            `      FAIL: Unknown "match" value of "${queryObject.match}".`
+          ));
+          failure = `Unknown "match" value of "${queryObject.match}".`;
+          snapshot += `  FAIL: Unknown "match" value of "${queryObject.match}".\n`;
+          continue;
+      }
 
       try {
         // register any required namespaces
@@ -116,7 +133,7 @@ export function validateXPath(contents, validator, file, cmdOptions) {
 
         // and execute the query
         const nodes = select(queryObject.query, xmlDoc);
-        if (nodes.length == 0 && queryObject.required) {
+        if (nodes.length == 0 && queryObject.match == MATCH_REQUIRED) {
           console.log(chalk.gray(
             `    Processing query "${queryObject.query}" (required):`
           ));
@@ -125,6 +142,17 @@ export function validateXPath(contents, validator, file, cmdOptions) {
           ));
           failure = `Required query "${queryObject.query}" did not match any elements.`;
           snapshot += `  FAIL: Required query "${queryObject.query}" did not match any elements.\n`;
+          continue;
+        }
+        if (nodes.length != 0 && queryObject.match == MATCH_FORBIDDEN) {
+          console.log(chalk.gray(
+            `    Processing query "${queryObject.query}" (forbidden):`
+          ));
+          console.error(chalk.red(
+            `      FAIL: Forbidden query matched ${nodes.length} elements`
+          ));
+          failure = `Forbidden query "${queryObject.query}" matched ${nodes.length} elements.`;
+          snapshot += `  FAIL: Forbidden query "${queryObject.query}" match ${nodes.length} elements.\n`;
           continue;
         }
 

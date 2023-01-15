@@ -31,3 +31,10 @@ export const SNAPSHOT_NO_WRITE = 'no-write';
 export const SNAPSHOT_CREATE = 'create';
 export const SNAPSHOT_RESET = 'reset';
 
+// define enum constants for the match option in tests.json
+export const MATCH_REQUIRED = 'required';
+export const MATCH_FORBIDDEN = 'forbidden';
+export const MATCH_OPTIONAL = 'optional';
+
+// Snapshot file comment line header
+export const SNAPSHOT_COMMENT_LINE_HEADER = '***** ';

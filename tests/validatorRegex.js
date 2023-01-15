@@ -27,8 +27,7 @@
  */
 
 import chalk from 'chalk';
-import fs from 'node:fs';
-import path from 'node:path';
+import { SNAPSHOT_COMMENT_LINE_HEADER } from './globals.js';
 
 /**
  * Execute the regex based validator.  Supports the 'regex' property with the expression to match,
@@ -44,6 +43,7 @@ import path from 'node:path';
  */
 export function validateRegex(contents, validator, file, cmdOptions) {
   let result = { snapshot: contents, failure: undefined };
+  let header = [SNAPSHOT_COMMENT_LINE_HEADER];
 
   let regexArray = Array.isArray(validator.regex)
     ? validator.regex
@@ -52,6 +52,9 @@ export function validateRegex(contents, validator, file, cmdOptions) {
   // execute all expressions
   for (const filter of regexArray) {
     let expression;
+
+    // describe this regex
+    header.push(`Regular expression: "${filter.regex}"`);
 
     // set up the regex expression
     try {
@@ -65,8 +68,25 @@ export function validateRegex(contents, validator, file, cmdOptions) {
     }
 
     // handle the "replace" use case
-    if (filter.replace)
+    if (filter.replace) {
+      header.push(`  Replace: ${filter.replace}`);
       result.snapshot = result.snapshot.replace(expression, filter.replace);
+    }
+
+    // handle theh "forbidden" use case
+    if (filter.forbidden) {
+      const match = result.snapshot.match(new RegExp(filter.regex, "m"));
+      if (match) {
+        // error - matched when it was forbidden
+        console.error(
+          chalk.red(
+            `      FAIL: Regular expression "${filter.regex}" is "forbidden" yet matched ${match.length} items.`
+          )
+        );
+        result.failure = `FAIL: Regular expression "${filter.regex}" is "forbidden" yet matched ${match.length} items.`;
+        continue;
+      }
+    }
 
     // handle the "require" use case
     if (filter.require) {
@@ -91,6 +111,8 @@ export function validateRegex(contents, validator, file, cmdOptions) {
           requireIndex < requireArray.length;
           ++requireIndex
         ) {
+          header.push(`  Match (${requireIndex + 1}): ${requireArray[requireIndex]}`);
+
           if (
             requireArray[requireIndex].toLowerCase() !=
             match[requireIndex + 1].toLowerCase()
@@ -117,7 +139,7 @@ export function validateRegex(contents, validator, file, cmdOptions) {
         // error - element does not match
         console.error(
           chalk.red(
-            `      FAIL: "require" regular expression "${filter.regex}"failed to find a match.`
+            `      FAIL: "require" regular expression "${filter.regex}" failed to find a match.`
           )
         );
         result.failure = `FAIL: "require" regular expression "${filter.regex}" failed to find a match.`;
@@ -125,6 +147,10 @@ export function validateRegex(contents, validator, file, cmdOptions) {
       }
     }
   }
+
+  // adjust the result with a header
+  header.push('');
+  result.snapshot = `${header.join(`\n${SNAPSHOT_COMMENT_LINE_HEADER}`)}\n${result.snapshot}`;
 
   return result;
 }
