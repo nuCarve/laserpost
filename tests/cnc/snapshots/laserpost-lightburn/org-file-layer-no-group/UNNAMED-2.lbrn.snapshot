@@ -1,0 +1,41 @@
+***** 
+*****  XPath query "/LightBurnProject/CutSetting" (required)
+***** 
+<CutSetting type="Cut">
+      <index Value="0"/>
+      <name Value="Bottom rounded vaporize"/>
+      <minPower Value="80"/>
+      <maxPower Value="80"/>
+      <minPower2 Value="80"/>
+      <maxPower2 Value="80"/>
+      <speed Value="30"/>
+      <priority Value="2"/>
+      <runBlower Value="1"/>
+      <zOffset Value="0"/>
+      <numPasses Value="1"/>
+      <zPerPass Value="0"/>
+      <enableLaser1 Value="1"/>
+      <enableLaser2 Value="0"/>
+    </CutSetting>
+***** 
+*****  XPath query "/LightBurnProject/Shape" (required)
+***** 
+<Shape Type="Path" CutIndex="0">
+      <XForm>1 0 0 1 0 0</XForm>
+      <V vx="51.05" vy="141.649"/>
+      <V vx="51.05" vy="141.15"/>
+      <V vx="51.05" vy="141.05"/>
+      <V vx="141" vy="141.05" c0x="146.492" c0y="141.05"/>
+      <V vx="150.95" vy="151" c1x="150.95" c1y="145.508"/>
+      <V vx="150.95" vy="170.95"/>
+      <V vx="61" vy="170.95" c0x="55.505" c0y="170.95"/>
+      <V vx="51.05" vy="161" c1x="51.05" c1y="166.495"/>
+      <P T="L" p0="0" p1="1"/>
+      <P T="L" p0="1" p1="2"/>
+      <P T="L" p0="2" p1="3"/>
+      <P T="B" p0="3" p1="4"/>
+      <P T="L" p0="4" p1="5"/>
+      <P T="L" p0="5" p1="6"/>
+      <P T="B" p0="6" p1="7"/>
+      <P T="L" p0="7" p1="0"/>
+    </Shape>

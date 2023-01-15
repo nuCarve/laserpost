@@ -45,11 +45,11 @@
       "validators": {
         "lbrn": {
           "xpath": [
-            { "query": "/LightBurnProject/@AppVersion", "required": true }
+            { "query": "/LightBurnProject/@AppVersion", "match": "required" }
           ]
         },
         "svg": {
-          "xpath": [{ "query": "/svg:svg/@version", "required": true }]
+          "xpath": [{ "query": "/svg:svg/@version", "match": "required" }]
         }
       },
       "properties": {
@@ -62,14 +62,14 @@
       "validators": {
         "lbrn": {
           "xpath": [
-            { "query": "/LightBurnProject/CutSetting", "required": true },
-            { "query": "/LightBurnProject/Shape", "required": true }
+            { "query": "/LightBurnProject/CutSetting", "match": "required" },
+            { "query": "/LightBurnProject/Shape", "match": "required" }
           ]
         },
         "svg": {
           "xpath": [
-            { "query": "/svg:svg/svg:g", "required": false },
-            { "query": "/svg:svg/svg:path", "required": false }
+            { "query": "/svg:svg/svg:g", "match": "optional" },
+            { "query": "/svg:svg/svg:path", "match": "optional" }
           ]
         }
       }
@@ -80,12 +80,12 @@
       "validators": {
         "lbrn": {
           "xpath": [
-            { "query": "/LightBurnProject/CutSetting[2]", "required": true },
-            { "query": "/LightBurnProject/Shape[3]", "required": true }
+            { "query": "/LightBurnProject/CutSetting[2]", "match": "required" },
+            { "query": "/LightBurnProject/Shape[3]", "match": "required" }
           ]
         },
         "svg": {
-          "xpath": [{ "query": "/svg:svg/svg:g[2]", "required": true }]
+          "xpath": [{ "query": "/svg:svg/svg:g[2]", "match": "required" }]
         }
       }
     }
@@ -208,42 +208,128 @@
       "comment": "Model complex-ll-top, verify not rotated and LBRN not dirty w/ll orientation",
       "setup": "all",
       "cnc": "complex-ll-top",
-      "properties": { "machine0050Orientation": "MACHINE_ORIENTATION_LOWER_LEFT" }
+      "properties": {
+        "machine0050Orientation": "MACHINE_ORIENTATION_LOWER_LEFT"
+      }
     },
     {
       "name": "Orientation LL-UL",
       "comment": "Model complex-ll-top, verify not rotated and LBRN not dirty w/ul orientation",
       "setup": "all",
       "cnc": "complex-ll-top",
-      "properties": { "machine0050Orientation": "MACHINE_ORIENTATION_UPPER_LEFT" }
+      "properties": {
+        "machine0050Orientation": "MACHINE_ORIENTATION_UPPER_LEFT"
+      }
     },
     {
       "name": "Orientation LL-LR",
       "comment": "Model complex-ll-top, verify not rotated and LBRN not dirty w/lr orientation",
       "setup": "all",
       "cnc": "complex-ll-top",
-      "properties": { "machine0050Orientation": "MACHINE_ORIENTATION_LOWER_RIGHT" }
+      "properties": {
+        "machine0050Orientation": "MACHINE_ORIENTATION_LOWER_RIGHT"
+      }
     },
     {
       "name": "Orientation LL-UR",
       "comment": "Model complex-ll-top, verify not rotated and LBRN not dirty w/ur orientation",
       "setup": "all",
       "cnc": "complex-ll-top",
-      "properties": { "machine0050Orientation": "MACHINE_ORIENTATION_UPPER_RIGHT" }
+      "properties": {
+        "machine0050Orientation": "MACHINE_ORIENTATION_UPPER_RIGHT"
+      }
     },
     {
       "name": "Orientation Right LL-LL",
       "comment": "Model complex-ll-right, verify not rotated and LBRN not dirty w/ur orientation",
       "setup": "all",
       "cnc": "complex-ll-right",
-      "properties": { "machine0050Orientation": "MACHINE_ORIENTATION_UPPER_RIGHT" }
+      "properties": {
+        "machine0050Orientation": "MACHINE_ORIENTATION_UPPER_RIGHT"
+      }
+    },
+    {
+      "name": "Notes none",
+      "comment": "Notes set to none; verify they are not generated at all.",
+      "setup": "baseline",
+      "cnc": "op-1-defaults",
+      "validators": {
+        "lbrn": {
+          "xpath": [
+            { "query": "/LightBurnProject/Notes", "match": "forbidden" }
+          ]
+        },
+        "svg": {
+          "xpath": [{ "query": "/nothing", "match": "forbidden" }],
+          "regex": [
+            {
+              "regex": "(Job setup information has been generated)",
+              "forbidden": true
+            }
+          ]
+        }
+      },
+      "properties": { "laserpost0400IncludeNotes": "INCLUDE_NOTES_NONE" }
+    },
+    {
+      "name": "Notes hidden",
+      "comment": "Notes set to hidden; verify they are generated but not shown.",
+      "setup": "baseline",
+      "cnc": "op-1-defaults",
+      "posts": ["laserpost-lightburn"],
+      "validators": {
+        "lbrn": {
+          "xpath": [{ "query": "/LightBurnProject/Notes", "match": "required" }]
+        }
+      },
+      "properties": { "laserpost0400IncludeNotes": "INCLUDE_NOTES_HIDDEN" }
+    },
+    {
+      "name": "Notes show important",
+      "comment": "Notes set to show important; verify they are generated but not shown.",
+      "setup": "baseline",
+      "cnc": "op-1-defaults",
+      "validators": {
+        "lbrn": {
+          "xpath": [{ "query": "/LightBurnProject/Notes", "match": "required" }]
+        },
+        "svg": {
+          "xpath": [{ "query": "/nothing", "match": "forbidden" }],
+          "regex": [
+            {
+              "regex": "(Job setup information has been generated)",
+              "forbidden": true
+            }
+          ]
+        }
+      },
+      "properties": {
+        "laserpost0400IncludeNotes": "INCLUDE_NOTES_SHOW_IMPORTANT"
+      }
+    },
+    {
+      "name": "Notes show",
+      "comment": "Notes set to show; verify they are generated and shown.",
+      "setup": "baseline",
+      "cnc": "op-1-defaults",
+      "validators": {
+        "lbrn": {
+          "xpath": [{ "query": "/LightBurnProject/Notes", "match": "required" }]
+        },
+        "svg": {
+          "xpath": [{ "query": "/nothing", "match": "forbidden" }],
+          "regex": [
+            {
+              "regex": "(Job setup information has been generated)",
+              "require": "Job setup information has been generated"
+            }
+          ]
+        }
+      },
+      "properties": { "laserpost0400IncludeNotes": "INCLUDE_NOTES_SHOW" }
     }
   ],
   "to-do": [
-    "laserpost0200GroupShapes:",
-    "  VERIFY OUTPUT FILES",
-    "  type: 'boolean',",
-    "  value: GROUP_SHAPES_DEFAULT,",
     "laserpost0300AlignmentMarks:",
     "  NEED TO ROTATE BASED ON ORIENTATION; MAYBE MORE POSITION OPTIONS?",
     "    { title: localize('None'), id: ALIGNMENT_MARK_NONE },",

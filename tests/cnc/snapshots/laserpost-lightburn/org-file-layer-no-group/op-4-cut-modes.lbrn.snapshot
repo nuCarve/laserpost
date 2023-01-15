@@ -1,0 +1,62 @@
+***** 
+*****  XPath query "/LightBurnProject/CutSetting" (required)
+***** 
+<CutSetting type="Cut">
+    <index Value="0"/>
+    <name Value="Outer through, Center through"/>
+    <minPower Value="80"/>
+    <maxPower Value="80"/>
+    <minPower2 Value="80"/>
+    <maxPower2 Value="80"/>
+    <speed Value="30"/>
+    <priority Value="0"/>
+    <runBlower Value="1"/>
+    <zOffset Value="0"/>
+    <numPasses Value="1"/>
+    <zPerPass Value="0"/>
+    <enableLaser1 Value="0"/>
+    <enableLaser2 Value="1"/>
+  </CutSetting>
+***** 
+*****  XPath query "/LightBurnProject/Shape" (required)
+***** 
+<Shape Type="Path" CutIndex="0">
+    <XForm>1 0 0 1 0 0</XForm>
+    <V vx="1.483" vy="101.25"/>
+    <V vx="1.05" vy="101"/>
+    <P T="L" p0="0" p1="1"/>
+  </Shape>
+<Shape Type="Ellipse" CutIndex="0" Rx="99.95" Ry="99.95">
+    <XForm>1 0 0 1 101 101</XForm>
+  </Shape>
+<Shape Type="Path" CutIndex="0">
+    <XForm>1 0 0 1 0 0</XForm>
+    <V vx="1.05" vy="101"/>
+    <V vx="1.483" vy="100.75"/>
+    <P T="L" p0="0" p1="1"/>
+  </Shape>
+<Shape Type="Path" CutIndex="0">
+    <XForm>1 0 0 1 0 0</XForm>
+    <V vx="89.192" vy="113.017"/>
+    <V vx="88.942" vy="113.45"/>
+    <P T="L" p0="0" p1="1"/>
+  </Shape>
+<Shape Type="Path" CutIndex="0">
+    <XForm>1 0 0 1 0 0</XForm>
+    <V vx="88.942" vy="113.45"/>
+    <V vx="88.55" vy="113.45"/>
+    <V vx="88.55" vy="88.55"/>
+    <V vx="113.45" vy="88.55"/>
+    <V vx="113.45" vy="113.45"/>
+    <P T="L" p0="0" p1="1"/>
+    <P T="L" p0="1" p1="2"/>
+    <P T="L" p0="2" p1="3"/>
+    <P T="L" p0="3" p1="4"/>
+    <P T="L" p0="4" p1="0"/>
+  </Shape>
+<Shape Type="Path" CutIndex="0">
+    <XForm>1 0 0 1 0 0</XForm>
+    <V vx="88.942" vy="113.45"/>
+    <V vx="88.692" vy="113.017"/>
+    <P T="L" p0="0" p1="1"/>
+  </Shape>
