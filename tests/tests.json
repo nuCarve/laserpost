@@ -143,48 +143,58 @@
       }
     },
     {
-      "name": "Group operation no shape",
-      "comment": "Group by operation, full compare",
+      "name": "Org op no group",
+      "comment": "Organize by operation, without grouping",
       "setup": "all",
       "cnc": "op-4-cut-modes",
       "properties": {
-        "laserpost0100Grouping": "GROUPING_BY_OPERATION",
+        "laserpost0100Organization": "ORGANIZATION_BY_OPERATION",
         "laserpost0200GroupShapes": "false"
       }
     },
     {
-      "name": "Group operation shape",
-      "comment": "Group by operation, full compare",
+      "name": "Org op group",
+      "comment": "Organize by operation, with grouping",
       "setup": "all",
       "cnc": "op-4-cut-modes",
       "properties": {
-        "laserpost0100Grouping": "GROUPING_BY_OPERATION",
+        "laserpost0100Organization": "ORGANIZATION_BY_OPERATION",
         "laserpost0200GroupShapes": "true"
       }
     },
     {
-      "name": "Group layer no shape",
-      "comment": "Group by layer, full compare",
+      "name": "Org layer no group",
+      "comment": "Oranize by layer without grouping",
       "setup": "all",
       "cnc": "op-4-cut-modes",
       "properties": {
-        "laserpost0100Grouping": "GROUPING_BY_LAYER",
+        "laserpost0100Organization": "ORGANIZATION_BY_LAYER",
         "laserpost0200GroupShapes": "false"
       }
     },
     {
-      "name": "Group layer shape",
-      "comment": "Group by layer, full compare",
+      "name": "Org layer group",
+      "comment": "Organize by layer with grouping",
       "setup": "all",
       "cnc": "op-4-cut-modes",
       "properties": {
-        "laserpost0100Grouping": "GROUPING_BY_LAYER",
+        "laserpost0100Organization": "ORGANIZATION_BY_LAYER",
         "laserpost0200GroupShapes": "true"
       }
     },
     {
-      "name": "Group file no shape",
-      "comment": "Group by layer file, full compare - with alignment mark testing for each layer file",
+      "name": "Org file layer no group",
+      "comment": "Organize by layer file, without grouping",
+      "setup": "all",
+      "cnc": "op-4-cut-modes",
+      "properties": {
+        "laserpost0100Organization": "ORGANIZATION_BY_LAYER_FILE",
+        "laserpost0200GroupShapes": "false"
+      }
+    },
+    {
+      "name": "Org file layer group",
+      "comment": "Organize by layer file, with grouping - with alignment mark testing for each layer file",
       "setup": "all",
       "cnc": "op-4-cut-modes",
       "validators": {
@@ -200,30 +210,7 @@
         }
       },
       "properties": {
-        "laserpost0100Grouping": "GROUPING_BY_LAYER_FILE",
-        "laserpost0300AlignmentMarks": "ALIGNMENT_MARK_UPPER_RIGHT",
-        "laserpost0200GroupShapes": "false"
-      }
-    },
-    {
-      "name": "Group file shapes",
-      "comment": "Group by layer file, full compare - with alignment mark testing for each layer file",
-      "setup": "all",
-      "cnc": "op-4-cut-modes",
-      "validators": {
-        "lbrn": {
-          "regex": [
-            { "regex": "Operation: Alignment (mark)", "require": "mark" }
-          ]
-        },
-        "svg": {
-          "regex": [
-            { "regex": "Operation: Alignment (mark)", "require": "mark" }
-          ]
-        }
-      },
-      "properties": {
-        "laserpost0100Grouping": "GROUPING_BY_LAYER_FILE",
+        "laserpost0100Organization": "ORGANIZATION_BY_LAYER_FILE",
         "laserpost0300AlignmentMarks": "ALIGNMENT_MARK_UPPER_RIGHT",
         "laserpost0200GroupShapes": "true"
       }
@@ -266,9 +253,11 @@
   ],
   "to-do": [
     "laserpost0200GroupShapes:",
+    "  VERIFY OUTPUT FILES",
     "  type: 'boolean',",
     "  value: GROUP_SHAPES_DEFAULT,",
     "laserpost0300AlignmentMarks:",
+    "  NEED TO ROTATE BASED ON ORIENTATION; MAYBE MORE POSITION OPTIONS?",
     "    { title: localize('None'), id: ALIGNMENT_MARK_NONE },",
     "    { title: localize('Aligned to stock upper-right'), id: ALIGNMENT_MARK_UPPER_RIGHT },",
     "    { title: localize('Aligned to stock center-right'), id: ALIGNMENT_MARK_CENTER_RIGHT },",

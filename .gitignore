@@ -1,8 +1,5 @@
 release/dist/
 *.log
-*.lbrn
-*.svg
 *.failed
-*.txt
 tests/cnc/results/
 node_modules

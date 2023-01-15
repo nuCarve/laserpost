@@ -121,11 +121,15 @@ export function validatePostResults(
             // run the snapshot compare / management
             if (!validatorResult.failure) {
               const targetSnapshotFile = path.resolve(snapshotPath, path.basename(file, path.extname(file)) + '.snapshot');
+              const artifactFile = path.resolve(cncPath, file);
+              const targetArtifactFile = path.resolve(snapshotPath, file);
 
               const failureMessage = snapshotCompare(
                 key,
                 snapshotFile,
                 targetSnapshotFile,
+                artifactFile,
+                targetArtifactFile,
                 cmdOptions
               );
               if (!failureMessage) result.pass++;
@@ -193,6 +197,8 @@ function runValidator(validatorType, contents, validator, file, cmdOptions) {
  * @param validatorName Name of the validator
  * @param newSnapshotFile Path to the file that has the new snapshot test results
  * @param baselineSnapshotFile Path to the baseline snapshot (for the baseline snapshot to compare against)
+ * @param sourceArtifactFile Path to the source artifact file
+ * @param targetArtifactFile Path to copy the source artifact file to, if a snapshot is recorded  
  * @param cmdOptions Options from the command line (tests, paths).
  * @returns String with failure message, undefined means success
  */
@@ -200,6 +206,8 @@ export function snapshotCompare(
   validatorName,
   newSnapshotFile,
   baselineSnapshotFile,
+  sourceArtifactFile,
+  targetArtifactFile,
   cmdOptions
 ) {
   // do we need to look at the baseline snapshot?
@@ -255,8 +263,10 @@ export function snapshotCompare(
       chalk.yellow(`      ${validatorName}: Resetting snapshot to latest.`)
     );
 
-  // overwrite the baseline snapshot with latest
+  // overwrite the baseline snapshot with latest, and copy over the artifact
   fs.copyFileSync(newSnapshotFile, baselineSnapshotFile);
+  fs.copyFileSync(sourceArtifactFile, targetArtifactFile);
+
   return undefined;
 }
 
