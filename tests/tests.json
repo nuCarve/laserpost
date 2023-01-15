@@ -80,7 +80,7 @@
         },
         "svg": {
           "xpath": [
-            { "query": "/svg:svg/svg:g", "required": true },
+            { "query": "/svg:svg/svg:g", "required": false },
             { "query": "/svg:svg/svg:path", "required": false }
           ]
         }

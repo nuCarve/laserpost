@@ -1,4 +1,4 @@
-XPath query "/svg:svg/svg:g" (required):
+XPath query "/svg:svg/svg:g" (not required):
 <g id="laserpost_bottom_rounded_vaporize" xmlns="http://www.w3.org/2000/svg">
       <desc>Layer group: "Bottom rounded vaporize"</desc>
       <!-- Operation: Bottom rounded vaporize -->

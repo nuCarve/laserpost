@@ -1,4 +1,4 @@
-XPath query "/svg:svg/svg:g" (required):
+XPath query "/svg:svg/svg:g" (not required):
 <g id="laserpost_outer_through_center_through" xmlns="http://www.w3.org/2000/svg">
     <desc>Layer group: "Outer through, Center through"</desc>
     <!-- Operation: Outer through -->

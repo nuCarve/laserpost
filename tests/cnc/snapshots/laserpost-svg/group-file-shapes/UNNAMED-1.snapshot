@@ -1,4 +1,4 @@
-XPath query "/svg:svg/svg:g" (required):
+XPath query "/svg:svg/svg:g" (not required):
 <g id="laserpost_top_hex_etch" xmlns="http://www.w3.org/2000/svg">
       <desc>Layer group: "Top hex etch"</desc>
       <!-- Operation: Top hex etch -->
