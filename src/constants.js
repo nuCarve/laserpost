@@ -14,10 +14,10 @@ const INCLUDE_COMMENTS_INSANE = 'insane';
 const INCLUDE_COMMENTS_DEFAULT = INCLUDE_COMMENTS_NORMAL;
 
 // operation/layer grouping
-const GROUPING_BY_OPERATION = 'group-operation';
-const GROUPING_BY_LAYER = 'group-layer';
-const GROUPING_BY_LAYER_FILE = 'file-layer';
-const GROUPING_DEFAULT = GROUPING_BY_OPERATION;
+const ORGANIZATION_BY_OPERATION = 'org-operation';
+const ORGANIZATION_BY_LAYER = 'org-layer';
+const ORGANIZATION_BY_LAYER_FILE = 'org-file-layer';
+const GROUPING_DEFAULT = ORGANIZATION_BY_OPERATION;
 
 // define enum for notes include level
 const INCLUDE_NOTES_NONE = 'none';

@@ -147,10 +147,11 @@ function onWriteHeader(layer) {
  */
 function onWriteShapes(layer) {
   const projLayer = project.layers[layer];
+  const useGroups = !!getProperty('laserpost0200GroupShapes', GROUP_SHAPES_DEFAULT);
 
   // create a group if there is more than one item in the layer, we are grouping by layer and
-  // we are not redirecting
-  if (projLayer.operationSets.length > 1 && projLayer.index != -1) {
+  // we are not redirecting (and groups enabled)
+  if (projLayer.operationSets.length > 1 && projLayer.index != -1 && useGroups) {
     writeCommentLine(localize('Layer group: "{name}"'), {
       name: projLayer.name,
     });
@@ -170,8 +171,8 @@ function onWriteShapes(layer) {
   ) {
     const opGroup = projLayer.operationSets[setIndex];
 
-    // do we have more than one operation in this group?  If so, and enabled, go ahead and group it
-    if (opGroup.operations.length > 1) {
+    // do we have more than one operation in this group?  If so, go ahead and group it
+    if (opGroup.operations.length > 1 && useGroups) {
       writeCommentLine(localize('Operation group: "{name}"'), {
         name: opGroup.groupName,
       });
@@ -195,8 +196,7 @@ function onWriteShapes(layer) {
 
       // do we need to group shapes within our operation?
       if (
-        operation.shapeSets.length > 1 &&
-        getProperty('laserpost0200GroupShapes', GROUP_SHAPES_DEFAULT)
+        operation.shapeSets.length > 1 && useGroups
       ) {
         writeXML('Shape', { Type: 'Group' }, true);
         writeXML('XForm', { content: '1 0 0 1 0 0' });
@@ -218,8 +218,7 @@ function onWriteShapes(layer) {
 
       // if we grouped the shapes, close the group
       if (
-        operation.shapeSets.length > 1 &&
-        getProperty('laserpost0200GroupShapes', GROUP_SHAPES_DEFAULT)
+        operation.shapeSets.length > 1 && useGroups
       ) {
         writeXMLClose();
         writeXMLClose();
@@ -228,8 +227,7 @@ function onWriteShapes(layer) {
 
     // if we grouped these operations, close the group now
     if (
-      opGroup.operations.length > 1 &&
-      getProperty('laserpost0200GroupShapes', GROUP_SHAPES_DEFAULT)
+      opGroup.operations.length > 1 && useGroups
     ) {
       writeXMLClose();
       writeXMLClose();
@@ -237,7 +235,7 @@ function onWriteShapes(layer) {
   }
 
   // close the layer group if created
-  if (projLayer.operationSets.length > 1 && projLayer.index != -1) {
+  if (projLayer.operationSets.length > 1 && projLayer.index != -1 && useGroups) {
     writeXMLClose();
     writeXMLClose();
   }

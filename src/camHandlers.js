@@ -622,8 +622,8 @@ function onClose() {
 
   // determine if we are doing file redirection
   const redirect =
-    getProperty('laserpost0100Grouping', GROUPING_DEFAULT) ==
-    GROUPING_BY_LAYER_FILE;
+    getProperty('laserpost0100Organization', GROUPING_DEFAULT) ==
+    ORGANIZATION_BY_LAYER_FILE;
 
   // build up project notes
   generateProjectNotes(redirect ? 0 : -1);

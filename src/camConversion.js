@@ -142,8 +142,8 @@ function createLayers() {
 function createProjectLayers() {
   // determine if we are grouping by layer or by operation
   const groupByLayer =
-    getProperty('laserpost0100Grouping', GROUPING_DEFAULT) == GROUPING_BY_LAYER ||
-    getProperty('laserpost0100Grouping', GROUPING_DEFAULT) == GROUPING_BY_LAYER_FILE;
+    getProperty('laserpost0100Organization', GROUPING_DEFAULT) == ORGANIZATION_BY_LAYER ||
+    getProperty('laserpost0100Organization', GROUPING_DEFAULT) == ORGANIZATION_BY_LAYER_FILE;
 
   // build up the project layers
   project.layers = [];
@@ -212,7 +212,7 @@ function populateProjectLayers() {
 
         // if a single layer per file, add our cut settings to this layer and remap all layer index
         // to use layer 0 (since there is only one layer per file)
-        if (getProperty('laserpost0100Grouping', GROUPING_DEFAULT) == GROUPING_BY_LAYER_FILE) {
+        if (getProperty('laserpost0100Organization', GROUPING_DEFAULT) == ORGANIZATION_BY_LAYER_FILE) {
           const originalIndex = groupOperation.index;
           project.cutSettings[originalIndex].index = 0;
           groupOperation.index = 0;
@@ -251,7 +251,7 @@ function populateProjectLayers() {
 function populateFilesAndPath() {
   // determine if we are doing file redirection
   const redirect =
-    getProperty('laserpost0100Grouping', GROUPING_DEFAULT) == GROUPING_BY_LAYER_FILE;
+    getProperty('laserpost0100Organization', GROUPING_DEFAULT) == ORGANIZATION_BY_LAYER_FILE;
 
   // process all layers
   for (let layerIndex = 0; layerIndex < project.layers.length; ++layerIndex) {
