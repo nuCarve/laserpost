@@ -1,0 +1,31 @@
+***** 
+***** LaserPost automated testing snapshot
+***** See https://github.com/nucarve/laserpost for information.
+***** 
+***** Snapshot:
+*****   Post: laserpost-lightburn
+*****   Setup: Speed units mm/sec
+*****   File: op-1-defaults.lbrn
+***** 
+***** Properties:
+*****   machine0100SpeedUnits: SPEED_UNITS_MMPS
+*****   laserpost0500IncludeComments: INCLUDE_COMMENTS_NONE
+*****   automatedTesting: true
+***** 
+***** Options:
+*****   quiet: "--quiet"
+*****   nobackup: "--nobackup"
+*****   noeditor: "--noeditor"
+*****   nointeraction: "--nointeraction"
+*****   timeout: ["--timeout","1"]
+***** 
+***** Validators:
+*****   RegEx validator:
+*****     Regular expression: "(mm/\w+) using laser"
+*****     Require: "mm/sec"
+*****       Match (1 of 1): "mm/sec"
+*****   XPath validator:
+*****     Query: "/LightBurnProject/@AppVersion"
+*****     Match: required
+***** 
+ AppVersion="1.2.04"

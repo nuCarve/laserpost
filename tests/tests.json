@@ -470,36 +470,64 @@
         "laserPower0500ThroughMin": "83",
         "laserPower0600ThroughMax": "93"
       }
+    },
+    {
+      "name": "Speed units mm/sec",
+      "comment": "Speed units set to mm/sec; verify units.",
+      "setup": "barebones",
+      "cnc": "op-1-defaults",
+      "validators": {
+        "lbrn": {
+          "regex": [
+            {
+              "regex": "(mm/\\w+) using laser",
+              "require": "mm/sec"
+            }
+          ]
+        },
+        "txt": {
+          "regex": [
+            {
+              "regex": "(mm/\\w+) using laser",
+              "require": "mm/sec"
+            }
+          ]
+        }
+      },
+      "properties": {
+        "machine0100SpeedUnits": "SPEED_UNITS_MMPS"
+      }
+    },
+    {
+      "name": "Speed units mm/min",
+      "comment": "Speed units set to mm/min; verify units.",
+      "setup": "barebones",
+      "cnc": "op-1-defaults",
+      "validators": {
+        "lbrn": {
+          "regex": [
+            {
+              "regex": "(mm/\\w+) using laser",
+              "require": "mm/min"
+            }
+          ]
+        },
+        "txt": {
+          "regex": [
+            {
+              "regex": "(mm/\\w+) using laser",
+              "require": "mm/min"
+            }
+          ]
+        }
+      },
+      "properties": {
+        "machine0100SpeedUnits": "SPEED_UNITS_MMPM"
+      }
     }
+
   ],
   "to-do": [
-    "laserPower0100EtchMin:",
-    "  type: 'number',",
-    "  value: LASER_POWER_ETCH_MIN_DEFAULT,",
-    "laserPower0200EtchMax:",
-    "  type: 'number',",
-    "  value: LASER_POWER_ETCH_MAX_DEFAULT,",
-    "laserPower0300VaporizeMin:",
-    "  type: 'number',",
-    "  value: LASER_POWER_VAPORIZE_MIN_DEFAULT,",
-    "laserPower0400VaporizeMax:",
-    "  type: 'number',",
-    "  value: LASER_POWER_VAPORIZE_MAX_DEFAULT,",
-    "laserPower0500ThroughMin:",
-    "  type: 'number',",
-    "  value: LASER_POWER_THROUGH_MIN_DEFAULT,",
-    "laserPower0600ThroughMax:",
-    "  type: 'number',",
-    "  value: LASER_POWER_THROUGH_MAX_DEFAULT,",
-    "",
-    "",
-    "// #if LBRN",
-    "machine0050Orientation:",
-    "    { title: localize('Upper left'), id: MACHINE_ORIENTATION_UPPER_LEFT },",
-    "    { title: localize('Upper right'), id: MACHINE_ORIENTATION_UPPER_RIGHT },",
-    "    { title: localize('Lower left'), id: MACHINE_ORIENTATION_LOWER_LEFT },",
-    "    { title: localize('Lower right'), id: MACHINE_ORIENTATION_LOWER_RIGHT },",
-    "// #endif",
     "machine0100SpeedUnits:",
     "    { title: localize('mm/sec'), id: SPEED_UNITS_MMPS },",
     "    { title: localize('mm/min'), id: SPEED_UNITS_MMPM },",
