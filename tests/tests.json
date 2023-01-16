@@ -936,22 +936,56 @@
       "properties": {
         "op0300LaserEnable": "LASER_ENABLE_BOTH"
       }
+    },
+    {
+      "name": "Layer settings",
+      "comment": "Tests for multiple layer settings (power scale=11, z-offset=22, passes=33 and z-step=44).",
+      "setup": "barebones",
+      "cnc": "op-1-defaults",
+      "validators": {
+        "lbrn": {
+          "xpath": [
+            {
+              "query": "/LightBurnProject/CutSetting[1]/zOffset[@Value=\"22\"]",
+              "match": "required"
+            },
+            {
+              "query": "/LightBurnProject/CutSetting[1]/numPasses[@Value=\"33\"]",
+              "match": "required"
+            },
+            {
+              "query": "/LightBurnProject/CutSetting[1]/zPerPass[@Value=\"44\"]",
+              "match": "required"
+            },
+            {
+              "query": "/LightBurnProject/Shape[1]/Children/Shape[@PowerScale=\"11\"]",
+              "match": "required"
+            }
+          ]
+        },
+        "txt": {
+          "regex": [
+            {
+              "regex": "\\(scale (\\w+)%\\)",
+              "require": "11"
+            },
+            {
+              "regex": "Z offset (\\w+), passes (\\w+), z-step (\\w+)",
+              "require": ["22", "33", "44"]
+            }
+          ]
+        }
+      },
+      "properties": {
+        "op0400PowerScale": "11",
+        "op0500ZOffset": "22",
+        "op0600Passes": "33",
+        "op0700ZStep": "44"        
+      }
     }
   ],
   "to-do": [
     "debug: svg org-layer-group has many duplicate layer numbers ... why?",
-    "op0400PowerScale:",
-    "  type: 'number',",
-    "  value: POWER_SCALE_DEFAULT,",
-    "op0500ZOffset:",
-    "  type: 'number',",
-    "  value: Z_OFFSET_DEFAULT,",
-    "op0600Passes:",
-    "  type: 'number',",
-    "  value: PASS_COUNT_DEFAULT,",
-    "op0700ZStep:",
-    "  type: 'number',",
-    "  value: Z_STEP_PER_PASS_DEFAULT,",
     "op0800GroupName:",
     "  type: 'string',",
     "  value: GROUP_NAME_DEFAULT,",

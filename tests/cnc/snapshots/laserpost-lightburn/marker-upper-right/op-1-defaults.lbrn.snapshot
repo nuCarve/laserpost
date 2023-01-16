@@ -45,10 +45,10 @@
 <Shape Type="Group">
     <XForm>1 0 0 1 0 0</XForm>
     <Children>
-      <Shape Type="Ellipse" CutIndex="1" Rx="5" Ry="5">
+      <Shape Type="Ellipse" PowerScale="100" CutIndex="1" Rx="5" Ry="5">
         <XForm>1 0 0 1 5 5</XForm>
       </Shape>
-      <Shape Type="Path" CutIndex="1">
+      <Shape Type="Path" CutIndex="1" PowerScale="100">
         <XForm>1 0 0 1 0 0</XForm>
         <V vx="5" vy="10"/>
         <V vx="5" vy="0"/>

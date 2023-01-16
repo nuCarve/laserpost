@@ -71,16 +71,16 @@
       <Shape Type="Group">
         <XForm>1 0 0 1 0 0</XForm>
         <Children>
-          <Shape Type="Path" CutIndex="0">
+          <Shape Type="Path" CutIndex="0" PowerScale="100">
             <XForm>1 0 0 1 0 0</XForm>
             <V vx="11.483" vy="101.25"/>
             <V vx="11.05" vy="101"/>
             <P T="L" p0="0" p1="1"/>
           </Shape>
-          <Shape Type="Ellipse" CutIndex="0" Rx="99.95" Ry="99.95">
+          <Shape Type="Ellipse" PowerScale="100" CutIndex="0" Rx="99.95" Ry="99.95">
             <XForm>1 0 0 1 111 101</XForm>
           </Shape>
-          <Shape Type="Path" CutIndex="0">
+          <Shape Type="Path" CutIndex="0" PowerScale="100">
             <XForm>1 0 0 1 0 0</XForm>
             <V vx="11.05" vy="101"/>
             <V vx="11.483" vy="100.75"/>
@@ -92,13 +92,13 @@
       <Shape Type="Group">
         <XForm>1 0 0 1 0 0</XForm>
         <Children>
-          <Shape Type="Path" CutIndex="0">
+          <Shape Type="Path" CutIndex="0" PowerScale="100">
             <XForm>1 0 0 1 0 0</XForm>
             <V vx="99.192" vy="113.017"/>
             <V vx="98.942" vy="113.45"/>
             <P T="L" p0="0" p1="1"/>
           </Shape>
-          <Shape Type="Path" CutIndex="0">
+          <Shape Type="Path" CutIndex="0" PowerScale="100">
             <XForm>1 0 0 1 0 0</XForm>
             <V vx="98.942" vy="113.45"/>
             <V vx="98.55" vy="113.45"/>
@@ -111,7 +111,7 @@
             <P T="L" p0="3" p1="4"/>
             <P T="L" p0="4" p1="0"/>
           </Shape>
-          <Shape Type="Path" CutIndex="0">
+          <Shape Type="Path" CutIndex="0" PowerScale="100">
             <XForm>1 0 0 1 0 0</XForm>
             <V vx="98.942" vy="113.45"/>
             <V vx="98.692" vy="113.017"/>
@@ -123,10 +123,10 @@
       <Shape Type="Group">
         <XForm>1 0 0 1 0 0</XForm>
         <Children>
-          <Shape Type="Ellipse" CutIndex="3" Rx="5" Ry="5">
+          <Shape Type="Ellipse" PowerScale="100" CutIndex="3" Rx="5" Ry="5">
             <XForm>1 0 0 1 5 5</XForm>
           </Shape>
-          <Shape Type="Path" CutIndex="3">
+          <Shape Type="Path" CutIndex="3" PowerScale="100">
             <XForm>1 0 0 1 0 0</XForm>
             <V vx="5" vy="10"/>
             <V vx="5" vy="0"/>

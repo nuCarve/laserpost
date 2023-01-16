@@ -1,0 +1,72 @@
+***** 
+***** LaserPost automated testing snapshot
+***** See https://github.com/nucarve/laserpost for information.
+***** 
+***** Snapshot:
+*****   Post: laserpost-lightburn
+*****   Setup: Layer settings
+*****   File: op-1-defaults.lbrn
+***** 
+***** Properties:
+*****   op0400PowerScale: 11
+*****   op0500ZOffset: 22
+*****   op0600Passes: 33
+*****   op0700ZStep: 44
+*****   laserpost0500IncludeComments: INCLUDE_COMMENTS_NONE
+*****   automatedTesting: true
+***** 
+***** Options:
+*****   quiet: "--quiet"
+*****   nobackup: "--nobackup"
+*****   noeditor: "--noeditor"
+*****   nointeraction: "--nointeraction"
+*****   timeout: ["--timeout","1"]
+***** 
+***** Validators:
+*****   XPath validator:
+*****     Query: "/LightBurnProject/@AppVersion"
+*****     Match: required
+*****   XPath validator:
+*****     Query: "/LightBurnProject/CutSetting[1]/zOffset[@Value="22"]"
+*****     Match: required
+*****   XPath validator:
+*****     Query: "/LightBurnProject/CutSetting[1]/numPasses[@Value="33"]"
+*****     Match: required
+*****   XPath validator:
+*****     Query: "/LightBurnProject/CutSetting[1]/zPerPass[@Value="44"]"
+*****     Match: required
+*****   XPath validator:
+*****     Query: "/LightBurnProject/Shape[1]/Children/Shape[@PowerScale="11"]"
+*****     Match: required
+***** 
+ AppVersion="1.2.04"
+<zOffset Value="22"/>
+<numPasses Value="33"/>
+<zPerPass Value="44"/>
+<Shape Type="Path" CutIndex="0" PowerScale="11">
+        <XForm>1 0 0 1 0 0</XForm>
+        <V vx="100.517" vy="50.3"/>
+        <V vx="100.95" vy="50.55"/>
+        <P T="L" p0="0" p1="1"/>
+      </Shape>
+<Shape Type="Path" CutIndex="0" PowerScale="11">
+        <XForm>1 0 0 1 0 0</XForm>
+        <V vx="100.95" vy="50.55"/>
+        <V vx="100.95" vy="50.95"/>
+        <V vx="1.05" vy="50.95"/>
+        <V vx="1.05" vy="1.05"/>
+        <V vx="91" vy="1.05" c0x="96.495" c0y="1.05"/>
+        <V vx="100.95" vy="11" c1x="100.95" c1y="5.505"/>
+        <P T="L" p0="0" p1="1"/>
+        <P T="L" p0="1" p1="2"/>
+        <P T="L" p0="2" p1="3"/>
+        <P T="L" p0="3" p1="4"/>
+        <P T="B" p0="4" p1="5"/>
+        <P T="L" p0="5" p1="0"/>
+      </Shape>
+<Shape Type="Path" CutIndex="0" PowerScale="11">
+        <XForm>1 0 0 1 0 0</XForm>
+        <V vx="100.95" vy="50.55"/>
+        <V vx="100.517" vy="50.8"/>
+        <P T="L" p0="0" p1="1"/>
+      </Shape>

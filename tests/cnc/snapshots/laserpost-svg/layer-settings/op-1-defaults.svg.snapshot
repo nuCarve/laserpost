@@ -4,11 +4,14 @@
 ***** 
 ***** Snapshot:
 *****   Post: laserpost-svg
-*****   Setup: Layer mode cut
+*****   Setup: Layer settings
 *****   File: op-1-defaults.svg
 ***** 
 ***** Properties:
-*****   op0100LayerMode: LAYER_MODE_INHERIT
+*****   op0400PowerScale: 11
+*****   op0500ZOffset: 22
+*****   op0600Passes: 33
+*****   op0700ZStep: 44
 *****   laserpost0500IncludeComments: INCLUDE_COMMENTS_NONE
 *****   automatedTesting: true
 ***** 

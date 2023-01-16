@@ -52,7 +52,7 @@
       <XForm>1 0 0 1 0 0</XForm>
       <Children>
         <!-- Operation: Stock outline -->
-        <Shape Type="Path" CutIndex="3">
+        <Shape Type="Path" CutIndex="3" PowerScale="100">
           <XForm>1 0 0 1 0 0</XForm>
           <V vx="212" vy="202"/>
           <V vx="10" vy="202"/>
@@ -67,10 +67,10 @@
         <Shape Type="Group">
           <XForm>1 0 0 1 0 0</XForm>
           <Children>
-            <Shape Type="Ellipse" CutIndex="3" Rx="5" Ry="5">
+            <Shape Type="Ellipse" PowerScale="100" CutIndex="3" Rx="5" Ry="5">
               <XForm>1 0 0 1 5 5</XForm>
             </Shape>
-            <Shape Type="Path" CutIndex="3">
+            <Shape Type="Path" CutIndex="3" PowerScale="100">
               <XForm>1 0 0 1 0 0</XForm>
               <V vx="5" vy="10"/>
               <V vx="5" vy="0"/>

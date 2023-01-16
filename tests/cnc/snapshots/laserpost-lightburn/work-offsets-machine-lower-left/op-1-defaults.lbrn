@@ -58,13 +58,13 @@
   <Shape Type="Group">
     <XForm>1 0 0 1 0 0</XForm>
     <Children>
-      <Shape Type="Path" CutIndex="0">
+      <Shape Type="Path" CutIndex="0" PowerScale="100">
         <XForm>1 0 0 1 0 0</XForm>
         <V vx="51.483" vy="76.7" />
         <V vx="51.05" vy="76.45" />
         <P T="L" p0="0" p1="1" />
       </Shape>
-      <Shape Type="Path" CutIndex="0">
+      <Shape Type="Path" CutIndex="0" PowerScale="100">
         <XForm>1 0 0 1 0 0</XForm>
         <V vx="51.05" vy="76.45" />
         <V vx="51.05" vy="76.05" />
@@ -79,7 +79,7 @@
         <P T="B" p0="4" p1="5" />
         <P T="L" p0="5" p1="0" />
       </Shape>
-      <Shape Type="Path" CutIndex="0">
+      <Shape Type="Path" CutIndex="0" PowerScale="100">
         <XForm>1 0 0 1 0 0</XForm>
         <V vx="51.05" vy="76.45" />
         <V vx="51.483" vy="76.2" />
@@ -87,7 +87,7 @@
       </Shape>
     </Children>
   </Shape>
-  <Shape Type="Path" CutIndex="1">
+  <Shape Type="Path" CutIndex="1" PowerScale="100">
     <XForm>1 0 0 1 0 0</XForm>
     <V vx="50" vy="75" />
     <V vx="152" vy="75" />

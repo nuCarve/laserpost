@@ -44,7 +44,7 @@
       <enableLaser1 Value="1"/>
       <enableLaser2 Value="0"/>
     </CutSetting>
-<Shape Type="Path" CutIndex="0">
+<Shape Type="Path" CutIndex="0" PowerScale="100">
       <XForm>1 0 0 1 0 0</XForm>
       <V vx="100.946" vy="45.969"/>
       <V vx="92.34" vy="41"/>
