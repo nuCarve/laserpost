@@ -189,6 +189,11 @@
       "comment": "Organize by layer with grouping",
       "setup": "all",
       "cnc": "op-4-cut-modes",
+      "validators": {
+        "txt": {
+          "regex": [{ "regex": "Layer \\d \\(", "count": 3 }]
+        }
+      },
       "properties": {
         "laserpost0100Organization": "ORGANIZATION_BY_LAYER",
         "laserpost0200GroupShapes": "true"
@@ -980,7 +985,7 @@
         "op0400PowerScale": "11",
         "op0500ZOffset": "22",
         "op0600Passes": "33",
-        "op0700ZStep": "44"        
+        "op0700ZStep": "44"
       }
     },
     {

@@ -28,9 +28,13 @@
 
 /**
  * Execute the regex based validator.  Supports the 'regex' property with the expression to match,
- * and the 'replace' property (text to replace the match with in the original content stream), 
- * the 'require' property (which is string or an array, with one element for each matching parameter, such as
- * { regex: "Document mode: (\w+)", require: ["inch"] }), and the 'forbidden' property (boolean).
+ * followed by an operation:
+ * 
+ * - 'replace': text to replace the match with in the original content stream
+ * - 'require': a string or an array, with one element for each matching parameter, such as
+ *              { regex: "Document mode: (\w+)", require: ["inch"] }), and the 'forbidden' property (boolean).
+ * - 'forbidden': boolean true will fail if the match is successful
+ * - 'count': Count of items that must match (count: 0 is same as forbidden)
  *
  * @param contents - Contents object with { snapshot: string, failure: [string], header: [string] }
  * @param validator - Validator object from the setup
@@ -50,8 +54,8 @@ export function validateRegex(contents, validator, file, cmdOptions) {
     // describe this regex
     contents.header.push('  RegEx validator:');
     contents.header.push(`    Regular expression: "${filter.regex}"`);
-    if (!filter.replace && !filter.forbidden && !filter.require) {
-      contents.failure.push(`FAIL: RegEx validator missing any actions (no replace, forbidden or require)`);
+    if (!filter.replace && !filter.forbidden && !filter.require && !filter.count) {
+      contents.failure.push(`FAIL: RegEx validator missing any actions (no replace, forbidden, require, or count)`);
       continue;
     }
 
@@ -75,6 +79,16 @@ export function validateRegex(contents, validator, file, cmdOptions) {
       const match = contents.snapshot.match(new RegExp(filter.regex, "m"));
       if (match) {
         contents.failure.push(`FAIL: Regular expression "${filter.regex}" is "forbidden" yet matched ${match.length} items.`);
+        continue;
+      }
+    }
+
+    // handle the "count" use case
+    if (filter.count !== undefined) {
+      contents.header.push(`    Count: ${filter.count}`);
+      const match = contents.snapshot.match(new RegExp(filter.regex, "gm"));
+      if ((match && match.length != filter.count) || (match === null && filter.count != 0)) {
+        contents.failure.push(`FAIL: Regular expression "${filter.regex}" matched ${match?.length ?? 0} items but expected ${filter.count}.`);
         continue;
       }
     }
