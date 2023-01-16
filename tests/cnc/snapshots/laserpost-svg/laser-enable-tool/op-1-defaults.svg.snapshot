@@ -1,0 +1,27 @@
+***** 
+***** LaserPost automated testing snapshot
+***** See https://github.com/nucarve/laserpost for information.
+***** 
+***** Snapshot:
+*****   Post: laserpost-svg
+*****   Setup: Laser enable tool
+*****   File: op-1-defaults.svg
+***** 
+***** Properties:
+*****   op0300LaserEnable: LASER_ENABLE_TOOL
+*****   laserpost0500IncludeComments: INCLUDE_COMMENTS_NONE
+*****   automatedTesting: true
+***** 
+***** Options:
+*****   quiet: "--quiet"
+*****   nobackup: "--nobackup"
+*****   noeditor: "--noeditor"
+*****   nointeraction: "--nointeraction"
+*****   timeout: ["--timeout","1"]
+***** 
+***** Validators:
+*****   XPath validator:
+*****     Query: "/svg:svg/@version"
+*****     Match: required
+***** 
+ version="1.1"

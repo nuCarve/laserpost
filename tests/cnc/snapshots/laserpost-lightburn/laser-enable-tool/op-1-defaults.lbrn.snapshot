@@ -1,0 +1,35 @@
+***** 
+***** LaserPost automated testing snapshot
+***** See https://github.com/nucarve/laserpost for information.
+***** 
+***** Snapshot:
+*****   Post: laserpost-lightburn
+*****   Setup: Laser enable tool
+*****   File: op-1-defaults.lbrn
+***** 
+***** Properties:
+*****   op0300LaserEnable: LASER_ENABLE_TOOL
+*****   laserpost0500IncludeComments: INCLUDE_COMMENTS_NONE
+*****   automatedTesting: true
+***** 
+***** Options:
+*****   quiet: "--quiet"
+*****   nobackup: "--nobackup"
+*****   noeditor: "--noeditor"
+*****   nointeraction: "--nointeraction"
+*****   timeout: ["--timeout","1"]
+***** 
+***** Validators:
+*****   XPath validator:
+*****     Query: "/LightBurnProject/@AppVersion"
+*****     Match: required
+*****   XPath validator:
+*****     Query: "/LightBurnProject/CutSetting[1]/enableLaser1[@Value="1"]"
+*****     Match: required
+*****   XPath validator:
+*****     Query: "/LightBurnProject/CutSetting[1]/enableLaser2[@Value="0"]"
+*****     Match: required
+***** 
+ AppVersion="1.2.04"
+<enableLaser1 Value="1"/>
+<enableLaser2 Value="0"/>

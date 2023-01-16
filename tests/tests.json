@@ -785,16 +785,161 @@
       "properties": {
         "op0200UseAir": "USE_AIR_ON"
       }
+    },
+    {
+      "name": "Laser enable tool",
+      "comment": "Set layer to use the default tool-specified laser.",
+      "setup": "barebones",
+      "cnc": "op-1-defaults",
+      "validators": {
+        "lbrn": {
+          "xpath": [
+            {
+              "query": "/LightBurnProject/CutSetting[1]/enableLaser1[@Value=\"1\"]",
+              "match": "required"
+            },
+            {
+              "query": "/LightBurnProject/CutSetting[1]/enableLaser2[@Value=\"0\"]",
+              "match": "required"
+            }
+          ]
+        },
+        "txt": {
+          "regex": [
+            {
+              "regex": "using laser (\\w+)",
+              "require": "1"
+            }
+          ]
+        }
+      },
+      "properties": {
+        "op0300LaserEnable": "LASER_ENABLE_TOOL"
+      }
+    },
+    {
+      "name": "Laser enable laser 1",
+      "comment": "Set layer to use laser 1.",
+      "setup": "barebones",
+      "cnc": "op-1-defaults",
+      "validators": {
+        "lbrn": {
+          "xpath": [
+            {
+              "query": "/LightBurnProject/CutSetting[1]/enableLaser1[@Value=\"1\"]",
+              "match": "required"
+            },
+            {
+              "query": "/LightBurnProject/CutSetting[1]/enableLaser2[@Value=\"0\"]",
+              "match": "required"
+            }
+          ]
+        },
+        "txt": {
+          "regex": [
+            {
+              "regex": "using laser (\\w+)",
+              "require": "1"
+            }
+          ]
+        }
+      },
+      "properties": {
+        "op0300LaserEnable": "LASER_ENABLE_1"
+      }
+    },
+    {
+      "name": "Laser enable laser 2",
+      "comment": "Set layer to use laser 2.",
+      "setup": "barebones",
+      "cnc": "op-1-defaults",
+      "validators": {
+        "lbrn": {
+          "xpath": [
+            {
+              "query": "/LightBurnProject/CutSetting[1]/enableLaser1[@Value=\"0\"]",
+              "match": "required"
+            },
+            {
+              "query": "/LightBurnProject/CutSetting[1]/enableLaser2[@Value=\"1\"]",
+              "match": "required"
+            }
+          ]
+        },
+        "txt": {
+          "regex": [
+            {
+              "regex": "using laser (\\w+)",
+              "require": "2"
+            }
+          ]
+        }
+      },
+      "properties": {
+        "op0300LaserEnable": "LASER_ENABLE_2"
+      }
+    },
+    {
+      "name": "Laser enable lasers off",
+      "comment": "Set layer to use no lasers.",
+      "setup": "barebones",
+      "cnc": "op-1-defaults",
+      "validators": {
+        "lbrn": {
+          "xpath": [
+            {
+              "query": "/LightBurnProject/CutSetting[1]/doOutput[@Value=\"0\"]",
+              "match": "required"
+            }
+          ]
+        },
+        "txt": {
+          "regex": [
+            {
+              "regex": "Laser turned (\\w+)",
+              "require": "off"
+            }
+          ]
+        }
+      },
+      "properties": {
+        "op0300LaserEnable": "LASER_ENABLE_OFF"
+      }
+    },
+    {
+      "name": "Laser enable laser both",
+      "comment": "Set layer to use both lasers.",
+      "setup": "barebones",
+      "cnc": "op-1-defaults",
+      "validators": {
+        "lbrn": {
+          "xpath": [
+            {
+              "query": "/LightBurnProject/CutSetting[1]/enableLaser1[@Value=\"1\"]",
+              "match": "required"
+            },
+            {
+              "query": "/LightBurnProject/CutSetting[1]/enableLaser2[@Value=\"1\"]",
+              "match": "required"
+            }
+          ]
+        },
+        "txt": {
+          "regex": [
+            {
+              "regex": "using lasers (\\w+) and (\\w+)",
+              "require": ["1", "2"]
+            }
+          ]
+        }
+      },
+      "properties": {
+        "op0300LaserEnable": "LASER_ENABLE_BOTH"
+      }
     }
   ],
   "to-do": [
     "debug: svg org-layer-group has many duplicate layer numbers ... why?",
-    "op0300LaserEnable:",
-    "    { title: localize('Use tool setting'), id: LASER_ENABLE_TOOL },",
-    "    { title: localize('Disable output'), id: LASER_ENABLE_OFF },",
-    "    { title: localize('Laser 1'), id: LASER_ENABLE_1 },",
-    "    { title: localize('Laser 2'), id: LASER_ENABLE_2 },",
-    "    { title: localize('Both lasers'), id: LASER_ENABLE_BOTH },",
     "op0400PowerScale:",
     "  type: 'number',",
     "  value: POWER_SCALE_DEFAULT,",
