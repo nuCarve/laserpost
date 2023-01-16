@@ -116,7 +116,7 @@ function onWriteShapes(layer) {
       writeXML('g', { id: safeId(opGroup.groupName) }, true);
       writeXML('desc', {
         content: format(
-          localize('Operation group: "{name}")', { name: opGroup.groupName })
+          localize('Operation group: "{name}"'), { name: opGroup.groupName }
         ),
       });
     }

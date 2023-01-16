@@ -145,7 +145,9 @@ const Z_OFFSET_DEFAULT = 0;
 const PASS_COUNT_DEFAULT = 1;
 const Z_STEP_PER_PASS_DEFAULT = 0;
 const GROUP_NAME_DEFAULT = '';
+const GROUP_NAME_TEST = 'Test-group-name';
 const CUSTOM_CUT_SETTING_XML_DEFAULT = '';
+const CUSTOM_CUT_SETTING_XML_TEST = '<CutSetting><Test /></CutSetting>';
 
 // CAM APIs offer a redirection feature to create multiple output fles (such as used in
 // file-by-layer).  When JavaScript errors occur during redirection the logging information is

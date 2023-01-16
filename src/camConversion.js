@@ -1085,7 +1085,7 @@ function getCutSetting(cutSettingSpecs) {
     // otherwise the properties of the setting
     if (
       cutSettingSpecs.customCutSettingXML &&
-      cutSettingsSpecs.laserEnable !== LASER_ENABLE_OFF
+      cutSettingSpecs.laserEnable !== LASER_ENABLE_OFF
     )
       // if custom cut is used, we expect a perfect string match.  This might someday be
       // improved with a deep object comparison (preceeded by filtering out unwanted fields)
