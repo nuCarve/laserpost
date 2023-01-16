@@ -1,0 +1,32 @@
+***** 
+***** LaserPost automated testing snapshot
+***** See https://github.com/nucarve/laserpost for information.
+***** 
+***** Snapshot:
+*****   Post: laserpost-lightburn
+*****   Setup: Shuttle U
+*****   File: op-4-cut-modes.lbrn
+***** 
+***** Properties:
+*****   machine0500ShuttleLaser1: 50
+*****   machine0600ShuttleLaser2: 100
+*****   laserpost0500IncludeComments: INCLUDE_COMMENTS_NONE
+*****   automatedTesting: true
+***** 
+***** Options:
+*****   quiet: "--quiet"
+*****   nobackup: "--nobackup"
+*****   noeditor: "--noeditor"
+*****   nointeraction: "--nointeraction"
+*****   timeout: ["--timeout","1"]
+***** 
+***** Validators:
+*****   XPath validator:
+*****     Query: "/LightBurnProject/CutSetting[1]/uOffset[@Value="100"]"
+*****     Match: required
+*****   XPath validator:
+*****     Query: "/LightBurnProject/CutSetting[2]/uOffset[@Value="50"]"
+*****     Match: required
+***** 
+<uOffset Value="100"/>
+<uOffset Value="50"/>

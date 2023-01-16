@@ -524,23 +524,34 @@
       "properties": {
         "machine0100SpeedUnits": "SPEED_UNITS_MMPM"
       }
+    },
+    {
+      "name": "Shuttle U",
+      "comment": "Set shuttle U on laser 1 to 50 and laser 2 to 100.",
+      "setup": "baseline",
+      "cnc": "op-4-cut-modes",
+      "posts": ["laserpost-lightburn"],
+      "validators": {
+        "lbrn": {
+          "xpath": [
+            {
+              "query": "/LightBurnProject/CutSetting[1]/uOffset[@Value=\"100\"]",
+              "match": "required"
+            },
+            {
+              "query": "/LightBurnProject/CutSetting[2]/uOffset[@Value=\"50\"]",
+              "match": "required"
+            }
+          ]
+        }
+      },
+      "properties": { 
+        "machine0500ShuttleLaser1": "50",
+        "machine0600ShuttleLaser2": "100" 
+      }
     }
-
   ],
   "to-do": [
-    "machine0100SpeedUnits:",
-    "    { title: localize('mm/sec'), id: SPEED_UNITS_MMPS },",
-    "    { title: localize('mm/min'), id: SPEED_UNITS_MMPM },",
-    "machine0300AutomaticUpdate:",
-    "    { title: localize('Never'), id: UPDATE_FREQUENCY_NEVER },",
-    "    { title: localize('Always'), id: UPDATE_FREQUENCY_ALWAYS },",
-    "    { title: localize('Hourly'), id: UPDATE_FREQUENCY_HOURLY },",
-    "    { title: localize('Daily'), id: UPDATE_FREQUENCY_DAILY },",
-    "    { title: localize('Weekly'), id: UPDATE_FREQUENCY_WEEKLY },",
-    "    { title: localize('Monthly'), id: UPDATE_FREQUENCY_MONTHLY },",
-    "machine0400UpdateAllowBeta:",
-    "  type: 'boolean',",
-    "  value: UPDATE_ALLOW_BETA_DEFAULT,",
     "// #if LBRN",
     "machine0500ShuttleLaser1:",
     "  type: 'string',",
