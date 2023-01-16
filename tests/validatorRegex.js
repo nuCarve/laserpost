@@ -69,7 +69,7 @@ export function validateRegex(contents, validator, file, cmdOptions) {
       contents.snapshot = contents.snapshot.replace(expression, filter.replace);
     }
 
-    // handle theh "forbidden" use case
+    // handle the "forbidden" use case
     if (filter.forbidden) {
       contents.header.push(`    Forbidden`);
       const match = contents.snapshot.match(new RegExp(filter.regex, "m"));
