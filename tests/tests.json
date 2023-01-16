@@ -20,7 +20,9 @@
           "post": "laserpost-svg",
           "file": "*.svg",
           "validator": "xpath",
-          "namespaces": { "svg": "http://www.w3.org/2000/svg" }
+          "namespaces": {
+            "svg": "http://www.w3.org/2000/svg"
+          }
         },
         "txt": {
           "post": "*",
@@ -39,11 +41,19 @@
       "validators": {
         "lbrn": {
           "xpath": [
-            { "query": "/LightBurnProject/@AppVersion", "match": "required" }
+            {
+              "query": "/LightBurnProject/@AppVersion",
+              "match": "required"
+            }
           ]
         },
         "svg": {
-          "xpath": [{ "query": "/svg:svg/@version", "match": "required" }]
+          "xpath": [
+            {
+              "query": "/svg:svg/@version",
+              "match": "required"
+            }
+          ]
         }
       }
     },
@@ -53,14 +63,26 @@
       "validators": {
         "lbrn": {
           "xpath": [
-            { "query": "/LightBurnProject/CutSetting", "match": "required" },
-            { "query": "/LightBurnProject/Shape", "match": "required" }
+            {
+              "query": "/LightBurnProject/CutSetting",
+              "match": "required"
+            },
+            {
+              "query": "/LightBurnProject/Shape",
+              "match": "required"
+            }
           ]
         },
         "svg": {
           "xpath": [
-            { "query": "/svg:svg/svg:g", "match": "optional" },
-            { "query": "/svg:svg/svg:path", "match": "optional" }
+            {
+              "query": "/svg:svg/svg:g",
+              "match": "optional"
+            },
+            {
+              "query": "/svg:svg/svg:path",
+              "match": "optional"
+            }
           ]
         }
       }
@@ -71,12 +93,23 @@
       "validators": {
         "lbrn": {
           "xpath": [
-            { "query": "/LightBurnProject/CutSetting[2]", "match": "required" },
-            { "query": "/LightBurnProject/Shape[3]", "match": "required" }
+            {
+              "query": "/LightBurnProject/CutSetting[2]",
+              "match": "required"
+            },
+            {
+              "query": "/LightBurnProject/Shape[3]",
+              "match": "required"
+            }
           ]
         },
         "svg": {
-          "xpath": [{ "query": "/svg:svg/svg:g[2]", "match": "required" }]
+          "xpath": [
+            {
+              "query": "/svg:svg/svg:g[2]",
+              "match": "required"
+            }
+          ]
         }
       }
     }
@@ -179,12 +212,18 @@
       "validators": {
         "lbrn": {
           "regex": [
-            { "regex": "Operation: Alignment (mark)", "require": "mark" }
+            {
+              "regex": "Operation: Alignment (mark)",
+              "require": "mark"
+            }
           ]
         },
         "svg": {
           "regex": [
-            { "regex": "Operation: Alignment (mark)", "require": "mark" }
+            {
+              "regex": "Operation: Alignment (mark)",
+              "require": "mark"
+            }
           ]
         }
       },
@@ -248,7 +287,10 @@
       "validators": {
         "lbrn": {
           "xpath": [
-            { "query": "/LightBurnProject/Notes", "match": "forbidden" }
+            {
+              "query": "/LightBurnProject/Notes",
+              "match": "forbidden"
+            }
           ]
         },
         "svg": {
@@ -260,7 +302,9 @@
           ]
         }
       },
-      "properties": { "laserpost0400IncludeNotes": "INCLUDE_NOTES_NONE" }
+      "properties": {
+        "laserpost0400IncludeNotes": "INCLUDE_NOTES_NONE"
+      }
     },
     {
       "name": "Notes hidden",
@@ -278,7 +322,9 @@
           ]
         }
       },
-      "properties": { "laserpost0400IncludeNotes": "INCLUDE_NOTES_HIDDEN" }
+      "properties": {
+        "laserpost0400IncludeNotes": "INCLUDE_NOTES_HIDDEN"
+      }
     },
     {
       "name": "Notes show important",
@@ -545,9 +591,9 @@
           ]
         }
       },
-      "properties": { 
+      "properties": {
         "machine0500ShuttleLaser1": "50",
-        "machine0600ShuttleLaser2": "100" 
+        "machine0600ShuttleLaser2": "100"
       }
     },
     {
@@ -658,15 +704,91 @@
       "properties": {
         "op0100LayerMode": "LAYER_MODE_OFFSET_FILL"
       }
+    },
+    {
+      "name": "Air assist gas",
+      "comment": "Set air assist to inherit from assist gas.",
+      "setup": "barebones",
+      "cnc": "op-1-defaults",
+      "validators": {
+        "lbrn": {
+          "xpath": [
+            {
+              "query": "/LightBurnProject/CutSetting[1]/runBlower[@Value=\"1\"]",
+              "match": "required"
+            }
+          ]
+        },
+        "txt": {
+          "regex": [
+            {
+              "regex": "air (\\w+)",
+              "require": "on"
+            }
+          ]
+        }
+      },
+      "properties": {
+        "op0200UseAir": "USE_AIR_ASSIST_GAS"
+      }
+    },
+    {
+      "name": "Air assist off",
+      "comment": "Set air assist off.",
+      "setup": "barebones",
+      "cnc": "op-1-defaults",
+      "validators": {
+        "lbrn": {
+          "xpath": [
+            {
+              "query": "/LightBurnProject/CutSetting[1]/runBlower[@Value=\"0\"]",
+              "match": "required"
+            }
+          ]
+        },
+        "txt": {
+          "regex": [
+            {
+              "regex": "air (\\w+)",
+              "require": "off"
+            }
+          ]
+        }
+      },
+      "properties": {
+        "op0200UseAir": "USE_AIR_OFF"
+      }
+    },
+    {
+      "name": "Air assist on",
+      "comment": "Set air assist on.",
+      "setup": "barebones",
+      "cnc": "op-1-defaults",
+      "validators": {
+        "lbrn": {
+          "xpath": [
+            {
+              "query": "/LightBurnProject/CutSetting[1]/runBlower[@Value=\"1\"]",
+              "match": "required"
+            }
+          ]
+        },
+        "txt": {
+          "regex": [
+            {
+              "regex": "air (\\w+)",
+              "require": "on"
+            }
+          ]
+        }
+      },
+      "properties": {
+        "op0200UseAir": "USE_AIR_ON"
+      }
     }
-
   ],
   "to-do": [
     "debug: svg org-layer-group has many duplicate layer numbers ... why?",
-    "op0200UseAir:",
-    "    { title: localize('Off'), id: USE_AIR_OFF },",
-    "    { title: localize('On'), id: USE_AIR_ON },",
-    "    { title: localize('Use tool setting'), id: USE_AIR_ASSIST_GAS },",
     "op0300LaserEnable:",
     "    { title: localize('Use tool setting'), id: LASER_ENABLE_TOOL },",
     "    { title: localize('Disable output'), id: LASER_ENABLE_OFF },",

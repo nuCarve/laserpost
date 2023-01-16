@@ -1,0 +1,31 @@
+***** 
+***** LaserPost automated testing snapshot
+***** See https://github.com/nucarve/laserpost for information.
+***** 
+***** Snapshot:
+*****   Post: laserpost-lightburn
+*****   Setup: Air assist gas
+*****   File: op-1-defaults.lbrn
+***** 
+***** Properties:
+*****   op0200UseAir: USE_AIR_ASSIST_GAS
+*****   laserpost0500IncludeComments: INCLUDE_COMMENTS_NONE
+*****   automatedTesting: true
+***** 
+***** Options:
+*****   quiet: "--quiet"
+*****   nobackup: "--nobackup"
+*****   noeditor: "--noeditor"
+*****   nointeraction: "--nointeraction"
+*****   timeout: ["--timeout","1"]
+***** 
+***** Validators:
+*****   XPath validator:
+*****     Query: "/LightBurnProject/@AppVersion"
+*****     Match: required
+*****   XPath validator:
+*****     Query: "/LightBurnProject/CutSetting[1]/runBlower[@Value="1"]"
+*****     Match: required
+***** 
+ AppVersion="1.2.04"
+<runBlower Value="1"/>
