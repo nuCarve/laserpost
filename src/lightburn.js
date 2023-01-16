@@ -107,7 +107,9 @@ function onFileCreate(layer) {
  */
 function onWriteHeader(layer) {
   // output notes, including layer notes, to the header
-  const headerNotes = projectNotes.concat(globalNotes.concat(generateLayerNotes(layer)));
+  const headerNotes = projectNotes.concat(
+    globalNotes.concat(generateLayerNotes(layer))
+  );
   for (let noteIndex = 0; noteIndex < headerNotes.length; ++noteIndex)
     debugLog(headerNotes[noteIndex]);
   debugLog('');
@@ -147,11 +149,18 @@ function onWriteHeader(layer) {
  */
 function onWriteShapes(layer) {
   const projLayer = project.layers[layer];
-  const useGroups = !!getProperty('laserpost0200GroupShapes', GROUP_SHAPES_DEFAULT);
+  const useGroups = !!getProperty(
+    'laserpost0200GroupShapes',
+    GROUP_SHAPES_DEFAULT
+  );
 
   // create a group if there is more than one item in the layer, we are grouping by layer and
   // we are not redirecting (and groups enabled)
-  if (projLayer.operationSets.length > 1 && projLayer.index != -1 && useGroups) {
+  if (
+    projLayer.operationSets.length > 1 &&
+    projLayer.index != -1 &&
+    useGroups
+  ) {
     debugLog(localize('Layer group: "{name}"'), {
       name: projLayer.name,
     });
@@ -195,9 +204,7 @@ function onWriteShapes(layer) {
       });
 
       // do we need to group shapes within our operation?
-      if (
-        operation.shapeSets.length > 1 && useGroups
-      ) {
+      if (operation.shapeSets.length > 1 && useGroups) {
         writeXML('Shape', { Type: 'Group' }, true);
         writeXML('XForm', { content: '1 0 0 1 0 0' });
         writeXML('Children', {}, true);
@@ -217,25 +224,25 @@ function onWriteShapes(layer) {
       }
 
       // if we grouped the shapes, close the group
-      if (
-        operation.shapeSets.length > 1 && useGroups
-      ) {
+      if (operation.shapeSets.length > 1 && useGroups) {
         writeXMLClose();
         writeXMLClose();
       }
     }
 
     // if we grouped these operations, close the group now
-    if (
-      opGroup.operations.length > 1 && useGroups
-    ) {
+    if (opGroup.operations.length > 1 && useGroups) {
       writeXMLClose();
       writeXMLClose();
     }
   }
 
   // close the layer group if created
-  if (projLayer.operationSets.length > 1 && projLayer.index != -1 && useGroups) {
+  if (
+    projLayer.operationSets.length > 1 &&
+    projLayer.index != -1 &&
+    useGroups
+  ) {
     writeXMLClose();
     writeXMLClose();
   }
@@ -259,7 +266,9 @@ function onWriteTrailer(layer) {
       showOnLoad = notesImportant;
     else if (includeNotes == INCLUDE_NOTES_SHOW) showOnLoad = true;
 
-    const setupNotes = projectNotes.concat(globalNotes.concat(generateLayerNotes(layer)));
+    const setupNotes = projectNotes.concat(
+      globalNotes.concat(generateLayerNotes(layer))
+    );
     writeXML('Notes', {
       ShowOnLoad: showOnLoad ? 1 : 0,
       Notes: setupNotes.join('\n'),
@@ -455,6 +464,7 @@ function writeShapeEllipse(shape) {
     'Shape',
     {
       Type: 'Ellipse',
+      PowerScale: shape.cutSetting.powerScale,
       CutIndex: shape.cutSetting.index,
       Rx: formatRadius.format(shape.radius),
       Ry: formatRadius.format(shape.radius),
@@ -493,7 +503,11 @@ function writeShapePath(shape) {
 
   writeXML(
     'Shape',
-    { Type: 'Path', CutIndex: shape.cutSetting.index },
+    {
+      Type: 'Path',
+      CutIndex: shape.cutSetting.index,
+      PowerScale: shape.cutSetting.powerScale,
+    },
     true,
     commentOutShape
   );
