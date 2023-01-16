@@ -1,0 +1,50 @@
+***** 
+***** LaserPost automated testing snapshot
+***** See https://github.com/nucarve/laserpost for information.
+***** 
+***** Snapshot:
+*****   Post: laserpost-lightburn
+*****   Setup: Group name
+*****   File: op-4-cut-modes.lbrn
+***** 
+***** Properties:
+*****   op0800GroupName: LASER_ENABLE_BOTH
+*****   laserpost0500IncludeComments: INCLUDE_COMMENTS_NONE
+*****   automatedTesting: true
+***** 
+***** Options:
+*****   quiet: "--quiet"
+*****   nobackup: "--nobackup"
+*****   noeditor: "--noeditor"
+*****   nointeraction: "--nointeraction"
+*****   timeout: ["--timeout","1"]
+***** 
+***** Validators:
+*****   XPath validator:
+*****     Query: "/LightBurnProject/@AppVersion"
+*****     Match: required
+*****   XPath validator:
+*****     Query: "/LightBurnProject/Shape[1][@Type="Group"]/Children/Shape[1][@Type="Group"]"
+*****     Match: required
+***** 
+ AppVersion="1.2.04"
+<Shape Type="Group">
+        <XForm>1 0 0 1 0 0</XForm>
+        <Children>
+          <Shape Type="Path" CutIndex="0" PowerScale="100">
+            <XForm>1 0 0 1 0 0</XForm>
+            <V vx="1.483" vy="101.25"/>
+            <V vx="1.05" vy="101"/>
+            <P T="L" p0="0" p1="1"/>
+          </Shape>
+          <Shape Type="Ellipse" PowerScale="100" CutIndex="0" Rx="99.95" Ry="99.95">
+            <XForm>1 0 0 1 101 101</XForm>
+          </Shape>
+          <Shape Type="Path" CutIndex="0" PowerScale="100">
+            <XForm>1 0 0 1 0 0</XForm>
+            <V vx="1.05" vy="101"/>
+            <V vx="1.483" vy="100.75"/>
+            <P T="L" p0="0" p1="1"/>
+          </Shape>
+        </Children>
+      </Shape>

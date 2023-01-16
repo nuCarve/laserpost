@@ -982,13 +982,37 @@
         "op0600Passes": "33",
         "op0700ZStep": "44"        
       }
+    },
+    {
+      "name": "Group name",
+      "comment": "Set all layers to use same group name, verify they are correctly gathered into a group.",
+      "setup": "barebones",
+      "cnc": "op-4-cut-modes",
+      "validators": {
+        "lbrn": {
+          "xpath": [
+            {
+              "query": "/LightBurnProject/Shape[1][@Type=\"Group\"]/Children/Shape[1][@Type=\"Group\"]",
+              "match": "required"
+            }
+          ]
+        },
+        "svg": {
+          "xpath": [
+            {
+              "query": "/svg:svg/svg:g/svg:g",
+              "match": "required"
+            }
+          ]
+        }
+      },
+      "properties": {
+        "op0800GroupName": "LASER_ENABLE_BOTH"
+      }
     }
   ],
   "to-do": [
     "debug: svg org-layer-group has many duplicate layer numbers ... why?",
-    "op0800GroupName:",
-    "  type: 'string',",
-    "  value: GROUP_NAME_DEFAULT,",
     "// #if LBRN",
     "op0900CustomCutSettingXML:",
     "  type: 'string',",
