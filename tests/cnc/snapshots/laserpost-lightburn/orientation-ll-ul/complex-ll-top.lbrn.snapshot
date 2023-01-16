@@ -9,7 +9,7 @@
 ***** 
 ***** Properties:
 *****   machine0050Orientation: MACHINE_ORIENTATION_UPPER_LEFT
-*****   laserpost0500IncludeComments: INCLUDE_COMMENTS_DEBUG
+*****   laserpost0500IncludeComments: INCLUDE_COMMENTS_NONE
 *****   removeVersionAndTimestamp: true
 ***** 
 ***** Options:

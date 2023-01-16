@@ -10,7 +10,7 @@
 ***** Properties:
 *****   laserpost0100Organization: ORGANIZATION_BY_OPERATION
 *****   laserpost0200GroupShapes: true
-*****   laserpost0500IncludeComments: INCLUDE_COMMENTS_DEBUG
+*****   laserpost0500IncludeComments: INCLUDE_COMMENTS_NONE
 *****   removeVersionAndTimestamp: true
 ***** 
 ***** Options:

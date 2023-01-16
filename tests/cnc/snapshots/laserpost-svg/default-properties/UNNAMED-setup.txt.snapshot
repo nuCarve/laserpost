@@ -8,7 +8,7 @@
 *****   File: UNNAMED-setup.txt
 ***** 
 ***** Properties:
-*****   laserpost0500IncludeComments: INCLUDE_COMMENTS_DEBUG
+*****   laserpost0500IncludeComments: INCLUDE_COMMENTS_NONE
 *****   removeVersionAndTimestamp: true
 ***** 
 ***** Options:

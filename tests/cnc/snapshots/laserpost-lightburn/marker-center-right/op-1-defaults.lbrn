@@ -2,93 +2,6 @@
 <LightBurnProject AppVersion="1.2.04" FormatVersion="0" MaterialHeight="0" MirrorX="True" MirrorY="True">
   <Thumbnail Source="iVBORw0KGgoAAAANSUhEUgAAAIAAAACACAMAAAD04JH5AAAC9FBMVEU2CAmeGBtwERM8CQo1CAniIyfcIibbIibWISXVISXQICTPICS0HB+tGx6oGh2nGh2iGRycGBuaGBt7ExV0EhRtERNpEBJBCgs6CQpmEBJTDQ5MDA1FCww/Cgs5CQodBAUqBgdYDQ9RDA5LCw0+CQs3CAopBgciBQYbBAXmIyjhIifaISbZISbOHyTMHyTHHiPFHiLAHSG/HSG5HCCyGx+mGR2lGR2fGByYFxuSFhmRFhmMFRiLFRiGFBeFFBd/ExZ9ExZ3EhVwERRkDxFjDxFcDhBXDQ9PDA5JCw1CCgwhBQbrJCnoJCnlIyjjIyjfIifSICXKHyPCHiLBHiK9HSG7HSG2HCCwGx+qGh6WFxqUFxqPFhmNFhmIFRiHFRiDFBeBFBd7ExZbDhBUDQ9NDA4nBgeTFxplEBJfDxFZDhAyCAksBwgrBwgWAwQxBwkVAwQPAgMJAQICAgEEAwEKBwMTDQYdEwksHQ5gPx84JRJkQiEzIhEnGg0bEgkYEAgPCgUMCAQJBgMGBAIyIBC2djutcDhpRCJdPR5XOBxELBZBKhUfFArNhUPHgUHCfj/BfT+8ej27ej23dzy1dTuxczqucTmlazajajWfZzScZTONXC6HWCx4Tid3TSd1TCZ0SyZoQyJZOh1NMhk9KBQ6JhM0IhErHA4oGg0lGAzNhkTNhUTLg0PLhEPDfkC/fD++ez+8ej65eD21dTypbjimbDeaZDOXYjKMWy6JWS2GVyyCVCt/Uip8UCl5TyhzSyZqRSNnQyJkQSFYOR1MMRlJLxhGLhfJgkPAfUCrbzmZYzOKWi6EVixvSSVUNxxCKxY/KRUzIRF9USpiQCFQNBtBKxY7JxQvHxAjFwwgFQsaEQkjFgsQCgUvHg8WDgc3IxJwSCVGLRdAKRWSXjEwHxAqGw4nGQ0kFwweEwoUDQcRCwYLBwQSCwYIBQMFAwICAAAIAQEZBAQlBgYfBQUSAwMMAgIGAQEXBAQRAwMKAgIEAQEAAAD///+QlUPNAAAA/HRSTlP//////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////wDUesd+AAAACXBIWXMAAC4jAAAuIwF4pT92AAAI2ElEQVR4nO2be1BU1x3HP3cXhIUF5CkSOcszFQVqrPGBmviKGqudNG3TpGptZmpNxunUPmI1U9s0qY1VU+tQja3jZJJYbTVJOzW2xjFR1PjARwRFKwrLHkBBUJEFltey/ePuLuwKelcI+Mf+/ti997fn/r6f+zuPe87ZXaWNgTXdAOv7AQjoeuLoH02lB4B+kgdHV4SATm8/WhcEndvVv+bW0w2MfqfigPcCFaD/E+DWfDgyMBAJcKk+HBnwA/gB/AB+AD+AH8AP4AcYSAu4fxFPe/XFmsgbKAdCb6/pEwClDV/mhCXXLgyVIKSQwfWLI3qp7TPAirm1SIQEAcjkU6/3HsCXNrDxubMAhojoyLAbEsyjD/S+GnzIwEeViRJ95PgUAD6whSEx1K7shTb40ghXZzsk2ckm5+m3KckDW+yD6zspNGdgWyNiyAQP16FCRNQTD67tE8DJkzAl28tZdUIK+7d6BaC1ClYkCm566/OnRLjzoPqq6X+trVx4eYRsHa8evx6yK189nOGovNO6Z9oH1NRsjqvZMB14dejmvLiazXl5eXGbRwXfM6biC4C+KCLhewAUfdFYoVOsX4wAGHamQ9hySs6Wtre235wXAZgutRpK2+PjWw2lhuHG+wNoHAdWfijkTQBOXLGBEBcrKwDIEjKacpBI8gHOgQAJAvFnDZE1Aiyxw1iAVflSEhSE4PRqgFRJK+l6vU4ICcATCJIT9YnJ2gJrBTiFVP4OkCJQpi+ZHQ/8AOAYDLlzprL+BZ0UalEpdTn76/efG6YtssZe4IDk84AlEsaORBn/HvLKK8CTn2PJ/RW8ORKZAICQ/HUlrAGpJbLGDOSg3l8IEA9ggIyVwGGkCWABuDIgWABYEaIPAbY6a/htiegAcIDifBqrw1iZS064blxTAnydEWUK2K6qCovTpzhfnYLSfeN9WQUL3MGk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" />
 
-  <!-- DEBUG: LaserPost (VERSION-REMOVED) file settings properties: -->
-  <!-- DEBUG:      Organization (laserpost0100Organization): "org-operation" -->
-  <!-- DEBUG:      Group shapes (laserpost0200GroupShapes): true -->
-  <!-- DEBUG:      Alignment marks (laserpost0300AlignmentMarks): "mark-center-right" -->
-  <!-- DEBUG:      Notes (laserpost0400IncludeNotes): "important" -->
-  <!-- DEBUG:      Comments (laserpost0500IncludeComments): "debug" -->
-
-  <!-- DEBUG: Workspace properties: -->
-  <!-- DEBUG:      Trace stock (work0100TraceStock): true -->
-  <!-- DEBUG:      Offset X axis (work0200OffsetX): 0 -->
-  <!-- DEBUG:      Offset Y axis (work0300OffsetY): 0 -->
-
-  <!-- DEBUG: Power overrides properties: -->
-  <!-- DEBUG:      Etch power (min, %) (laserPower0100EtchMin): 0 -->
-  <!-- DEBUG:      Etch power (max, %) (laserPower0200EtchMax): 0 -->
-  <!-- DEBUG:      Vaporize power (min, %) (laserPower0300VaporizeMin): 0 -->
-  <!-- DEBUG:      Vaporize power (max, %) (laserPower0400VaporizeMax): 0 -->
-  <!-- DEBUG:      Through power (min, %) (laserPower0500ThroughMin): 0 -->
-  <!-- DEBUG:      Through power (max, %) (laserPower0600ThroughMax): 0 -->
-
-  <!-- DEBUG: Machine properties: -->
-  <!-- DEBUG:      Machine orientation (machine0050Orientation): "upper-right" -->
-  <!-- DEBUG:      Speed units (machine0100SpeedUnits): "mmps" -->
-  <!-- DEBUG:      Check for updates (machine0300AutomaticUpdate): "daily" -->
-  <!-- DEBUG:      Beta releases (machine0400UpdateAllowBeta): false -->
-  <!-- DEBUG:      Mirror shuttle laser 1 (machine0500ShuttleLaser1): "" -->
-  <!-- DEBUG:      Mirror shuttle laser 2 (machine0600ShuttleLaser2): "" -->
-
-  <!-- DEBUG: Document units: inch -->
-
-  <!-- DEBUG: Operation "2D Profile1" properties: -->
-  <!-- DEBUG:      Layer mode (op0100LayerMode): "inherit" -->
-  <!-- DEBUG:      Air assist (op0200UseAir): "gas" -->
-  <!-- DEBUG:      Laser selection (op0300LaserEnable): "laser1" -->
-  <!-- DEBUG:      Power scale (%) (op0400PowerScale): 100 -->
-  <!-- DEBUG:      Z-offset (mm) (op0500ZOffset): 0 -->
-  <!-- DEBUG:      Pass count (op0600Passes): 1 -->
-  <!-- DEBUG:      Z-step per pass (mm) (op0700ZStep): 0 -->
-  <!-- DEBUG:      Grouping name (op0800GroupName): "" -->
-  <!-- DEBUG:      Custom CutSetting (XML) (op0900CustomCutSettingXML): "" -->
-
-  <!-- DEBUG: Operation: "2D Profile1" using group "n/a" -->
-  <!-- DEBUG: Settings: 80-80% (tool power properties), layer mode: line, laser enable: laser1, power scale: 100, air: on, z-offset: 0, passes: 1, z-step: 0 -->
-
-  <!-- DEBUG: Dump: Groups (2 groups): -->
-  <!-- DEBUG:   Group "(none)" (1 operations) -->
-  <!-- DEBUG:     Operation "2D Profile1" (80-80% power, power scale 100%, layer mode line (10 paths) -->
-  <!-- DEBUG:   Group "Stock outline" (1 operations) -->
-  <!-- DEBUG:     Operation "Stock outline" (100-100% power, power scale 100%, layer mode line (5 paths) -->
-
-  <!-- DEBUG: Project organization: -->
-  <!-- DEBUG:   Cut settings: -->
-  <!-- DEBUG:     #0: "2D Profile1" 80-80% power at 30 mm/min, index=0, priority=0, layerMode=line, laserEnable=laser1 -->
-  <!-- DEBUG:     #1: "Stock outline, Alignment mark" 100-100% power at 100 mm/min, index=1, priority=1, layerMode=line, laserEnable=off -->
-  <!-- DEBUG:   Layer #0: "All layers" (3 operation sets): -->
-  <!-- DEBUG:     Operation group #0: -->
-  <!-- DEBUG:       Operation #0: "2D Profile1" -->
-  <!-- DEBUG:         Shape groups: -->
-  <!-- DEBUG:           Shape (type=path, layer=0, powerScale=100, vectors=2) -->
-  <!-- DEBUG:           Shape (type=path, layer=0, powerScale=100, vectors=6) -->
-  <!-- DEBUG:           Shape (type=path, layer=0, powerScale=100, vectors=2) -->
-  <!-- DEBUG:     Operation group #1: -->
-  <!-- DEBUG:       Operation #0: "Stock outline" -->
-  <!-- DEBUG:         Shape groups: -->
-  <!-- DEBUG:           Shape (type=path, layer=1, powerScale=100, vectors=4) -->
-  <!-- DEBUG:     Operation group #2: -->
-  <!-- DEBUG:       Operation #0: "Alignment mark" -->
-  <!-- DEBUG:         Shape groups: -->
-  <!-- DEBUG:           Shape (type=ellipse, layer=1, powerScale=100) -->
-  <!-- DEBUG:           Shape (type=path, layer=1, powerScale=100, vectors=4) -->
-  <!-- Project generated by LaserPost for LightBurn (version VERSION-REMOVED). -->
-  <!-- Visit https://nucarve.com/laserpost for software, instructions and instructional videos. -->
-
-  <!-- File: UNNAMED.lbrn -->
-
-  <!-- Program -->
-  <!--   Name: UNNAMED -->
-  <!-- Machine -->
-  <!--   Vendor: Autodesk -->
-  <!--   Model: CNC intermediate -->
-
-  <!-- Layers: -->
-  <!--   00: 2D Profile1 -->
-  <!--     Fill "line" at power 80-80% (scale 100%) and 30 mm/sec using laser 1 (air on, Z offset 0, passes 1, z-step 0) -->
-  <!--   01: Stock outline, Alignment mark -->
-  <!--     Output turned off -->
-
   <VariableText>
     <Start Value="0" />
     <End Value="999" />
@@ -142,7 +55,6 @@
     <zPerPass Value="0" />
     <doOutput Value="0" />
   </CutSetting>
-  <!-- Operation: 2D Profile1 -->
   <Shape Type="Group">
     <XForm>1 0 0 1 0 0</XForm>
     <Children>
@@ -175,7 +87,6 @@
       </Shape>
     </Children>
   </Shape>
-  <!-- Operation: Stock outline -->
   <Shape Type="Path" CutIndex="1">
     <XForm>1 0 0 1 0 0</XForm>
     <V vx="112" vy="52" />
@@ -187,7 +98,6 @@
     <P T="L" p0="2" p1="3" />
     <P T="L" p0="3" p1="0" />
   </Shape>
-  <!-- Operation: Alignment mark -->
   <Shape Type="Group">
     <XForm>1 0 0 1 0 0</XForm>
     <Children>

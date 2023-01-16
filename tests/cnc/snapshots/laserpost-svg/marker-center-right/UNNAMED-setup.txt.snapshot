@@ -9,7 +9,7 @@
 ***** 
 ***** Properties:
 *****   laserpost0300AlignmentMarks: ALIGNMENT_MARK_CENTER_RIGHT
-*****   laserpost0500IncludeComments: INCLUDE_COMMENTS_DEBUG
+*****   laserpost0500IncludeComments: INCLUDE_COMMENTS_NONE
 *****   removeVersionAndTimestamp: true
 ***** 
 ***** Options:

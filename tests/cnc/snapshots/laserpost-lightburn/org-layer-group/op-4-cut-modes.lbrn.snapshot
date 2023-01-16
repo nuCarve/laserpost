@@ -10,7 +10,7 @@
 ***** Properties:
 *****   laserpost0100Organization: ORGANIZATION_BY_LAYER
 *****   laserpost0200GroupShapes: true
-*****   laserpost0500IncludeComments: INCLUDE_COMMENTS_DEBUG
+*****   laserpost0500IncludeComments: INCLUDE_COMMENTS_NONE
 *****   removeVersionAndTimestamp: true
 ***** 
 ***** Options:
@@ -94,7 +94,6 @@
 <Shape Type="Group">
     <XForm>1 0 0 1 0 0</XForm>
     <Children>
-      <!-- Operation: Outer through -->
       <Shape Type="Group">
         <XForm>1 0 0 1 0 0</XForm>
         <Children>
@@ -115,7 +114,6 @@
           </Shape>
         </Children>
       </Shape>
-      <!-- Operation: Center through -->
       <Shape Type="Group">
         <XForm>1 0 0 1 0 0</XForm>
         <Children>

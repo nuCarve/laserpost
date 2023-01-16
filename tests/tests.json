@@ -29,7 +29,7 @@
         }
       },
       "properties": {
-        "laserpost0500IncludeComments": "INCLUDE_COMMENTS_DEBUG",
+        "laserpost0500IncludeComments": "INCLUDE_COMMENTS_NONE",
         "removeVersionAndTimestamp": "true"
       }
     },
@@ -45,9 +45,6 @@
         "svg": {
           "xpath": [{ "query": "/svg:svg/@version", "match": "required" }]
         }
-      },
-      "properties": {
-        "laserpost0500IncludeComments": "INCLUDE_COMMENTS_DEBUG"
       }
     },
     "all": {
@@ -194,7 +191,8 @@
       "properties": {
         "laserpost0100Organization": "ORGANIZATION_BY_LAYER_FILE",
         "laserpost0300AlignmentMarks": "ALIGNMENT_MARK_UPPER_RIGHT",
-        "laserpost0200GroupShapes": "true"
+        "laserpost0200GroupShapes": "true",
+        "laserpost0500IncludeComments": "INCLUDE_COMMENTS_NORMAL"
       }
     },
     {
@@ -273,7 +271,12 @@
       "posts": ["laserpost-lightburn"],
       "validators": {
         "lbrn": {
-          "xpath": [{ "query": "/LightBurnProject/Notes[@ShowOnLoad=\"0\"]", "match": "required" }]
+          "xpath": [
+            {
+              "query": "/LightBurnProject/Notes[@ShowOnLoad=\"0\"]",
+              "match": "required"
+            }
+          ]
         }
       },
       "properties": { "laserpost0400IncludeNotes": "INCLUDE_NOTES_HIDDEN" }
@@ -285,7 +288,12 @@
       "cnc": "op-1-defaults",
       "validators": {
         "lbrn": {
-          "xpath": [{ "query": "/LightBurnProject/Notes[@ShowOnLoad=\"1\"]", "match": "required" }],
+          "xpath": [
+            {
+              "query": "/LightBurnProject/Notes[@ShowOnLoad=\"1\"]",
+              "match": "required"
+            }
+          ],
           "regex": [
             {
               "regex": "This is a test, (only a test).",
@@ -305,7 +313,8 @@
       },
       "properties": {
         "laserpost0400IncludeNotes": "INCLUDE_NOTES_SHOW_IMPORTANT",
-        "createImportantNote": "true"
+        "createImportantNote": "true",
+        "laserpost0500IncludeComments": "INCLUDE_COMMENTS_NORMAL"
       }
     },
     {
@@ -315,7 +324,12 @@
       "cnc": "op-1-defaults",
       "validators": {
         "lbrn": {
-          "xpath": [{ "query": "/LightBurnProject/Notes[@ShowOnLoad=\"1\"]", "match": "required" }]
+          "xpath": [
+            {
+              "query": "/LightBurnProject/Notes[@ShowOnLoad=\"1\"]",
+              "match": "required"
+            }
+          ]
         },
         "svg": {
           "xpath": [{ "query": "/nothing", "match": "forbidden" }],
@@ -327,33 +341,13 @@
           ]
         }
       },
-      "properties": { "laserpost0400IncludeNotes": "INCLUDE_NOTES_SHOW" }
+      "properties": {
+        "laserpost0400IncludeNotes": "INCLUDE_NOTES_SHOW",
+        "laserpost0500IncludeComments": "INCLUDE_COMMENTS_NORMAL"
+      }
     }
   ],
   "to-do": [
-    "laserpost0300AlignmentMarks:",
-    "  NEED TO ROTATE BASED ON ORIENTATION; MAYBE MORE POSITION OPTIONS?",
-    "    { title: localize('None'), id: ALIGNMENT_MARK_NONE },",
-    "    { title: localize('Aligned to stock upper-right'), id: ALIGNMENT_MARK_UPPER_RIGHT },",
-    "    { title: localize('Aligned to stock center-right'), id: ALIGNMENT_MARK_CENTER_RIGHT },",
-    "    { title: localize('Aligned to stock lower-right'), id: ALIGNMENT_MARK_LOWER_RIGHT },",
-    "laserpost0400IncludeNotes:",
-    "    { title: localize('Disable'), id: INCLUDE_NOTES_NONE },",
-    "    // #if LBRN",
-    "    { title: localize('Hidden'), id: INCLUDE_NOTES_HIDDEN },",
-    "    // #endif",
-    "    {",
-    "      title: localize('Show when important'),",
-    "      id: INCLUDE_NOTES_SHOW_IMPORTANT,",
-    "    },",
-    "    { title: localize('Always show'), id: INCLUDE_NOTES_SHOW },",
-    "laserpost0500IncludeComments:",
-    "    { title: localize('Disable'), id: INCLUDE_COMMENTS_NONE },",
-    "    { title: localize('Normal'), id: INCLUDE_COMMENTS_NORMAL },",
-    "    { title: localize('Debug'), id: INCLUDE_COMMENTS_DEBUG },",
-    "    { title: localize('Insane'), id: INCLUDE_COMMENTS_INSANE },",
-    "",
-    "",
     "work0100TraceStock:",
     "  type: 'boolean',",
     "  value: TRACE_STOCK_DEFAULT,",
