@@ -252,7 +252,6 @@
           ]
         },
         "svg": {
-          "xpath": [{ "query": "/nothing", "match": "forbidden" }],
           "regex": [
             {
               "regex": "(Job setup information has been generated)",
@@ -302,7 +301,6 @@
           ]
         },
         "svg": {
-          "xpath": [{ "query": "/nothing", "match": "forbidden" }],
           "regex": [
             {
               "regex": "This is a test, (only a test).",
@@ -332,7 +330,6 @@
           ]
         },
         "svg": {
-          "xpath": [{ "query": "/nothing", "match": "forbidden" }],
           "regex": [
             {
               "regex": "(Job setup information has been generated)",
@@ -345,12 +342,66 @@
         "laserpost0400IncludeNotes": "INCLUDE_NOTES_SHOW",
         "laserpost0500IncludeComments": "INCLUDE_COMMENTS_NORMAL"
       }
+    },
+    {
+      "name": "Trace stock enabled",
+      "comment": "Enable trace stock; verify trace stock layer is generated.",
+      "setup": "all",
+      "cnc": "op-1-defaults",
+      "validators": {
+        "lbrn": {
+          "regex": [
+            {
+              "regex": "(Operation: Stock outline)",
+              "require": "Operation: Stock outline"
+            }
+          ]
+        },
+        "svg": {
+          "regex": [
+            {
+              "regex": "(Operation: Stock outline)",
+              "require": "Operation: Stock outline"
+            }
+          ]
+        }
+      },
+      "properties": {
+        "work0100TraceStock": "true",
+        "laserpost0500IncludeComments": "INCLUDE_COMMENTS_NORMAL"
+      }
+    },
+    {
+      "name": "Trace stock disabled",
+      "comment": "Disable trace stock; verify trace stock layer is not generated.",
+      "setup": "barebones",
+      "cnc": "op-1-defaults",
+      "validators": {
+        "lbrn": {
+          "regex": [
+            {
+              "regex": "Operation: Stock outline",
+              "forbidden": true
+            }
+          ]
+        },
+        "svg": {
+          "regex": [
+            {
+              "regex": "Operation: Stock outline",
+              "forbidden": true
+            }
+          ]
+        }
+      },
+      "properties": {
+        "work0100TraceStock": "false",
+        "laserpost0500IncludeComments": "INCLUDE_COMMENTS_NORMAL"
+      }
     }
+
   ],
   "to-do": [
-    "work0100TraceStock:",
-    "  type: 'boolean',",
-    "  value: TRACE_STOCK_DEFAULT,",
     "work0200OffsetX:",
     "  type: 'number',",
     "  value: OFFSET_X_AXIS_DEFAULT,",

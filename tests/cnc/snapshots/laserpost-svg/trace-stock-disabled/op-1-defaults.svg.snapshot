@@ -1,0 +1,30 @@
+***** 
+***** LaserPost automated testing snapshot
+***** See https://github.com/nucarve/laserpost for information.
+***** 
+***** Snapshot:
+*****   Post: laserpost-svg
+*****   Setup: Trace stock disabled
+*****   File: op-1-defaults.svg
+***** 
+***** Properties:
+*****   work0100TraceStock: false
+*****   laserpost0500IncludeComments: INCLUDE_COMMENTS_NORMAL
+*****   removeVersionAndTimestamp: true
+***** 
+***** Options:
+*****   quiet: "--quiet"
+*****   nobackup: "--nobackup"
+*****   noeditor: "--noeditor"
+*****   nointeraction: "--nointeraction"
+*****   timeout: ["--timeout","1"]
+***** 
+***** Validators:
+*****   RegEx validator:
+*****     Regular expression: "Operation: Stock outline"
+*****     Forbidden
+*****   XPath validator:
+*****     Query: "/svg:svg/@version"
+*****     Match: required
+***** 
+ version="1.1"
