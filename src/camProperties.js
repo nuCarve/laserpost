@@ -428,12 +428,12 @@ properties = {
   //
   // hidden settings, used by automated test
   //
-  removeVersionAndTimestamp: {
-    title: 'Remove version and timestamp',
+  automatedTesting: {
+    title: 'Automated testing',
     description:
-      'Used by automated testing to disable inclusion of timestamp and version numbers in generated files, to generalize their outputs.',
+      'Set by automated testing to clense output (remove timestamps, version numbers, etc).',
     type: 'boolean',
-    value: true,
+    value: false,
     visible: false,
   },
   createImportantNote: {

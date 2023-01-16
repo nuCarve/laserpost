@@ -11,7 +11,7 @@
  */
 function onOpen() {
   // if running automated tests, cleanse the version numbers
-  if (getProperty('removeVersionAndTimestamp', false) == true) {
+  if (getProperty('automatedTesting', false) == true) {
     description = description.replace("VERSION_NUMBER", "VERSION-REMOVED");
     longDescrition = longDescription.replace("VERSION_NUMBER", "VERSION-REMOVED");
     generatedBy = generatedBy.replace("VERSION_NUMBER", "VERSION-REMOVED");
@@ -71,7 +71,7 @@ function generateProjectNotes(layerIndex) {
     });
 
   // include timestamp (unless disabled)
-  if (getProperty('removeVersionAndTimestamp', false) == false)
+  if (getProperty('automatedTesting', false) == false)
     appendProjectNote(localize('Generated at: {date}'), {
       date: new Date().toString(),
     });

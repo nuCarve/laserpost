@@ -17,10 +17,18 @@
 function groupsToProject() {
   // set up the project.translate and project.box to reflect the CAM settings
   project.box = {
-    minX: getGlobalParameter('stock-lower-x') + getProperty('work0200OffsetX', OFFSET_X_AXIS_DEFAULT),
-    minY: getGlobalParameter('stock-lower-y') + getProperty('work0300OffsetY', OFFSET_Y_AXIS_DEFAULT),
-    maxX: getGlobalParameter('stock-upper-x') + getProperty('work0200OffsetX', OFFSET_X_AXIS_DEFAULT),
-    maxY: getGlobalParameter('stock-upper-y') + getProperty('work0300OffsetY', OFFSET_Y_AXIS_DEFAULT),
+    minX:
+      getGlobalParameter('stock-lower-x') +
+      getProperty('work0200OffsetX', OFFSET_X_AXIS_DEFAULT),
+    minY:
+      getGlobalParameter('stock-lower-y') +
+      getProperty('work0300OffsetY', OFFSET_Y_AXIS_DEFAULT),
+    maxX:
+      getGlobalParameter('stock-upper-x') +
+      getProperty('work0200OffsetX', OFFSET_X_AXIS_DEFAULT),
+    maxY:
+      getGlobalParameter('stock-upper-y') +
+      getProperty('work0300OffsetY', OFFSET_Y_AXIS_DEFAULT),
   };
   project.translate = {
     x: false,
@@ -142,8 +150,10 @@ function createLayers() {
 function createProjectLayers() {
   // determine if we are grouping by layer or by operation
   const groupByLayer =
-    getProperty('laserpost0100Organization', GROUPING_DEFAULT) == ORGANIZATION_BY_LAYER ||
-    getProperty('laserpost0100Organization', GROUPING_DEFAULT) == ORGANIZATION_BY_LAYER_FILE;
+    getProperty('laserpost0100Organization', GROUPING_DEFAULT) ==
+      ORGANIZATION_BY_LAYER ||
+    getProperty('laserpost0100Organization', GROUPING_DEFAULT) ==
+      ORGANIZATION_BY_LAYER_FILE;
 
   // build up the project layers
   project.layers = [];
@@ -212,7 +222,10 @@ function populateProjectLayers() {
 
         // if a single layer per file, add our cut settings to this layer and remap all layer index
         // to use layer 0 (since there is only one layer per file)
-        if (getProperty('laserpost0100Organization', GROUPING_DEFAULT) == ORGANIZATION_BY_LAYER_FILE) {
+        if (
+          getProperty('laserpost0100Organization', GROUPING_DEFAULT) ==
+          ORGANIZATION_BY_LAYER_FILE
+        ) {
           const originalIndex = groupOperation.index;
           project.cutSettings[originalIndex].index = 0;
           groupOperation.index = 0;
@@ -251,7 +264,8 @@ function populateProjectLayers() {
 function populateFilesAndPath() {
   // determine if we are doing file redirection
   const redirect =
-    getProperty('laserpost0100Organization', GROUPING_DEFAULT) == ORGANIZATION_BY_LAYER_FILE;
+    getProperty('laserpost0100Organization', GROUPING_DEFAULT) ==
+    ORGANIZATION_BY_LAYER_FILE;
 
   // process all layers
   for (let layerIndex = 0; layerIndex < project.layers.length; ++layerIndex) {
@@ -574,17 +588,15 @@ function translate(xy) {
     y: getProperty('work0300OffsetY', OFFSET_Y_AXIS_DEFAULT),
   };
 
-  if (xy.x !== undefined && project.translate.x) {
-    xy.x = project.box.maxX - project.box.minX - xy.x + project.box.minX;
-  }
-  if (xy.y !== undefined && project.translate.y) {
-    xy.y = project.box.maxY - project.box.minY - xy.y + project.box.minY;
-  }
-
   if (xy.x !== undefined)
-    xy.x += workspaceOffsets.x;
+    if (project.translate.x)
+      xy.x = project.box.maxX - project.box.minX - xy.x + project.box.minX;
+    else xy.x += workspaceOffsets.x;
+
   if (xy.y !== undefined)
-    xy.y += workspaceOffsets.y;
+    if (project.translate.y)
+      xy.y = project.box.maxY - project.box.minY - xy.y + project.box.minY;
+    else xy.y += workspaceOffsets.y;
 
   if (project.translate.reflect) {
     const originalX = xy.x;
@@ -1220,7 +1232,10 @@ function traceStockOutline() {
  */
 function createAlignmentMark() {
   // set up the alignment mark if requested
-  const alignmentMark = getProperty('laserpost0300AlignmentMarks', ALIGNMENT_MARK_DEFAULT);
+  const alignmentMark = getProperty(
+    'laserpost0300AlignmentMarks',
+    ALIGNMENT_MARK_DEFAULT
+  );
   if (alignmentMark !== ALIGNMENT_MARK_NONE) {
     // get the stock dimensions
     const stock = {
@@ -1249,7 +1264,7 @@ function createAlignmentMark() {
 
     // increase the width of our working box
     project.box.maxX += markGap + markRadius * 2;
-    
+
     // set up our layer to hold the alignment marks
     const cutSetting = getCutSetting({
       name: ALIGNMENT_MARK_GROUP_NAME,

@@ -16,6 +16,10 @@
  * @returns `true` if an update is available, `false` if no update or did not check
  */
 function checkUpdateAvailability() {
+  // disable for automated testing
+  if (getProperty('automatedTesting', false) == true) 
+    return false;
+
   // check if we have updated since our last check
   if (activeState.installedSemver && activeState.installedSemver !== semVer) {
     delete activeState.updateSemver;
