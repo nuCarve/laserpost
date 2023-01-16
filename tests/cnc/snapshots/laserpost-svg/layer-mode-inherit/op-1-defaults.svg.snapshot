@@ -1,0 +1,27 @@
+***** 
+***** LaserPost automated testing snapshot
+***** See https://github.com/nucarve/laserpost for information.
+***** 
+***** Snapshot:
+*****   Post: laserpost-svg
+*****   Setup: Layer mode inherit
+*****   File: op-1-defaults.svg
+***** 
+***** Properties:
+*****   op0100LayerMode: LAYER_MODE_INHERIT
+*****   laserpost0500IncludeComments: INCLUDE_COMMENTS_DEBUG
+*****   automatedTesting: true
+***** 
+***** Options:
+*****   quiet: "--quiet"
+*****   nobackup: "--nobackup"
+*****   noeditor: "--noeditor"
+*****   nointeraction: "--nointeraction"
+*****   timeout: ["--timeout","1"]
+***** 
+***** Validators:
+*****   XPath validator:
+*****     Query: "/svg:svg/@version"
+*****     Match: required
+***** 
+ version="1.1"

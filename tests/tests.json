@@ -549,24 +549,120 @@
         "machine0500ShuttleLaser1": "50",
         "machine0600ShuttleLaser2": "100" 
       }
+    },
+    {
+      "name": "Layer mode inherit",
+      "comment": "Set operation layer mode to inherit, which is cut/line.",
+      "setup": "barebones",
+      "cnc": "op-1-defaults",
+      "validators": {
+        "lbrn": {
+          "xpath": [
+            {
+              "query": "/LightBurnProject/CutSetting[1][@type=\"Cut\"]",
+              "match": "required"
+            }
+          ]
+        },
+        "txt": {
+          "regex": [
+            {
+              "regex": "Mode \"(\\w+)\"",
+              "require": "cut"
+            }
+          ]
+        }
+      },
+      "properties": {
+        "op0100LayerMode": "LAYER_MODE_INHERIT",
+        "laserpost0500IncludeComments": "INCLUDE_COMMENTS_DEBUG"
+      }
+    },
+    {
+      "name": "Layer mode line",
+      "comment": "Set operation layer mode to cut.",
+      "setup": "barebones",
+      "cnc": "op-1-defaults",
+      "validators": {
+        "lbrn": {
+          "xpath": [
+            {
+              "query": "/LightBurnProject/CutSetting[1][@type=\"Cut\"]",
+              "match": "required"
+            }
+          ]
+        },
+        "txt": {
+          "regex": [
+            {
+              "regex": "Mode \"(\\w+)\"",
+              "require": "cut"
+            }
+          ]
+        }
+      },
+      "properties": {
+        "op0100LayerMode": "LAYER_MODE_LINE"
+      }
+    },
+    {
+      "name": "Layer mode fill",
+      "comment": "Set operation layer mode to fill.",
+      "setup": "barebones",
+      "cnc": "op-1-defaults",
+      "validators": {
+        "lbrn": {
+          "xpath": [
+            {
+              "query": "/LightBurnProject/CutSetting[1][@type=\"Scan\"]",
+              "match": "required"
+            }
+          ]
+        },
+        "txt": {
+          "regex": [
+            {
+              "regex": "Mode \"(\\w+)\"",
+              "require": "fill"
+            }
+          ]
+        }
+      },
+      "properties": {
+        "op0100LayerMode": "LAYER_MODE_FILL"
+      }
+    },
+    {
+      "name": "Layer mode offset fill",
+      "comment": "Set operation layer mode to offset fill.",
+      "setup": "barebones",
+      "cnc": "op-1-defaults",
+      "validators": {
+        "lbrn": {
+          "xpath": [
+            {
+              "query": "/LightBurnProject/CutSetting[1][@type=\"Offset\"]",
+              "match": "required"
+            }
+          ]
+        },
+        "txt": {
+          "regex": [
+            {
+              "regex": "Mode \"(.+)\"",
+              "require": "outline fill"
+            }
+          ]
+        }
+      },
+      "properties": {
+        "op0100LayerMode": "LAYER_MODE_OFFSET_FILL"
+      }
     }
+
   ],
   "to-do": [
-    "// #if LBRN",
-    "machine0500ShuttleLaser1:",
-    "  type: 'string',",
-    "  value: SHUTTLE_LASER_1_DEFAULT,",
-    "machine0600ShuttleLaser2:",
-    "  type: 'string',",
-    "  value: SHUTTLE_LASER_2_DEFAULT,",
-    "// #endif",
-    "",
-    "",
-    "op0100LayerMode:",
-    "    { title: localize('Use cutting mode'), id: LAYER_MODE_INHERIT },",
-    "    { title: localize('Line'), id: LAYER_MODE_LINE },",
-    "    { title: localize('Fill'), id: LAYER_MODE_FILL },",
-    "    { title: localize('Offset Fill'), id: LAYER_MODE_OFFSET_FILL },",
+    "debug: svg org-layer-group has many duplicate layer numbers ... why?",
     "op0200UseAir:",
     "    { title: localize('Off'), id: USE_AIR_OFF },",
     "    { title: localize('On'), id: USE_AIR_ON },",
