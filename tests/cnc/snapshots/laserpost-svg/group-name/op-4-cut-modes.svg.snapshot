@@ -8,7 +8,7 @@
 *****   File: op-4-cut-modes.svg
 ***** 
 ***** Properties:
-*****   op0800GroupName: LASER_ENABLE_BOTH
+*****   op0800GroupName: GROUP_NAME_TEST
 *****   laserpost0500IncludeComments: INCLUDE_COMMENTS_NONE
 *****   automatedTesting: true
 ***** 

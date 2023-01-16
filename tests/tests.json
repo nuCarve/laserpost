@@ -1007,17 +1007,35 @@
         }
       },
       "properties": {
-        "op0800GroupName": "LASER_ENABLE_BOTH"
+        "op0800GroupName": "GROUP_NAME_TEST"
+      }
+    },
+    {
+      "name": "Custom Cut XML",
+      "comment": "Custom cut setting XML; verify XML is used, and layers are merged with same XML.",
+      "setup": "barebones",
+      "cnc": "op-4-cut-modes",
+      "posts": ["laserpost-lightburn"],
+      "validators": {
+        "lbrn": {
+          "xpath": [
+            {
+              "query": "/LightBurnProject/CutSetting[2]/name[@Value=\"Stock outline\"]",
+              "match": "required"
+            },
+            {
+              "query": "/LightBurnProject/CutSetting[1]/Test",
+              "match": "required"
+            }
+          ]
+        }
+      },
+      "properties": {
+        "op0900CustomCutSettingXML": "CUSTOM_CUT_SETTING_XML_TEST"
       }
     }
   ],
   "to-do": [
-    "debug: svg org-layer-group has many duplicate layer numbers ... why?",
-    "// #if LBRN",
-    "op0900CustomCutSettingXML:",
-    "  type: 'string',",
-    "  value: CUSTOM_CUT_SETTING_XML_DEFAULT,",
-    "// #endif",
-    ""
+    "debug: svg org-layer-group has many duplicate layer numbers ... why?"
   ]
 }
