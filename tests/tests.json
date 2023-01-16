@@ -456,10 +456,21 @@
         "work0300OffsetY": "75",
         "machine0050Orientation": "MACHINE_ORIENTATION_LOWER_LEFT"
       }
+    },
+    {
+      "name": "Power overrides",
+      "comment": "Work offset X=50, Y=75 on lower-left machine; verify offsets.",
+      "setup": "all",
+      "cnc": "op-4-cut-modes",
+      "properties": {
+        "laserPower0100EtchMin": "81",
+        "laserPower0200EtchMax": "91",
+        "laserPower0300VaporizeMin": "82",
+        "laserPower0400VaporizeMax": "92",
+        "laserPower0500ThroughMin": "83",
+        "laserPower0600ThroughMax": "93"
+      }
     }
-
-
-
   ],
   "to-do": [
     "laserPower0100EtchMin:",
