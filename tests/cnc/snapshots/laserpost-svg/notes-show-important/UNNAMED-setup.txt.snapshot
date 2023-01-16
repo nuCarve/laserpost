@@ -11,7 +11,7 @@
 *****   laserpost0400IncludeNotes: INCLUDE_NOTES_SHOW_IMPORTANT
 *****   createImportantNote: true
 *****   laserpost0500IncludeComments: INCLUDE_COMMENTS_NORMAL
-*****   removeVersionAndTimestamp: true
+*****   automatedTesting: true
 ***** 
 ***** Options:
 *****   quiet: "--quiet"

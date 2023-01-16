@@ -10,7 +10,7 @@
 ***** Properties:
 *****   laserpost0400IncludeNotes: INCLUDE_NOTES_NONE
 *****   laserpost0500IncludeComments: INCLUDE_COMMENTS_NONE
-*****   removeVersionAndTimestamp: true
+*****   automatedTesting: true
 ***** 
 ***** Options:
 *****   quiet: "--quiet"
@@ -23,7 +23,4 @@
 *****   RegEx validator:
 *****     Regular expression: "(Job setup information has been generated)"
 *****     Forbidden
-*****   XPath validator:
-*****     Query: "/nothing"
-*****     Match: forbidden
 ***** 

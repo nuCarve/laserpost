@@ -11,7 +11,7 @@
 *****   laserpost0400IncludeNotes: INCLUDE_NOTES_SHOW_IMPORTANT
 *****   createImportantNote: true
 *****   laserpost0500IncludeComments: INCLUDE_COMMENTS_NORMAL
-*****   removeVersionAndTimestamp: true
+*****   automatedTesting: true
 ***** 
 ***** Options:
 *****   quiet: "--quiet"
@@ -23,8 +23,8 @@
 ***** Validators:
 *****   RegEx validator:
 *****     Regular expression: "This is a test, (only a test)."
-*****     Require: [object Object]
-*****     Match (1): only a test
+*****     Require: "only a test"
+*****       Match (1 of 1): "only a test"
 *****   XPath validator:
 *****     Query: "/LightBurnProject/Notes[@ShowOnLoad="1"]"
 *****     Match: required

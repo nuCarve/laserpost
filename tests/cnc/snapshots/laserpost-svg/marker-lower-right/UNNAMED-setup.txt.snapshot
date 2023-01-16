@@ -10,7 +10,7 @@
 ***** Properties:
 *****   laserpost0300AlignmentMarks: ALIGNMENT_MARK_LOWER_RIGHT
 *****   laserpost0500IncludeComments: INCLUDE_COMMENTS_NONE
-*****   removeVersionAndTimestamp: true
+*****   automatedTesting: true
 ***** 
 ***** Options:
 *****   quiet: "--quiet"

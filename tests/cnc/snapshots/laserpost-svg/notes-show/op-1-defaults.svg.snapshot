@@ -10,7 +10,7 @@
 ***** Properties:
 *****   laserpost0400IncludeNotes: INCLUDE_NOTES_SHOW
 *****   laserpost0500IncludeComments: INCLUDE_COMMENTS_NORMAL
-*****   removeVersionAndTimestamp: true
+*****   automatedTesting: true
 ***** 
 ***** Options:
 *****   quiet: "--quiet"
@@ -22,9 +22,6 @@
 ***** Validators:
 *****   RegEx validator:
 *****     Regular expression: "(Job setup information has been generated)"
-*****     Require: [object Object]
-*****     Match (1): Job setup information has been generated
-*****   XPath validator:
-*****     Query: "/nothing"
-*****     Match: forbidden
+*****     Require: "Job setup information has been generated"
+*****       Match (1 of 1): "Job setup information has been generated"
 ***** 

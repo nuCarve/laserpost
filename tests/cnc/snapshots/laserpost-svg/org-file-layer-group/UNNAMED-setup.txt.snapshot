@@ -12,7 +12,7 @@
 *****   laserpost0300AlignmentMarks: ALIGNMENT_MARK_UPPER_RIGHT
 *****   laserpost0200GroupShapes: true
 *****   laserpost0500IncludeComments: INCLUDE_COMMENTS_NORMAL
-*****   removeVersionAndTimestamp: true
+*****   automatedTesting: true
 ***** 
 ***** Options:
 *****   quiet: "--quiet"

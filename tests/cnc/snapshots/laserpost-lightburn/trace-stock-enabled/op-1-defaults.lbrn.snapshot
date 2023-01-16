@@ -10,7 +10,7 @@
 ***** Properties:
 *****   work0100TraceStock: true
 *****   laserpost0500IncludeComments: INCLUDE_COMMENTS_NORMAL
-*****   removeVersionAndTimestamp: true
+*****   automatedTesting: true
 ***** 
 ***** Options:
 *****   quiet: "--quiet"

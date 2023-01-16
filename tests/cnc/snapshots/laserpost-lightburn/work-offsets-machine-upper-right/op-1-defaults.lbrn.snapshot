@@ -1,0 +1,109 @@
+***** 
+***** LaserPost automated testing snapshot
+***** See https://github.com/nucarve/laserpost for information.
+***** 
+***** Snapshot:
+*****   Post: laserpost-lightburn
+*****   Setup: Work offsets machine upper-right
+*****   File: op-1-defaults.lbrn
+***** 
+***** Properties:
+*****   work0200OffsetX: 50
+*****   work0300OffsetY: 75
+*****   machine0050Orientation: MACHINE_ORIENTATION_UPPER_RIGHT
+*****   laserpost0500IncludeComments: INCLUDE_COMMENTS_NONE
+*****   automatedTesting: true
+***** 
+***** Options:
+*****   quiet: "--quiet"
+*****   nobackup: "--nobackup"
+*****   noeditor: "--noeditor"
+*****   nointeraction: "--nointeraction"
+*****   timeout: ["--timeout","1"]
+***** 
+***** Validators:
+*****   XPath validator:
+*****     Query: "/LightBurnProject/CutSetting"
+*****     Match: required
+*****   XPath validator:
+*****     Query: "/LightBurnProject/Shape"
+*****     Match: required
+*****   XPath validator:
+*****     Query: "//v[@vx="50"][@vy="75"]"
+*****     Match: required
+***** 
+<CutSetting type="Cut">
+    <index Value="0"/>
+    <name Value="2D Profile1"/>
+    <minPower Value="80"/>
+    <maxPower Value="80"/>
+    <minPower2 Value="80"/>
+    <maxPower2 Value="80"/>
+    <speed Value="30"/>
+    <priority Value="0"/>
+    <runBlower Value="1"/>
+    <zOffset Value="0"/>
+    <numPasses Value="1"/>
+    <zPerPass Value="0"/>
+    <enableLaser1 Value="1"/>
+    <enableLaser2 Value="0"/>
+  </CutSetting>
+<CutSetting type="Cut">
+    <index Value="1"/>
+    <name Value="Stock outline"/>
+    <minPower Value="100"/>
+    <maxPower Value="100"/>
+    <minPower2 Value="100"/>
+    <maxPower2 Value="100"/>
+    <speed Value="100"/>
+    <priority Value="1"/>
+    <runBlower Value="1"/>
+    <zOffset Value="0"/>
+    <numPasses Value="1"/>
+    <zPerPass Value="0"/>
+    <doOutput Value="0"/>
+  </CutSetting>
+<Shape Type="Group">
+    <XForm>1 0 0 1 0 0</XForm>
+    <Children>
+      <Shape Type="Path" CutIndex="0">
+        <XForm>1 0 0 1 0 0</XForm>
+        <V vx="150.517" vy="125.3"/>
+        <V vx="150.95" vy="125.55"/>
+        <P T="L" p0="0" p1="1"/>
+      </Shape>
+      <Shape Type="Path" CutIndex="0">
+        <XForm>1 0 0 1 0 0</XForm>
+        <V vx="150.95" vy="125.55"/>
+        <V vx="150.95" vy="125.95"/>
+        <V vx="51.05" vy="125.95"/>
+        <V vx="51.05" vy="76.05"/>
+        <V vx="141" vy="76.05" c0x="146.495" c0y="76.05"/>
+        <V vx="150.95" vy="86" c1x="150.95" c1y="80.505"/>
+        <P T="L" p0="0" p1="1"/>
+        <P T="L" p0="1" p1="2"/>
+        <P T="L" p0="2" p1="3"/>
+        <P T="L" p0="3" p1="4"/>
+        <P T="B" p0="4" p1="5"/>
+        <P T="L" p0="5" p1="0"/>
+      </Shape>
+      <Shape Type="Path" CutIndex="0">
+        <XForm>1 0 0 1 0 0</XForm>
+        <V vx="150.95" vy="125.55"/>
+        <V vx="150.517" vy="125.8"/>
+        <P T="L" p0="0" p1="1"/>
+      </Shape>
+    </Children>
+  </Shape>
+<Shape Type="Path" CutIndex="1">
+    <XForm>1 0 0 1 0 0</XForm>
+    <V vx="152" vy="127"/>
+    <V vx="50" vy="127"/>
+    <V vx="50" vy="75"/>
+    <V vx="152" vy="75"/>
+    <P T="L" p0="0" p1="1"/>
+    <P T="L" p0="1" p1="2"/>
+    <P T="L" p0="2" p1="3"/>
+    <P T="L" p0="3" p1="0"/>
+  </Shape>
+<V vx="50" vy="75"/>

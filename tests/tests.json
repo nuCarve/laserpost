@@ -30,7 +30,7 @@
       },
       "properties": {
         "laserpost0500IncludeComments": "INCLUDE_COMMENTS_NONE",
-        "removeVersionAndTimestamp": "true"
+        "automatedTesting": "true"
       }
     },
     "barebones": {
@@ -398,18 +398,70 @@
         "work0100TraceStock": "false",
         "laserpost0500IncludeComments": "INCLUDE_COMMENTS_NORMAL"
       }
+    },
+    {
+      "name": "Work offsets machine upper-right",
+      "comment": "Work offset X=50, Y=75 on upper-right machine; verify offsets.",
+      "setup": "all",
+      "cnc": "op-1-defaults",
+      "validators": {
+        "lbrn": {
+          "xpath": [
+            {
+              "query": "//v[@vx=\"50\"][@vy=\"75\"]",
+              "match": "required"
+            }
+          ]
+        },
+        "svg": {
+          "xpath": [
+            {
+              "query": "/svg:svg[@viewbox=\"0 0 578.268 483.78\"]",
+              "match": "required"
+            }
+          ]
+        }
+      },
+      "properties": {
+        "work0200OffsetX": "50",
+        "work0300OffsetY": "75",
+        "machine0050Orientation": "MACHINE_ORIENTATION_UPPER_RIGHT"
+      }
+    },
+    {
+      "name": "Work offsets machine lower-left",
+      "comment": "Work offset X=50, Y=75 on lower-left machine; verify offsets.",
+      "setup": "all",
+      "cnc": "op-1-defaults",
+      "validators": {
+        "lbrn": {
+          "xpath": [
+            {
+              "query": "//v[@vx=\"50\"][@vy=\"75\"]",
+              "match": "required"
+            }
+          ]
+        },
+        "svg": {
+          "xpath": [
+            {
+              "query": "/svg:svg[@viewbox=\"0 0 578.268 483.78\"]",
+              "match": "required"
+            }
+          ]
+        }
+      },
+      "properties": {
+        "work0200OffsetX": "50",
+        "work0300OffsetY": "75",
+        "machine0050Orientation": "MACHINE_ORIENTATION_LOWER_LEFT"
+      }
     }
+
+
 
   ],
   "to-do": [
-    "work0200OffsetX:",
-    "  type: 'number',",
-    "  value: OFFSET_X_AXIS_DEFAULT,",
-    "work0300OffsetY:",
-    "  type: 'number',",
-    "  value: OFFSET_Y_AXIS_DEFAULT,",
-    "",
-    "",
     "laserPower0100EtchMin:",
     "  type: 'number',",
     "  value: LASER_POWER_ETCH_MIN_DEFAULT,",

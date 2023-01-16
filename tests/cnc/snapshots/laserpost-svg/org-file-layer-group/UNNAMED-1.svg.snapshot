@@ -12,7 +12,7 @@
 *****   laserpost0300AlignmentMarks: ALIGNMENT_MARK_UPPER_RIGHT
 *****   laserpost0200GroupShapes: true
 *****   laserpost0500IncludeComments: INCLUDE_COMMENTS_NORMAL
-*****   removeVersionAndTimestamp: true
+*****   automatedTesting: true
 ***** 
 ***** Options:
 *****   quiet: "--quiet"
@@ -24,8 +24,8 @@
 ***** Validators:
 *****   RegEx validator:
 *****     Regular expression: "Operation: Alignment (mark)"
-*****     Require: [object Object]
-*****     Match (1): mark
+*****     Require: "mark"
+*****       Match (1 of 1): "mark"
 *****   XPath validator:
 *****     Query: "/svg:svg/svg:g"
 *****     Match: optional
