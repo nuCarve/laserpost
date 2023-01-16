@@ -20,6 +20,9 @@ function onOpen() {
   // before the thumbnail)
   onFileCreate();
 
+  // dump all non-operation properties to the log
+  dumpProperties();
+
   // include information about the document units
   debugLog(
     'Document units: {units}',
@@ -185,6 +188,9 @@ function onComment(message) {
  * onSection is called by CAM on the start of each operation.
  */
 function onSection() {
+  // add operation properties to the debug log
+  dumpOperationProperties();
+  
   // add a comment that contains the operation name
   var operationName = getParameter('operation-comment');
   if (!operationName)
