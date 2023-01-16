@@ -41,9 +41,6 @@ function generateProjectNotes(layerIndex) {
   // clear any existing project notes
   projectNotes = [];
 
-  // todo: Consider switching to having notes[] be the global shared notes, and appendNote
-  // todo: in here changing to prepare a projectNotes variable that combines with notes.
-
   // include info about LaserPost
   appendProjectNote(generatedBy);
   appendProjectNote(codeMoreInformation);
