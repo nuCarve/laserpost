@@ -109,8 +109,8 @@ function onWriteHeader(layer) {
   // output notes, including layer notes, to the header
   const headerNotes = projectNotes.concat(globalNotes.concat(generateLayerNotes(layer)));
   for (let noteIndex = 0; noteIndex < headerNotes.length; ++noteIndex)
-    writeCommentLine(headerNotes[noteIndex]);
-  writeln('');
+    debugLog(headerNotes[noteIndex]);
+  debugLog('');
 
   writeXML('VariableText', {}, true);
   writeXML('Start', { Value: '0' });
@@ -152,7 +152,7 @@ function onWriteShapes(layer) {
   // create a group if there is more than one item in the layer, we are grouping by layer and
   // we are not redirecting (and groups enabled)
   if (projLayer.operationSets.length > 1 && projLayer.index != -1 && useGroups) {
-    writeCommentLine(localize('Layer group: "{name}"'), {
+    debugLog(localize('Layer group: "{name}"'), {
       name: projLayer.name,
     });
 
@@ -173,7 +173,7 @@ function onWriteShapes(layer) {
 
     // do we have more than one operation in this group?  If so, go ahead and group it
     if (opGroup.operations.length > 1 && useGroups) {
-      writeCommentLine(localize('Operation group: "{name}"'), {
+      debugLog(localize('Operation group: "{name}"'), {
         name: opGroup.groupName,
       });
 
@@ -190,7 +190,7 @@ function onWriteShapes(layer) {
     ) {
       const operation = opGroup.operations[operationIndex];
 
-      writeCommentLine(localize('Operation: {name}'), {
+      debugLog(localize('Operation: {name}'), {
         name: operation.operationName,
       });
 
@@ -485,7 +485,7 @@ function writeShapePath(shape) {
   // fixes this)
   let commentOutShape = false;
   if (shape.cutSetting.layerMode != LAYER_MODE_LINE && !shape.closed) {
-    writeCommentLine(
+    debugLog(
       'Removing shape as LightBurn generates warnings and removes unclosed fill shapes'
     );
     commentOutShape = true;

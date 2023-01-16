@@ -37,10 +37,10 @@ function onWriteHeader(layer) {
 
   // output notes, including layer notes, to the header
   const headerNotes = projectNotes.concat(globalNotes.concat(generateLayerNotes(layer, false)));
-  writeln('');
+  debugLog('');
   for (let noteIndex = 0; noteIndex < headerNotes.length; ++noteIndex)
-    writeCommentLine(headerNotes[noteIndex]);
-  writeln('');
+    debugLog(headerNotes[noteIndex]);
+  debugLog('');
 
   // write the header, with X and Y flipped to match SVG coordinate space
   writeXML(
@@ -85,7 +85,7 @@ function onWriteShapes(layer) {
     projLayer.index != -1 &&
     useGroups
   ) {
-    writeCommentLine(localize('Layer group: "{name}"'), {
+    debugLog(localize('Layer group: "{name}"'), {
       name: projLayer.name,
     });
 
@@ -109,7 +109,7 @@ function onWriteShapes(layer) {
 
     // do we have more than one operation in this group?  If so, and enabled, go ahead and group it
     if (opGroup.operations.length > 1 && useGroups) {
-      writeCommentLine(localize('Operation group: "{name}"'), {
+      debugLog(localize('Operation group: "{name}"'), {
         name: opGroup.groupName,
       });
 
@@ -129,7 +129,7 @@ function onWriteShapes(layer) {
     ) {
       const operation = opGroup.operations[operationIndex];
 
-      writeCommentLine(localize('Operation: {name}'), {
+      debugLog(localize('Operation: {name}'), {
         name: operation.operationName,
       });
 
