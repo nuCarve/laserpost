@@ -10,6 +10,15 @@
  * onOpen is called by CAM at the start of the processing, before the first section.
  */
 function onOpen() {
+  // if running automated tests, cleanse the version numbers
+  if (getProperty('removeVersionAndTimestamp', false) == true) {
+    description = description.replace("VERSION_NUMBER", "VERSION-REMOVED");
+    longDescrition = longDescription.replace("VERSION_NUMBER", "VERSION-REMOVED");
+    generatedBy = generatedBy.replace("VERSION_NUMBER", "VERSION-REMOVED");
+    semVer = 'VERSION-REMOVED';
+    groupDefinitions.groupLaserPost.title = groupDefinitions.groupLaserPost.title.replace("VERSION_NUMBER", "VERSION-REMOVED");
+  }
+
   // load our state from the persistent state file
   stateLoad();
 
@@ -62,7 +71,7 @@ function generateProjectNotes(layerIndex) {
     });
 
   // include timestamp (unless disabled)
-  if (getProperty('includeTimestamp', true))
+  if (getProperty('removeVersionAndTimestamp', false) == false)
     appendProjectNote(localize('Generated at: {date}'), {
       date: new Date().toString(),
     });

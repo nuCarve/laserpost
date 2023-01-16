@@ -354,7 +354,7 @@ function dumpProperties() {
   for (group in groupDefinitions) {
     debugLog('{group} properties:', { group: groupDefinitions[group].title }, COMMENT_DEBUG);
     for (property in properties) {
-      if (properties[property].group == group)
+      if (properties[property].group && properties[property].group == group)
         debugLog('     {title} ({property}): {json}', { title: properties[property].title, property: property, json: JSON.stringify(getProperty(property))}, COMMENT_DEBUG);
     }
     debugLog('', {}, COMMENT_DEBUG);
@@ -362,7 +362,7 @@ function dumpProperties() {
   }
   debugLog('Machine properties:', { }, COMMENT_DEBUG);
   for (property in properties) {
-    if (properties[property].scope == "machine")
+    if (properties[property].scope && properties[property].scope == "machine")
       debugLog('     {title} ({property}): {json}', { title: properties[property].title, property: property, json: JSON.stringify(getProperty(property))}, COMMENT_DEBUG);
   }
   debugLog('', {}, COMMENT_DEBUG);
@@ -376,7 +376,7 @@ function dumpOperationProperties() {
   debugLog('', {}, COMMENT_DEBUG);
   debugLog('Operation "{name}" properties:', { name: getParameter('operation-comment') }, COMMENT_DEBUG);
   for (property in properties) {
-    if (properties[property].scope == 'operation')
+    if (properties[property].scope  && properties[property].scope == 'operation')
       debugLog('     {title} ({property}): {json}', { title: properties[property].title, property: property, json: JSON.stringify(currentSection.getProperty(property))}, COMMENT_DEBUG);
   }
   debugLog('', {}, COMMENT_DEBUG);

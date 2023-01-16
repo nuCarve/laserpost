@@ -11,7 +11,7 @@
 *****   laserpost0100Organization: ORGANIZATION_BY_LAYER_FILE
 *****   laserpost0200GroupShapes: false
 *****   laserpost0500IncludeComments: INCLUDE_COMMENTS_DEBUG
-*****   includeTimestamp: false
+*****   removeVersionAndTimestamp: true
 ***** 
 ***** Options:
 *****   quiet: "--quiet"

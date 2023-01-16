@@ -10,7 +10,7 @@
 ***** Properties:
 *****   machine0050Orientation: MACHINE_ORIENTATION_LOWER_RIGHT
 *****   laserpost0500IncludeComments: INCLUDE_COMMENTS_DEBUG
-*****   includeTimestamp: false
+*****   removeVersionAndTimestamp: true
 ***** 
 ***** Options:
 *****   quiet: "--quiet"

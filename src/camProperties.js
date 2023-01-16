@@ -428,10 +428,10 @@ properties = {
   //
   // hidden settings, used by automated test
   //
-  includeTimestamp: {
-    title: 'Include timestamp',
+  removeVersionAndTimestamp: {
+    title: 'Remove version and timestamp',
     description:
-      'Used by automated testing to disable inclusion of timestamp in generated files.',
+      'Used by automated testing to disable inclusion of timestamp and version numbers in generated files, to generalize their outputs.',
     type: 'boolean',
     value: true,
     visible: false,
