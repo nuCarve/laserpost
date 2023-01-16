@@ -273,32 +273,39 @@
       "posts": ["laserpost-lightburn"],
       "validators": {
         "lbrn": {
-          "xpath": [{ "query": "/LightBurnProject/Notes", "match": "required" }]
+          "xpath": [{ "query": "/LightBurnProject/Notes[@ShowOnLoad=\"0\"]", "match": "required" }]
         }
       },
       "properties": { "laserpost0400IncludeNotes": "INCLUDE_NOTES_HIDDEN" }
     },
     {
       "name": "Notes show important",
-      "comment": "Notes set to show important; verify they are generated but not shown.",
+      "comment": "Notes set to show important; verify they are generated as important.",
       "setup": "baseline",
       "cnc": "op-1-defaults",
       "validators": {
         "lbrn": {
-          "xpath": [{ "query": "/LightBurnProject/Notes", "match": "required" }]
+          "xpath": [{ "query": "/LightBurnProject/Notes[@ShowOnLoad=\"1\"]", "match": "required" }],
+          "regex": [
+            {
+              "regex": "This is a test, (only a test).",
+              "require": "only a test"
+            }
+          ]
         },
         "svg": {
           "xpath": [{ "query": "/nothing", "match": "forbidden" }],
           "regex": [
             {
-              "regex": "(Job setup information has been generated)",
-              "forbidden": true
+              "regex": "This is a test, (only a test).",
+              "require": "only a test"
             }
           ]
         }
       },
       "properties": {
-        "laserpost0400IncludeNotes": "INCLUDE_NOTES_SHOW_IMPORTANT"
+        "laserpost0400IncludeNotes": "INCLUDE_NOTES_SHOW_IMPORTANT",
+        "createImportantNote": "true"
       }
     },
     {
@@ -308,7 +315,7 @@
       "cnc": "op-1-defaults",
       "validators": {
         "lbrn": {
-          "xpath": [{ "query": "/LightBurnProject/Notes", "match": "required" }]
+          "xpath": [{ "query": "/LightBurnProject/Notes[@ShowOnLoad=\"1\"]", "match": "required" }]
         },
         "svg": {
           "xpath": [{ "query": "/nothing", "match": "forbidden" }],

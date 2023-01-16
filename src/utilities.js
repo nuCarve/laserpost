@@ -28,11 +28,22 @@ function closeEquals(a, b) {
 function appendNote(template, parameters, important) {
   if (important === true) notesImportant = true;
   const text = format(template, parameters);
-  notes.push(text);
+  globalNotes.push(text);
 }
 
 /**
- * Write a comment formatted for XML to the file including a newine at the end.  User preferences
+ * Add a line to the project notes field.
+ *
+ * @param template Template comment to format and write to the notes field
+ * @param parameters Optional key/value dictionary with parameters from template (such as {name})
+ */
+function appendProjectNote(template, parameters) {
+  const text = format(template, parameters);
+  projectNotes.push(text);
+}
+
+/**
+ * Write a comment formatted for XML to the file including a newline at the end.  User preferences
  * determines the detail level of comments.  Supports template strings (see `format`)
  *
  * @param template Template comment to format and write to the file

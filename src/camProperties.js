@@ -436,4 +436,12 @@ properties = {
     value: true,
     visible: false,
   },
+  createImportantNote: {
+    title: 'Create important note',
+    description:
+      'Used by automated testing to cause an important note to be generated.',
+    type: 'boolean',
+    value: false,
+    visible: false,
+  }
 };

@@ -107,7 +107,7 @@ function onFileCreate(layer) {
  */
 function onWriteHeader(layer) {
   // output notes, including layer notes, to the header
-  const headerNotes = notes.concat(generateLayerNotes(layer));
+  const headerNotes = projectNotes.concat(globalNotes.concat(generateLayerNotes(layer)));
   for (let noteIndex = 0; noteIndex < headerNotes.length; ++noteIndex)
     writeCommentLine(headerNotes[noteIndex]);
   writeln('');
@@ -252,14 +252,14 @@ function onWriteTrailer(layer) {
     'laserpost0400IncludeNotes',
     INCLUDE_NOTES_DEFAULT
   );
-  if (includeNotes != INCLUDE_NOTES_NONE && notes != '') {
+  if (includeNotes != INCLUDE_NOTES_NONE) {
     // determine if we cause LightBurn to show notes on file load
     let showOnLoad = false;
     if (includeNotes == INCLUDE_NOTES_SHOW_IMPORTANT)
       showOnLoad = notesImportant;
     else if (includeNotes == INCLUDE_NOTES_SHOW) showOnLoad = true;
 
-    const setupNotes = notes.concat(generateLayerNotes(layer));
+    const setupNotes = projectNotes.concat(globalNotes.concat(generateLayerNotes(layer)));
     writeXML('Notes', {
       ShowOnLoad: showOnLoad ? 1 : 0,
       Notes: setupNotes.join('\n'),

@@ -26,6 +26,10 @@ function onOpen() {
     { units: unit == MM ? 'mm' : 'inch' },
     COMMENT_DEBUG
   );
+
+  // for automated testing, to create an important note if the hidden property "createImportantNote" is set to true
+  if (getProperty('createImportantNote', false) === true)
+    appendNote('This is a test, only a test.', undefined, true);
 }
 
 /**
@@ -34,38 +38,45 @@ function onOpen() {
  * @param layerIndex Layer number being generated (-1 when single file for all layers)
  */
 function generateProjectNotes(layerIndex) {
-  // clear any existing notes
-  notes = [];
+  // clear any existing project notes
+  projectNotes = [];
+
+  // todo: Consider switching to having notes[] be the global shared notes, and appendNote
+  // todo: in here changing to prepare a projectNotes variable that combines with notes.
 
   // include info about LaserPost
-  appendNote(generatedBy);
-  appendNote(codeMoreInformation);
-  appendNote('');
+  appendProjectNote(generatedBy);
+  appendProjectNote(codeMoreInformation);
+  appendProjectNote('');
 
   // include the layer file details
   if (layerIndex != -1)
-    appendNote('File: {file} ({index} of {total})', {
+    appendProjectNote('File: {file} ({index} of {total})', {
       file: project.layers[layerIndex].filename,
       index: layerIndex + 1,
       total: project.layers.length,
     });
   else
-    appendNote('File: {file}', {
+    appendProjectNote('File: {file}', {
       file: project.layers[0].filename,
     });
 
   // include timestamp (unless disabled)
-  if (getProperty("includeTimestamp", true)) 
-    appendNote(localize('Generated at: {date}'), { date: new Date().toString() });
-  appendNote('');
+  if (getProperty('includeTimestamp', true))
+    appendProjectNote(localize('Generated at: {date}'), {
+      date: new Date().toString(),
+    });
+  appendProjectNote('');
 
   // if we have a program name/comment, add it to the file as comments and in notes
   if (programName || programComment) {
-    appendNote(localize('Program'));
+    appendProjectNote(localize('Program'));
     if (programName)
-      appendNote('  ' + localize('Name: {program}'), { program: programName });
+      appendProjectNote('  ' + localize('Name: {program}'), {
+        program: programName,
+      });
     if (programComment)
-      appendNote('  ' + localize('Comment: {comment}'), {
+      appendProjectNote('  ' + localize('Comment: {comment}'), {
         comment: programComment,
       });
   }
@@ -74,15 +85,15 @@ function generateProjectNotes(layerIndex) {
   var vendor = machineConfiguration.getVendor();
   var model = machineConfiguration.getModel();
 
-  appendNote(localize('Machine'));
+  appendProjectNote(localize('Machine'));
   if (vendor) {
-    appendNote('  ' + localize('Vendor: {vendor}'), { vendor: vendor });
+    appendProjectNote('  ' + localize('Vendor: {vendor}'), { vendor: vendor });
   }
   if (model) {
-    appendNote('  ' + localize('Model: {model}'), { model: model });
+    appendProjectNote('  ' + localize('Model: {model}'), { model: model });
   }
 
-  appendNote('');
+  appendProjectNote('');
 
   // if the user did any laser overrides, include those in the comments
   let laserPowerEtchMin = getProperty(
@@ -115,14 +126,17 @@ function generateProjectNotes(layerIndex) {
     laserPowerThroughMax != 0 ||
     laserPowerVaporizeMax != 0
   ) {
-    appendNote('Laser power overrides');
+    appendProjectNote('Laser power overrides');
     if (laserPowerEtchMax != 0)
-      appendNote('  ' + localize('Etch power: {min}% (min) - {max}% (max)'), {
-        min: laserPowerEtchMin,
-        max: laserPowerEtchMax,
-      });
+      appendProjectNote(
+        '  ' + localize('Etch power: {min}% (min) - {max}% (max)'),
+        {
+          min: laserPowerEtchMin,
+          max: laserPowerEtchMax,
+        }
+      );
     if (laserPowerVaporizeMax != 0)
-      appendNote(
+      appendProjectNote(
         '  ' + localize('Vaporize power: {min}% (min) - {max}% (max)'),
         {
           min: laserPowerVaporizeMin,
@@ -130,7 +144,7 @@ function generateProjectNotes(layerIndex) {
         }
       );
     if (laserPowerThroughMax != 0)
-      appendNote(
+      appendProjectNote(
         '  ' + localize('Through power: {min}% (min) - {max}% (max)'),
         {
           min: laserPowerThroughMin,
@@ -151,10 +165,10 @@ function generateProjectNotes(layerIndex) {
   );
 
   if (shuttleLaser1 != '' || shuttleLaser2 != '') {
-    appendNote('  ' + localize('Shuttle "U" for laser 1: {value}'), {
+    appendProjectNote('  ' + localize('Shuttle "U" for laser 1: {value}'), {
       value: shuttleLaser1 == '' ? '0' : shuttleLaser1,
     });
-    appendNote('  ' + localize('Shuttle "U" for laser 2: {value}'), {
+    appendProjectNote('  ' + localize('Shuttle "U" for laser 2: {value}'), {
       value: shuttleLaser2 == '' ? '0' : shuttleLaser2,
     });
   }
@@ -339,9 +353,10 @@ function onSection() {
         appendNote('', {}, true);
         appendNote(
           'WARNING: Operation "{name}" has Laser Enable set to "Use tool setting" but tool Pierce Time ({value}) is invalid.',
-          { name: operationName, value: tool.getPierceTime() }
+          { name: operationName, value: tool.getPierceTime() },
+          true
         );
-        appendNote('         For safety, setting layer to laser off.');
+        appendNote('         For safety, setting layer to laser off.', true);
         laserEnable = LASER_ENABLE_OFF;
         break;
     }

@@ -50,6 +50,10 @@ export function validateRegex(contents, validator, file, cmdOptions) {
     // describe this regex
     contents.header.push('  RegEx validator:');
     contents.header.push(`    Regular expression: "${filter.regex}"`);
+    if (!filter.replace && !filter.forbidden && !filter.require) {
+      contents.failure.push(`FAIL: RegEx validator missing any actions (no replace, forbidden or require)`);
+      continue;
+    }
 
     // set up the regex expression
     try {
@@ -67,6 +71,7 @@ export function validateRegex(contents, validator, file, cmdOptions) {
 
     // handle theh "forbidden" use case
     if (filter.forbidden) {
+      contents.header.push(`    Forbidden`);
       const match = contents.snapshot.match(new RegExp(filter.regex, "m"));
       if (match) {
         contents.failure.push(`FAIL: Regular expression "${filter.regex}" is "forbidden" yet matched ${match.length} items.`);
@@ -76,6 +81,7 @@ export function validateRegex(contents, validator, file, cmdOptions) {
 
     // handle the "require" use case
     if (filter.require) {
+      contents.header.push(`    Require: ${Array.isArray(filter.require) ? filter.require.join(', ') : filter}`);
       const requireArray = Array.isArray(filter.require)
         ? filter.require
         : [filter.require];

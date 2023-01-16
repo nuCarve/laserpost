@@ -165,7 +165,7 @@ export function validatePostResults(
 
           // if no prior errors, look at our snapshot failure (this let's prior failures win as the
           // snapshot isn't important when failures have happened)
-          if (!contents.failure.length == 0 && failureMessage)
+          if (contents.failure.length == 0 && failureMessage)
             contents.failure.push(failureMessage);
 
           // summarize our failure

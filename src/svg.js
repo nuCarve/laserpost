@@ -36,7 +36,7 @@ function onWriteHeader(layer) {
   let maxY = project.box.maxY;
 
   // output notes, including layer notes, to the header
-  const headerNotes = notes.concat(generateLayerNotes(layer, false));
+  const headerNotes = projectNotes.concat(globalNotes.concat(generateLayerNotes(layer, false)));
   writeln('');
   for (let noteIndex = 0; noteIndex < headerNotes.length; ++noteIndex)
     writeCommentLine(headerNotes[noteIndex]);
@@ -201,7 +201,7 @@ function onProjectComplete(redirect) {
     'laserpost0400IncludeNotes',
     INCLUDE_NOTES_DEFAULT
   );
-  if (includeNotes != INCLUDE_NOTES_NONE && notes != '') {
+  if (includeNotes != INCLUDE_NOTES_NONE) {
     // determine if we should tell the user via a warning dialog that the notes are available
     let showNotesWarning = false;
     if (includeNotes == INCLUDE_NOTES_SHOW_IMPORTANT)
@@ -215,7 +215,7 @@ function onProjectComplete(redirect) {
       programName + '-setup.txt'
     );
     redirectToFile2(path);
-    const setupNotes = notes.concat(generateLayerNotes(-1, redirect));
+    const setupNotes = projectNotes.concat(globalNotes.concat(generateLayerNotes(-1, redirect)));
     for (let noteIndex = 0; noteIndex < setupNotes.length; ++noteIndex)
       writeln(setupNotes[noteIndex]);
     closeRedirection2();

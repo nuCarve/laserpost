@@ -22,6 +22,7 @@
 ***** Validators:
 *****   RegEx validator:
 *****     Regular expression: "(Job setup information has been generated)"
+*****     Forbidden
 *****   XPath validator:
 *****     Query: "/nothing"
 *****     Match: forbidden
