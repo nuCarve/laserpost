@@ -81,7 +81,7 @@ export function validateRegex(contents, validator, file, cmdOptions) {
 
     // handle the "require" use case
     if (filter.require) {
-      contents.header.push(`    Require: ${Array.isArray(filter.require) ? filter.require.join(', ') : filter}`);
+      contents.header.push(`    Require: "${Array.isArray(filter.require) ? filter.require.join(', ') : filter.require}"`);
       const requireArray = Array.isArray(filter.require)
         ? filter.require
         : [filter.require];
@@ -97,7 +97,7 @@ export function validateRegex(contents, validator, file, cmdOptions) {
           requireIndex < requireArray.length;
           ++requireIndex
         ) {
-          contents.header.push(`    Match (${requireIndex + 1}): ${requireArray[requireIndex]}`);
+          contents.header.push(`      Match (${requireIndex + 1} of ${requireArray.length}): "${requireArray[requireIndex]}"`);
 
           if (
             requireArray[requireIndex].toLowerCase() !=

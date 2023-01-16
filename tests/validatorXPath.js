@@ -139,6 +139,5 @@ export function validateXPath(contents, validator, file, cmdOptions) {
         contents.failure.push(`Failed to parse XPath query "${queryObject.query}".`);
       }
     }
-  } else
-    contents.failure.push(`XPath validator setup missing required "xpath" property.`);
+  } 
 }
