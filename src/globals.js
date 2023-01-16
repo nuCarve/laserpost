@@ -14,6 +14,7 @@ let currentGroup = undefined; // tracks the current group in use, set in `onSect
 let currentPower = undefined; // track if the laser is powered on, used to understand CAM movements vs. cuts
 let activeState = undefined; // current state that will be persisted to the state file when done
 let origState = undefined; // original state loaded from state file and should not be changed
+let sectionProperties = {}; // for automated testing, captures globally overridden section properties (see onOpen)
 
 // groups is an array of CAM positions, organized by groupings (default is one per operation, but the user
 // can specify shared group names to combine operations into grouped collections).  In general, data is

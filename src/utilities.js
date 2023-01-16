@@ -112,3 +112,21 @@ function closeRedirection2() {
   if (ALLOW_REDIRECT_TO_FILE)
     closeRedirection();
 }
+
+/**
+ * Alternate version of Autodesk's getProperty method, that is to be used when getting section
+ * properties.  This implementation allows for the automated test environment to inject alternate
+ * values for the properties for validation.  If a property is found in the `sectionProperties` key
+ * map, that value is returned instead of the current property.  See `onOpen` for where the
+ * overridden properties are populated into sectionProperties.
+ * 
+ * @param propertyName - Name of the section prop to get
+ * @param defaultValue - Default value if there is no section (or overridden) property
+ * @returns Value from the property
+ */
+function getSectionProperty(propertyName, defaultValue) {
+  if (sectionProperties[propertyName])
+    return sectionProperties[propertyName];
+  if (currentSection.getProperty(propertyName)) return currentSection.getProperty(propertyName);
+  return defaultValue;
+}

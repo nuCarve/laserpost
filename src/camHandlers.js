@@ -10,13 +10,32 @@
  * onOpen is called by CAM at the start of the processing, before the first section.
  */
 function onOpen() {
-  // if running automated tests, cleanse the version numbers
+  // handle special cases when running automated tests
   if (getProperty('automatedTesting', false) == true) {
-    description = description.replace("VERSION_NUMBER", "VERSION-REMOVED");
-    longDescrition = longDescription.replace("VERSION_NUMBER", "VERSION-REMOVED");
-    generatedBy = generatedBy.replace("VERSION_NUMBER", "VERSION-REMOVED");
+    // clense version numbers
+    description = description.replace('VERSION_NUMBER', 'VERSION-REMOVED');
+    longDescrition = longDescription.replace(
+      'VERSION_NUMBER',
+      'VERSION-REMOVED'
+    );
+    generatedBy = generatedBy.replace('VERSION_NUMBER', 'VERSION-REMOVED');
     semVer = 'VERSION-REMOVED';
-    groupDefinitions.groupLaserPost.title = groupDefinitions.groupLaserPost.title.replace("VERSION_NUMBER", "VERSION-REMOVED");
+    groupDefinitions.groupLaserPost.title =
+      groupDefinitions.groupLaserPost.title.replace(
+        'VERSION_NUMBER',
+        'VERSION-REMOVED'
+      );
+
+    // capture operational settings at the global level (we can't see them when inside a section,
+    // and use the getSectionProperty() utility method to override using this dictionary)
+    sectionProperties = {};
+    for (property in properties)
+      if (
+        properties[property].scope &&
+        properties[property].scope == 'operation' &&
+        getProperty(property) !== undefined
+      )
+        sectionProperties[property] = getProperty(property);
   }
 
   // load our state from the persistent state file
@@ -199,7 +218,7 @@ function onComment(message) {
 function onSection() {
   // add operation properties to the debug log
   dumpOperationProperties();
-  
+
   // add a comment that contains the operation name
   var operationName = getParameter('operation-comment');
   if (!operationName)
@@ -294,8 +313,8 @@ function onSection() {
 
   // determine the air setting.
   let useAir = true;
-  let airAssistProperty = currentSection.getProperty('op0200UseAir');
-  airAssistProperty = airAssistProperty ? airAssistProperty : USE_AIR_DEFAULT;
+  const airAssistProperty = getSectionProperty('op0200UseAir', USE_AIR_DEFAULT);
+
   switch (airAssistProperty) {
     case USE_AIR_OFF:
       useAir = false;
@@ -312,8 +331,7 @@ function onSection() {
   }
 
   // set up the group - using the shared group name if specified, else a new empty group
-  const groupName = currentSection.getProperty('op0800GroupName');
-  if (groupName == '') groupName = undefined;
+  const groupName = getSectionProperty('op0800GroupName');
 
   currentGroup = getGroupByName(groupName, {
     groupName: groupName,
@@ -321,30 +339,21 @@ function onSection() {
   });
 
   // collect settings from the user via operation properties
-  let powerScale = currentSection.getProperty('op0400PowerScale');
-  powerScale = powerScale ? powerScale : POWER_SCALE_DEFAULT;
-  let opLayerMode = currentSection.getProperty('op0100LayerMode');
-  opLayerMode = opLayerMode ? opLayerMode : LAYER_MODE_DEFAULT;
+  const powerScale = getSectionProperty('op0400PowerScale', POWER_SCALE_DEFAULT);
+  let opLayerMode = getSectionProperty('op0100LayerMode', LAYER_MODE_DEFAULT);
   if (opLayerMode == LAYER_MODE_INHERIT) {
     // select fill based on the cutting mode
     if (currentSection.getJetMode() == JET_MODE_ETCHING)
       opLayerMode = LAYER_MODE_FILL;
     else opLayerMode = LAYER_MODE_LINE;
   }
-  let customCutSettingXML = currentSection.getProperty(
-    'op0900CustomCutSettingXML'
+  const customCutSettingXML = getSectionProperty(
+    'op0900CustomCutSettingXML', CUSTOM_CUT_SETTING_XML_DEFAULT
   );
-  customCutSettingXML = customCutSettingXML
-    ? customCutSettingXML
-    : CUSTOM_CUT_SETTING_XML_DEFAULT;
-  let laserEnable = currentSection.getProperty('op0300LaserEnable');
-  laserEnable = laserEnable ? laserEnable : LASER_ENABLE_DEFAULT;
-  let zOffset = currentSection.getProperty('op0500ZOffset');
-  zOffset = zOffset ? zOffset : Z_OFFSET_DEFAULT;
-  let passes = currentSection.getProperty('op0600Passes');
-  passes = passes ? passes : PASS_COUNT_DEFAULT;
-  let zStep = currentSection.getProperty('op0700ZStep');
-  zStep = zStep ? zStep : Z_STEP_PER_PASS_DEFAULT;
+  let laserEnable = getSectionProperty('op0300LaserEnable', LASER_ENABLE_DEFAULT);
+  const zOffset = getSectionProperty('op0500ZOffset', Z_OFFSET_DEFAULT);
+  const passes = getSectionProperty('op0600Passes', PASS_COUNT_DEFAULT);
+  const zStep = getSectionProperty('op0700ZStep', Z_STEP_PER_PASS_DEFAULT);
 
   // if laser enable set to inherit from tool, get value from the tool's pierce time
   if (laserEnable == LASER_ENABLE_TOOL) {

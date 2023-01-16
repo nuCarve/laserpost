@@ -377,7 +377,7 @@ function dumpOperationProperties() {
   debugLog('Operation "{name}" properties:', { name: getParameter('operation-comment') }, COMMENT_DEBUG);
   for (property in properties) {
     if (properties[property].scope  && properties[property].scope == 'operation')
-      debugLog('     {title} ({property}): {json}', { title: properties[property].title, property: property, json: JSON.stringify(currentSection.getProperty(property))}, COMMENT_DEBUG);
+      debugLog('     {title} ({property}): {json}', { title: properties[property].title, property: property, json: JSON.stringify(getSectionProperty(property))}, COMMENT_DEBUG);
   }
   debugLog('', {}, COMMENT_DEBUG);
 }
