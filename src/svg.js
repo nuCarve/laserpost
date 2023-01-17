@@ -36,7 +36,9 @@ function onWriteHeader(layer) {
   let maxY = project.box.maxY;
 
   // output notes, including layer notes, to the header
-  const headerNotes = projectNotes.concat(globalNotes.concat(generateLayerNotes(layer, false)));
+  const headerNotes = projectNotes.concat(
+    globalNotes.concat(generateLayerNotes(layer, false))
+  );
   debugLog('');
   for (let noteIndex = 0; noteIndex < headerNotes.length; ++noteIndex)
     debugLog(headerNotes[noteIndex]);
@@ -115,9 +117,9 @@ function onWriteShapes(layer) {
 
       writeXML('g', { id: safeId(opGroup.groupName) }, true);
       writeXML('desc', {
-        content: format(
-          localize('Operation group: "{name}"'), { name: opGroup.groupName }
-        ),
+        content: format(localize('Operation group: "{name}"'), {
+          name: opGroup.groupName,
+        }),
       });
     }
 
@@ -215,7 +217,9 @@ function onProjectComplete(redirect) {
       programName + '-setup.txt'
     );
     redirectToFile2(path);
-    const setupNotes = projectNotes.concat(globalNotes.concat(generateLayerNotes(-1, redirect)));
+    const setupNotes = projectNotes.concat(
+      globalNotes.concat(generateLayerNotes(-1, redirect))
+    );
     for (let noteIndex = 0; noteIndex < setupNotes.length; ++noteIndex)
       writeln(setupNotes[noteIndex]);
     closeRedirection2();
@@ -263,9 +267,14 @@ function writeCommentLine(template, parameters) {
 function generateLayerNotes(layer, showFilename) {
   const result = [];
 
-  // determine which layers to generated based on `layer` proeprty
+  // determine which layers to generated based on `layer` and showFilename properties
+  // When layer is >= 0, we do that specific layer.  When layer == -1, we are doing
+  // all layers ... but we do only a single top-level loop when showFilename is false
+  // because the layers are shared by a single file, but when showFilename is true we
+  // need to loop for all layers to individually show their settings
   const startLayer = layer == -1 ? 0 : layer;
-  const endLayer = layer == -1 ? project.layers.length : layer + 1;
+  const endLayer =
+    layer == -1 ? (showFilename ? project.layers.length : 1) : layer + 1;
 
   // include header based on organization by file/layer or just layer
   if (showFilename) result.push(localize('Files:'));
