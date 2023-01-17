@@ -10,7 +10,7 @@
 ***** Properties:
 *****   laserpost0100Organization: ORGANIZATION_BY_LAYER
 *****   laserpost0200GroupShapes: false
-*****   laserpost0500IncludeComments: INCLUDE_COMMENTS_NONE
+*****   laserpost0500IncludeComments: INCLUDE_COMMENTS_NORMAL
 *****   automatedTesting: true
 ***** 
 ***** Options:

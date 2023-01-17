@@ -5,8 +5,14 @@
 
 Automated testing will execute the Autodesk `post` executable against a collection of
 premade intermediate `cnc` files, using the various LaserPost CPS post-processors with various
-property configuration values.  The various generated files are filtered (based on test specific
-rules) and then are compared against baseline snapshots.  Differences result in a test failure. 
+property configuration values.  The tests use a combination of expressions to test the resulting
+generated files for matching (or forbidden) values (causing failures when incorrect), as well as
+create snapshots of the content (the entire file, or fragments to limit the scope of the test) which
+are then compared for differences from a baseline snapshot (and differences cause a failure).
+Information on the various files and models used, see the [README.md](cnc/README.md) file in the `tests/cnc`
+folder.
+
+# Install and test execution
 
 To build LaserPost, you will need [`nodejs and npm`](https://nodejs.org/en/) installed (must be >= node
 18.11.0).  Prior to running the build, you must run `npm i` from the root directory (which will set

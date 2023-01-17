@@ -161,7 +161,8 @@
       "cnc": "op-4-cut-modes",
       "properties": {
         "laserpost0100Organization": "ORGANIZATION_BY_OPERATION",
-        "laserpost0200GroupShapes": "false"
+        "laserpost0200GroupShapes": "false",
+        "laserpost0500IncludeComments": "INCLUDE_COMMENTS_NORMAL"
       }
     },
     {
@@ -171,7 +172,8 @@
       "cnc": "op-4-cut-modes",
       "properties": {
         "laserpost0100Organization": "ORGANIZATION_BY_OPERATION",
-        "laserpost0200GroupShapes": "true"
+        "laserpost0200GroupShapes": "true",
+        "laserpost0500IncludeComments": "INCLUDE_COMMENTS_NORMAL"
       }
     },
     {
@@ -181,7 +183,8 @@
       "cnc": "op-4-cut-modes",
       "properties": {
         "laserpost0100Organization": "ORGANIZATION_BY_LAYER",
-        "laserpost0200GroupShapes": "false"
+        "laserpost0200GroupShapes": "false",
+        "laserpost0500IncludeComments": "INCLUDE_COMMENTS_NORMAL"
       }
     },
     {
@@ -196,7 +199,8 @@
       },
       "properties": {
         "laserpost0100Organization": "ORGANIZATION_BY_LAYER",
-        "laserpost0200GroupShapes": "true"
+        "laserpost0200GroupShapes": "true",
+        "laserpost0500IncludeComments": "INCLUDE_COMMENTS_NORMAL"
       }
     },
     {
@@ -206,7 +210,8 @@
       "cnc": "op-4-cut-modes",
       "properties": {
         "laserpost0100Organization": "ORGANIZATION_BY_LAYER_FILE",
-        "laserpost0200GroupShapes": "false"
+        "laserpost0200GroupShapes": "false",
+        "laserpost0500IncludeComments": "INCLUDE_COMMENTS_NORMAL"
       }
     },
     {
@@ -1039,8 +1044,5 @@
         "op0900CustomCutSettingXML": "CUSTOM_CUT_SETTING_XML_TEST"
       }
     }
-  ],
-  "to-do": [
-    "debug: svg org-layer-group has many duplicate layer numbers ... why?"
   ]
 }
