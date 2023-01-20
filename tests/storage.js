@@ -29,7 +29,7 @@
 import fs from 'node:fs';
 import path from 'node:path';
 import * as url from 'node:url';
-import { SNAPSHOT_RESET } from './globals.js';
+import { SNAPSHOT_MODE_RESET } from './globals.js';
 import chalk from 'chalk';
 
 /**
@@ -122,7 +122,7 @@ export function clearResultsFolder(cmdOptions) {
   fs.rmSync(resultsPath, { force: true, recursive: true });
 
   // if no test filters and resetting all snapshots, clear out the snapshots folder
-  if (cmdOptions.tests.length == 0 && cmdOptions.snapshotMode === SNAPSHOT_RESET) {
+  if (cmdOptions.tests.length == 0 && cmdOptions.snapshotMode === SNAPSHOT_MODE_RESET) {
     console.log(chalk.yellow(`No test filters and reset requested; clearing all contents in the snapshot folder.`));
     const snapshotPath = path.resolve(cmdOptions.cncPath, 'snapshots');
     fs.rmSync(snapshotPath, { force: true, recursive: true });

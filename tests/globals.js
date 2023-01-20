@@ -27,9 +27,10 @@
  */
 
 // define enum constants for cmdOptions.snapshotMode
-export const SNAPSHOT_NO_WRITE = 'no-write';
-export const SNAPSHOT_CREATE = 'create';
-export const SNAPSHOT_RESET = 'reset';
+export const SNAPSHOT_MODE_NEVER = 'never';
+export const SNAPSHOT_MODE_CREATE = 'create';
+export const SNAPSHOT_MODE_DIFF = 'diff';
+export const SNAPSHOT_MODE_RESET = 'reset';
 
 // define enum constants for the match option in tests.json
 export const MATCH_REQUIRED = 'required';

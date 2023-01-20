@@ -31,9 +31,10 @@ import path from 'node:path';
 import minimatch from 'minimatch';
 import prettyDiff from './prettyDiff.js';
 import {
-  SNAPSHOT_NO_WRITE,
-  SNAPSHOT_RESET,
-  SNAPSHOT_CREATE,
+  SNAPSHOT_MODE_NEVER,
+  SNAPSHOT_MODE_RESET,
+  SNAPSHOT_MODE_CREATE,
+  SNAPSHOT_MODE_DIFF,
 } from './globals.js';
 import chalk from 'chalk';
 import { validateXPath } from './validatorXPath.js';
@@ -63,7 +64,7 @@ export function validatePostResults(
   snapshotPath
 ) {
   const result = { pass: 0, fail: 0, lastFailure: undefined };
-  
+
   // determine the post we used for this test
   const post = setup.posts[postNumber];
 
@@ -86,7 +87,9 @@ export function validatePostResults(
           // prepare the header with information about the snapshot
           contents.header.push('');
           contents.header.push('LaserPost automated testing snapshot');
-          contents.header.push('See https://github.com/nucarve/laserpost for information.')
+          contents.header.push(
+            'See https://github.com/nucarve/laserpost for information.'
+          );
           contents.header.push('');
           contents.header.push(`Snapshot:`);
           contents.header.push(`  Post: ${validator.post}`);
@@ -95,23 +98,21 @@ export function validatePostResults(
           contents.header.push('');
           contents.header.push('Properties:');
           for (const propertyKey in setup.properties)
-            contents.header.push(`  ${propertyKey}: ${setup.properties[propertyKey]}`)
+            contents.header.push(
+              `  ${propertyKey}: ${setup.properties[propertyKey]}`
+            );
           contents.header.push('');
           contents.header.push('Options:');
           for (const optionsKey in setup.options)
-            contents.header.push(`  ${optionsKey}: ${JSON.stringify(setup.options[optionsKey])}`);
+            contents.header.push(
+              `  ${optionsKey}: ${JSON.stringify(setup.options[optionsKey])}`
+            );
           contents.header.push('');
           contents.header.push('Validators:');
 
           // execute the generic regex validator (if requested)
           if (validator.regex) {
-            runValidator(
-              'regex',
-              contents,
-              validator,
-              file,
-              cmdOptions
-            );
+            runValidator('regex', contents, validator, file, cmdOptions);
           }
 
           // execute their specific requested validator
@@ -138,7 +139,10 @@ export function validatePostResults(
 
           // format the header for output to the snapshot file
           contents.header.push('');
-          const formattedHeader = SNAPSHOT_COMMENT_LINE_HEADER + contents.header.join('\n' + SNAPSHOT_COMMENT_LINE_HEADER) + '\n';
+          const formattedHeader =
+            SNAPSHOT_COMMENT_LINE_HEADER +
+            contents.header.join('\n' + SNAPSHOT_COMMENT_LINE_HEADER) +
+            '\n';
 
           // record the snapshot
           const snapshotFile = path.resolve(cncPath, file + '.snapshot');
@@ -202,7 +206,9 @@ function runValidator(validatorType, contents, validator, file, cmdOptions) {
       validateRegex(contents, validator, file, cmdOptions);
       break;
     default:
-      contents.failure.push(`Unknown validator "${validator.validator}" on "${key}" for "${file}".`);
+      contents.failure.push(
+        `Unknown validator "${validator.validator}" on "${key}" for "${file}".`
+      );
       break;
   }
 }
@@ -228,7 +234,7 @@ export function snapshotCompare(
   cmdOptions
 ) {
   // do we need to look at the baseline snapshot?
-  if (cmdOptions.snapshotMode != SNAPSHOT_RESET) {
+  if (cmdOptions.snapshotMode != SNAPSHOT_MODE_RESET) {
     // does the baseline snapshot file exist?
     if (fs.existsSync(baselineSnapshotFile)) {
       // load both snapshots
@@ -240,9 +246,13 @@ export function snapshotCompare(
       });
 
       // remove all lines that are snapshot comments
-      const snapshotFilter = (item) => !item.startsWith(SNAPSHOT_COMMENT_LINE_HEADER);
+      const snapshotFilter = (item) =>
+        !item.startsWith(SNAPSHOT_COMMENT_LINE_HEADER);
       newSnapshot = newSnapshot.split('\n').filter(snapshotFilter).join('\n');
-      baselineSnapshot = baselineSnapshot.split('\n').filter(snapshotFilter).join('\n');
+      baselineSnapshot = baselineSnapshot
+        .split('\n')
+        .filter(snapshotFilter)
+        .join('\n');
 
       // do a diff, which returns console-ready pretty formatting (or undefined if no diffs)
       const changes = prettyDiff(baselineSnapshot, newSnapshot);
@@ -256,23 +266,35 @@ export function snapshotCompare(
       }
 
       // not a match.
-      console.log(
-        chalk.red(
-          `      FAIL ${validatorName}: Snapshots do not match (${path.basename(
-            newSnapshotFile
-          )})`
-        )
-      );
-      console.log(`      ${changes.replace(/\n/g, '\n      ')}`);
-      return `Snapshots do not match (${path.basename(newSnapshotFile)}).`;
-    } else {
-      if (cmdOptions.snapshotMode == SNAPSHOT_NO_WRITE) {
+      if (cmdOptions.snapshotMode != SNAPSHOT_MODE_DIFF) {
         console.log(
           chalk.red(
-            `      FAIL ${validatorName}: Snapshot does not exist, but snapshot mode disallows creation (see "-s=create")`
+            `      FAIL ${validatorName}: Snapshots do not match (${path.basename(
+              newSnapshotFile
+            )})`
           )
         );
-        return 'Snapshot does not exist (see "-s=create")';
+        console.log(`      ${changes.replace(/\n/g, '\n      ')}`);
+        return `Snapshots do not match (${path.basename(newSnapshotFile)}).`;
+      }
+
+      // not a match, but using diff mode, so save the updated snapshot
+      console.log(
+        chalk.yellow(
+          `      ${validatorName}: Snapshots do not match, updating snapshot ${path.basename(
+            newSnapshotFile
+          )}.`
+        )
+      );
+  
+    } else {
+      if (cmdOptions.snapshotMode == SNAPSHOT_MODE_NEVER) {
+        console.log(
+          chalk.red(
+            `      FAIL ${validatorName}: Snapshot does not exist, but snapshot mode disallows creation (see "-s" option)`
+          )
+        );
+        return 'Snapshot does not exist (see "-s" option)';
       }
       console.log(
         chalk.yellow(
@@ -282,7 +304,11 @@ export function snapshotCompare(
     }
   } else
     console.log(
-      chalk.yellow(`      ${validatorName}: Resetting snapshot ${path.basename(newSnapshotFile)} to latest.`)
+      chalk.yellow(
+        `      ${validatorName}: Resetting snapshot ${path.basename(
+          newSnapshotFile
+        )} to latest.`
+      )
     );
 
   // overwrite the baseline snapshot with latest, and copy over the artifact
@@ -314,7 +340,7 @@ export function runTest(testSuite, testSetups, cmdOptions) {
     if (mergedSetups.posts.length == 0)
       invalidSetup = `Invalid setup: No "posts" defined.`;
 
-      if (invalidSetup) {
+    if (invalidSetup) {
       // invalid setup - so populate the failure details and loop
       result.fail++;
       result.summary.push({
@@ -330,7 +356,9 @@ export function runTest(testSuite, testSetups, cmdOptions) {
       let matchPost = false;
       for (const filter of cmdOptions.postFilter)
         if (
-          mergedSetups.posts[postIndex].toLowerCase().includes(filter.toLowerCase())
+          mergedSetups.posts[postIndex]
+            .toLowerCase()
+            .includes(filter.toLowerCase())
         ) {
           matchPost = true;
           break;
