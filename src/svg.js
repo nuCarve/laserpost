@@ -502,7 +502,7 @@ function closeShapePath() {
             ? 'none'
             : cutIndexToRGBColor(activePath.cutSetting.index),
         fill: cutIndexToRGBColor(activePath.cutSetting.index),
-        fill$mode: 'evenodd',
+        fill$rule: 'evenodd',
       });
     activePath.id++;
 
