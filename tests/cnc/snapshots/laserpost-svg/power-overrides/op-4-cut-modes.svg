@@ -15,7 +15,7 @@
   </g>
   <g id="laserpost_top_hex_etch">
     <desc>Operation: Top hex etch</desc>
-    <path id="laserpost_top_hex_etch_1" d=" M 381.937,173.74 L 414.463,154.961 L 414.463,117.165 L 381.732,98.268 L 349,117.165 L 349,154.961 L 381.732,173.858 L 381.937,173.74" stroke="none" fill="#178837" fill-mode="evenodd" />
+    <path id="laserpost_top_hex_etch_1" d=" M 381.937,173.74 L 414.463,154.961 L 414.463,117.165 L 381.732,98.268 L 349,117.165 L 349,154.961 L 381.732,173.858 L 381.937,173.74" stroke="none" fill="#178837" fill-rule="evenodd" />
   </g>
   <g id="laserpost_bottom_rounded_vaporize">
     <desc>Operation: Bottom rounded vaporize</desc>
