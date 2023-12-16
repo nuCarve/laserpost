@@ -546,7 +546,7 @@ function translateCoordinateSpace() {
               vectorIndex < shape.vectors.length;
               ++vectorIndex
             ) {
-              const vector = shape.vectors[vectorIndex];
+              let vector = shape.vectors[vectorIndex];
 
               vector = translate(vector);
               const transformC0 = translate({ x: vector.c0x, y: vector.c0y });

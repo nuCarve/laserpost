@@ -51,7 +51,7 @@ function appendProjectNote(template, parameters) {
  * @param level Optional level of the comment (COMMENT_NORMAL, COMMENT_DEBUG, COMMENT_INSANE); defaults to COMMENT_NORMAL
  */
 function debugLog(template, parameters, level) {
-  const text = format(template, parameters);
+  let text = format(template, parameters);
   text = text.replace(/[ \n]+$/, '');
 
   if (level === undefined) level = COMMENT_NORMAL;

@@ -250,7 +250,7 @@ function onProjectComplete(redirect) {
  * @param parameters Optional key/value dictionary with parameters from template (such as {name})
  */
 function writeCommentLine(template, parameters) {
-  const text = format(template, parameters);
+  let text = format(template, parameters);
   text = text.replace(/[ \n]+$/, '');
 
   if (text == '') writeln('');
@@ -480,7 +480,7 @@ function writeShapePath(shape) {
 
 /**
  * Path shape properties are enqueued in the `activePath` global so that we can generate them as a single path
- * element, allowing for improved fill-modes to handle details such as interior shapes on letters.  The actual
+ * element, allowing for improved fill-rule's to handle details such as interior shapes on letters.  The actual
  * writing of the path element is done here, if any path is pending.
  */
 function closeShapePath() {

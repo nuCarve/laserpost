@@ -17,9 +17,10 @@
  * with <memberName>value</memberName>
  */
 function stateLoad() {
+  let xmlFile;
   // set up path to the state file, and see if it exists
   try {
-    const xmlFile = new TextFile(getStatePath(), false, 'ansi');
+    xmlFile = new TextFile(getStatePath(), false, 'ansi');
   } catch (ex) {
     // no file, so set an empty state
     origState = {};

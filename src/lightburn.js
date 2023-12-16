@@ -286,7 +286,7 @@ function onWriteTrailer(layer) {
  * @param parameters Optional key/value dictionary with parameters from template (such as {name})
  */
 function writeCommentLine(template, parameters) {
-  const text = format(template, parameters);
+  let text = format(template, parameters);
   text = text.replace(/[ \n]+$/, '');
 
   if (text == '') writeln('');
