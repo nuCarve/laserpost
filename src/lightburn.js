@@ -86,15 +86,18 @@ function loadLightburnLibrary() {
  * to the user to get it working.
  */
 function checkLightburnLibrary() {
-  if (activeState.lightburnLibraryPath != getProperty('machine0070LightburnLibrary', ''))
-    showWarning(
-      localize('WARNING: Lightburn library path has changed.  You must run the post again for it to take affect.'),
-      {});
-  else if (activeState.lightburnLibraryPath != '' && !FileSystem.isFile(activeState.lightburnLibraryPath)) {
+  // skip if doing automated testing
+  if (getProperty('automatedTesting', false) == false) {
+    if (activeState.lightburnLibraryPath != getProperty('machine0070LightburnLibrary', ''))
       showWarning(
-          localize('WARNING: Library file "{path}" does not exist.  Check path and and ensure it has the library filename with extension.'),
-          { path: activeState.lightburnLibraryPath}
-      );
+        localize('WARNING: Lightburn library path has changed.  You must run the post again for it to take affect.'),
+        {});
+    else if (activeState.lightburnLibraryPath != '' && !FileSystem.isFile(activeState.lightburnLibraryPath)) {
+        showWarning(
+            localize('WARNING: Library file "{path}" does not exist.  Check path and and ensure it has the library filename with extension.'),
+            { path: activeState.lightburnLibraryPath}
+        );
+    }
   }
 }
 

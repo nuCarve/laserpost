@@ -1,1052 +1,1128 @@
 {
-  "setups": {
-    "baseline": {
-      "comment": "Sets up baseline options for POST and configures validators for the post processors artifacts",
-      "posts": ["laserpost-lightburn", "laserpost-svg"],
-      "options": {
-        "quiet": "--quiet",
-        "nobackup": "--nobackup",
-        "noeditor": "--noeditor",
-        "nointeraction": "--nointeraction",
-        "timeout": ["--timeout", "1"]
-      },
-      "validators": {
-        "lbrn": {
-          "post": "laserpost-lightburn",
-          "file": "*.lbrn",
-          "validator": "xpath"
-        },
-        "svg": {
-          "post": "laserpost-svg",
-          "file": "*.svg",
-          "validator": "xpath",
-          "namespaces": {
-            "svg": "http://www.w3.org/2000/svg"
-          }
-        },
-        "txt": {
-          "post": "*",
-          "file": "*.txt",
-          "validator": "text"
-        }
-      },
-      "properties": {
-        "laserpost0500IncludeComments": "INCLUDE_COMMENTS_NONE",
-        "automatedTesting": "true"
-      }
-    },
-    "barebones": {
-      "comment": "Strips artifacts to bare minimum for testing of basic operation.",
-      "setup": "baseline",
-      "validators": {
-        "lbrn": {
-          "xpath": [
-            {
-              "query": "/LightBurnProject/@AppVersion",
-              "match": "required"
-            }
-          ]
-        },
-        "svg": {
-          "xpath": [
-            {
-              "query": "/svg:svg/@version",
-              "match": "required"
-            }
-          ]
-        }
-      }
-    },
-    "all": {
-      "comment": "Maintains all relevant properties from artifacts.",
-      "setup": "baseline",
-      "validators": {
-        "lbrn": {
-          "xpath": [
-            {
-              "query": "/LightBurnProject/CutSetting",
-              "match": "required"
+    "setups": {
+        "baseline": {
+            "comment": "Sets up baseline options for POST and configures validators for the post processors artifacts",
+            "posts": ["laserpost-lightburn", "laserpost-svg"],
+            "options": {
+                "quiet": "--quiet",
+                "nobackup": "--nobackup",
+                "noeditor": "--noeditor",
+                "nointeraction": "--nointeraction",
+                "timeout": ["--timeout", "1"]
             },
-            {
-              "query": "/LightBurnProject/Shape",
-              "match": "required"
-            }
-          ]
-        },
-        "svg": {
-          "xpath": [
-            {
-              "query": "/svg:svg/svg:g",
-              "match": "optional"
+            "validators": {
+                "lbrn": {
+                    "post": "laserpost-lightburn",
+                    "file": "*.lbrn",
+                    "validator": "xpath"
+                },
+                "svg": {
+                    "post": "laserpost-svg",
+                    "file": "*.svg",
+                    "validator": "xpath",
+                    "namespaces": {
+                        "svg": "http://www.w3.org/2000/svg"
+                    }
+                },
+                "txt": {
+                    "post": "*",
+                    "file": "*.txt",
+                    "validator": "text"
+                }
             },
-            {
-              "query": "/svg:svg/svg:path",
-              "match": "optional"
+            "properties": {
+                "laserpost0500IncludeComments": "INCLUDE_COMMENTS_NONE",
+                "automatedTesting": "true"
             }
-          ]
+        },
+        "barebones": {
+            "comment": "Strips artifacts to bare minimum for testing of basic operation.",
+            "setup": "baseline",
+            "validators": {
+                "lbrn": {
+                    "xpath": [
+                        {
+                            "query": "/LightBurnProject/@AppVersion",
+                            "match": "required"
+                        }
+                    ]
+                },
+                "svg": {
+                    "xpath": [
+                        {
+                            "query": "/svg:svg/@version",
+                            "match": "required"
+                        }
+                    ]
+                }
+            }
+        },
+        "all": {
+            "comment": "Maintains all relevant properties from artifacts.",
+            "setup": "baseline",
+            "validators": {
+                "lbrn": {
+                    "xpath": [
+                        {
+                            "query": "/LightBurnProject/CutSetting",
+                            "match": "required"
+                        },
+                        {
+                            "query": "/LightBurnProject/Shape",
+                            "match": "required"
+                        }
+                    ]
+                },
+                "svg": {
+                    "xpath": [
+                        {
+                            "query": "/svg:svg/svg:g",
+                            "match": "optional"
+                        },
+                        {
+                            "query": "/svg:svg/svg:path",
+                            "match": "optional"
+                        }
+                    ]
+                }
+            }
+        },
+        "marker": {
+            "comment": "Alignment Marker testing, snaps only the specific layer and shapes",
+            "setup": "baseline",
+            "validators": {
+                "lbrn": {
+                    "xpath": [
+                        {
+                            "query": "/LightBurnProject/CutSetting[2]",
+                            "match": "required"
+                        },
+                        {
+                            "query": "/LightBurnProject/Shape[3]",
+                            "match": "required"
+                        }
+                    ]
+                },
+                "svg": {
+                    "xpath": [
+                        {
+                            "query": "/svg:svg/svg:g[2]",
+                            "match": "required"
+                        }
+                    ]
+                }
+            }
         }
-      }
     },
-    "marker": {
-      "comment": "Alignment Marker testing, snaps only the specific layer and shapes",
-      "setup": "baseline",
-      "validators": {
-        "lbrn": {
-          "xpath": [
-            {
-              "query": "/LightBurnProject/CutSetting[2]",
-              "match": "required"
+    "tests": [
+        {
+            "name": "Barebones",
+            "comment": "Test for basic operation without much content validation",
+            "setup": "barebones",
+            "cnc": "op-1-defaults"
+        },
+        {
+            "name": "Default properties",
+            "comment": "Default properties on op-1-defaults file",
+            "setup": "all",
+            "cnc": "op-1-defaults"
+        },
+        {
+            "name": "Marker upper-right",
+            "comment": "Alignment marker set to upper-right",
+            "setup": "marker",
+            "cnc": "op-1-defaults",
+            "properties": {
+                "laserpost0300AlignmentMarks": "ALIGNMENT_MARK_UPPER_RIGHT",
+                "laserpost0100Organization": "ORGANIZATION_BY_OPERATION"
+            }
+        },
+        {
+            "name": "Marker center-right",
+            "comment": "Alignment marker set to center-right",
+            "setup": "marker",
+            "cnc": "op-1-defaults",
+            "properties": {
+                "laserpost0300AlignmentMarks": "ALIGNMENT_MARK_CENTER_RIGHT",
+                "laserpost0100Organization": "ORGANIZATION_BY_OPERATION"
+            }
+        },
+        {
+            "name": "Marker lower-right",
+            "comment": "Alignment marker set to lower-right",
+            "setup": "marker",
+            "cnc": "op-1-defaults",
+            "properties": {
+                "laserpost0300AlignmentMarks": "ALIGNMENT_MARK_LOWER_RIGHT",
+                "laserpost0100Organization": "ORGANIZATION_BY_OPERATION"
+            }
+        },
+        {
+            "name": "Org op no group",
+            "comment": "Organize by operation, without grouping",
+            "setup": "all",
+            "cnc": "op-4-cut-modes",
+            "properties": {
+                "laserpost0100Organization": "ORGANIZATION_BY_OPERATION",
+                "laserpost0200GroupShapes": "false",
+                "laserpost0500IncludeComments": "INCLUDE_COMMENTS_NORMAL"
+            }
+        },
+        {
+            "name": "Org op group",
+            "comment": "Organize by operation, with grouping",
+            "setup": "all",
+            "cnc": "op-4-cut-modes",
+            "properties": {
+                "laserpost0100Organization": "ORGANIZATION_BY_OPERATION",
+                "laserpost0200GroupShapes": "true",
+                "laserpost0500IncludeComments": "INCLUDE_COMMENTS_NORMAL"
+            }
+        },
+        {
+            "name": "Org layer no group",
+            "comment": "Oranize by layer without grouping",
+            "setup": "all",
+            "cnc": "op-4-cut-modes",
+            "properties": {
+                "laserpost0100Organization": "ORGANIZATION_BY_LAYER",
+                "laserpost0200GroupShapes": "false",
+                "laserpost0500IncludeComments": "INCLUDE_COMMENTS_NORMAL"
+            }
+        },
+        {
+            "name": "Org layer group",
+            "comment": "Organize by layer with grouping",
+            "setup": "all",
+            "cnc": "op-4-cut-modes",
+            "validators": {
+                "txt": {
+                    "regex": [{ "regex": "Layer \\d \\(", "count": 3 }]
+                }
             },
-            {
-              "query": "/LightBurnProject/Shape[3]",
-              "match": "required"
+            "properties": {
+                "laserpost0100Organization": "ORGANIZATION_BY_LAYER",
+                "laserpost0200GroupShapes": "true",
+                "laserpost0500IncludeComments": "INCLUDE_COMMENTS_NORMAL"
             }
-          ]
         },
-        "svg": {
-          "xpath": [
-            {
-              "query": "/svg:svg/svg:g[2]",
-              "match": "required"
+        {
+            "name": "Org file layer no group",
+            "comment": "Organize by layer file, without grouping",
+            "setup": "all",
+            "cnc": "op-4-cut-modes",
+            "properties": {
+                "laserpost0100Organization": "ORGANIZATION_BY_LAYER_FILE",
+                "laserpost0200GroupShapes": "false",
+                "laserpost0500IncludeComments": "INCLUDE_COMMENTS_NORMAL"
             }
-          ]
-        }
-      }
-    }
-  },
-  "tests": [
-    {
-      "name": "Barebones",
-      "comment": "Test for basic operation without much content validation",
-      "setup": "barebones",
-      "cnc": "op-1-defaults"
-    },
-    {
-      "name": "Default properties",
-      "comment": "Default properties on op-1-defaults file",
-      "setup": "all",
-      "cnc": "op-1-defaults"
-    },
-    {
-      "name": "Marker upper-right",
-      "comment": "Alignment marker set to upper-right",
-      "setup": "marker",
-      "cnc": "op-1-defaults",
-      "properties": {
-        "laserpost0300AlignmentMarks": "ALIGNMENT_MARK_UPPER_RIGHT",
-        "laserpost0100Organization": "ORGANIZATION_BY_OPERATION"
-      }
-    },
-    {
-      "name": "Marker center-right",
-      "comment": "Alignment marker set to center-right",
-      "setup": "marker",
-      "cnc": "op-1-defaults",
-      "properties": {
-        "laserpost0300AlignmentMarks": "ALIGNMENT_MARK_CENTER_RIGHT",
-        "laserpost0100Organization": "ORGANIZATION_BY_OPERATION"
-      }
-    },
-    {
-      "name": "Marker lower-right",
-      "comment": "Alignment marker set to lower-right",
-      "setup": "marker",
-      "cnc": "op-1-defaults",
-      "properties": {
-        "laserpost0300AlignmentMarks": "ALIGNMENT_MARK_LOWER_RIGHT",
-        "laserpost0100Organization": "ORGANIZATION_BY_OPERATION"
-      }
-    },
-    {
-      "name": "Org op no group",
-      "comment": "Organize by operation, without grouping",
-      "setup": "all",
-      "cnc": "op-4-cut-modes",
-      "properties": {
-        "laserpost0100Organization": "ORGANIZATION_BY_OPERATION",
-        "laserpost0200GroupShapes": "false",
-        "laserpost0500IncludeComments": "INCLUDE_COMMENTS_NORMAL"
-      }
-    },
-    {
-      "name": "Org op group",
-      "comment": "Organize by operation, with grouping",
-      "setup": "all",
-      "cnc": "op-4-cut-modes",
-      "properties": {
-        "laserpost0100Organization": "ORGANIZATION_BY_OPERATION",
-        "laserpost0200GroupShapes": "true",
-        "laserpost0500IncludeComments": "INCLUDE_COMMENTS_NORMAL"
-      }
-    },
-    {
-      "name": "Org layer no group",
-      "comment": "Oranize by layer without grouping",
-      "setup": "all",
-      "cnc": "op-4-cut-modes",
-      "properties": {
-        "laserpost0100Organization": "ORGANIZATION_BY_LAYER",
-        "laserpost0200GroupShapes": "false",
-        "laserpost0500IncludeComments": "INCLUDE_COMMENTS_NORMAL"
-      }
-    },
-    {
-      "name": "Org layer group",
-      "comment": "Organize by layer with grouping",
-      "setup": "all",
-      "cnc": "op-4-cut-modes",
-      "validators": {
-        "txt": {
-          "regex": [{ "regex": "Layer \\d \\(", "count": 3 }]
-        }
-      },
-      "properties": {
-        "laserpost0100Organization": "ORGANIZATION_BY_LAYER",
-        "laserpost0200GroupShapes": "true",
-        "laserpost0500IncludeComments": "INCLUDE_COMMENTS_NORMAL"
-      }
-    },
-    {
-      "name": "Org file layer no group",
-      "comment": "Organize by layer file, without grouping",
-      "setup": "all",
-      "cnc": "op-4-cut-modes",
-      "properties": {
-        "laserpost0100Organization": "ORGANIZATION_BY_LAYER_FILE",
-        "laserpost0200GroupShapes": "false",
-        "laserpost0500IncludeComments": "INCLUDE_COMMENTS_NORMAL"
-      }
-    },
-    {
-      "name": "Org file layer group",
-      "comment": "Organize by layer file, with grouping - with alignment mark testing for each layer file",
-      "setup": "all",
-      "cnc": "op-4-cut-modes",
-      "validators": {
-        "lbrn": {
-          "regex": [
-            {
-              "regex": "Operation: Alignment (mark)",
-              "require": "mark"
-            }
-          ]
         },
-        "svg": {
-          "regex": [
-            {
-              "regex": "Operation: Alignment (mark)",
-              "require": "mark"
-            }
-          ]
-        }
-      },
-      "properties": {
-        "laserpost0100Organization": "ORGANIZATION_BY_LAYER_FILE",
-        "laserpost0300AlignmentMarks": "ALIGNMENT_MARK_UPPER_RIGHT",
-        "laserpost0200GroupShapes": "true",
-        "laserpost0500IncludeComments": "INCLUDE_COMMENTS_NORMAL"
-      }
-    },
-    {
-      "name": "Orientation LL-LL",
-      "comment": "Model complex-ll-top, verify not rotated and LBRN not dirty w/ll orientation",
-      "setup": "all",
-      "cnc": "complex-ll-top",
-      "properties": {
-        "machine0050Orientation": "MACHINE_ORIENTATION_LOWER_LEFT"
-      }
-    },
-    {
-      "name": "Orientation LL-UL",
-      "comment": "Model complex-ll-top, verify not rotated and LBRN not dirty w/ul orientation",
-      "setup": "all",
-      "cnc": "complex-ll-top",
-      "properties": {
-        "machine0050Orientation": "MACHINE_ORIENTATION_UPPER_LEFT"
-      }
-    },
-    {
-      "name": "Orientation LL-LR",
-      "comment": "Model complex-ll-top, verify not rotated and LBRN not dirty w/lr orientation",
-      "setup": "all",
-      "cnc": "complex-ll-top",
-      "properties": {
-        "machine0050Orientation": "MACHINE_ORIENTATION_LOWER_RIGHT"
-      }
-    },
-    {
-      "name": "Orientation LL-UR",
-      "comment": "Model complex-ll-top, verify not rotated and LBRN not dirty w/ur orientation",
-      "setup": "all",
-      "cnc": "complex-ll-top",
-      "properties": {
-        "machine0050Orientation": "MACHINE_ORIENTATION_UPPER_RIGHT"
-      }
-    },
-    {
-      "name": "Orientation Right LL-LL",
-      "comment": "Model complex-ll-right, verify not rotated and LBRN not dirty w/ur orientation",
-      "setup": "all",
-      "cnc": "complex-ll-right",
-      "properties": {
-        "machine0050Orientation": "MACHINE_ORIENTATION_UPPER_RIGHT"
-      }
-    },
-    {
-      "name": "Notes none",
-      "comment": "Notes set to none; verify they are not generated at all.",
-      "setup": "baseline",
-      "cnc": "op-1-defaults",
-      "validators": {
-        "lbrn": {
-          "xpath": [
-            {
-              "query": "/LightBurnProject/Notes",
-              "match": "forbidden"
-            }
-          ]
-        },
-        "svg": {
-          "regex": [
-            {
-              "regex": "(Job setup information has been generated)",
-              "forbidden": true
-            }
-          ]
-        }
-      },
-      "properties": {
-        "laserpost0400IncludeNotes": "INCLUDE_NOTES_NONE"
-      }
-    },
-    {
-      "name": "Notes hidden",
-      "comment": "Notes set to hidden; verify they are generated but not shown.",
-      "setup": "baseline",
-      "cnc": "op-1-defaults",
-      "posts": ["laserpost-lightburn"],
-      "validators": {
-        "lbrn": {
-          "xpath": [
-            {
-              "query": "/LightBurnProject/Notes[@ShowOnLoad=\"0\"]",
-              "match": "required"
-            }
-          ]
-        }
-      },
-      "properties": {
-        "laserpost0400IncludeNotes": "INCLUDE_NOTES_HIDDEN"
-      }
-    },
-    {
-      "name": "Notes show important",
-      "comment": "Notes set to show important; verify they are generated as important.",
-      "setup": "baseline",
-      "cnc": "op-1-defaults",
-      "validators": {
-        "lbrn": {
-          "xpath": [
-            {
-              "query": "/LightBurnProject/Notes[@ShowOnLoad=\"1\"]",
-              "match": "required"
-            }
-          ],
-          "regex": [
-            {
-              "regex": "This is a test, (only a test).",
-              "require": "only a test"
-            }
-          ]
-        },
-        "svg": {
-          "regex": [
-            {
-              "regex": "This is a test, (only a test).",
-              "require": "only a test"
-            }
-          ]
-        }
-      },
-      "properties": {
-        "laserpost0400IncludeNotes": "INCLUDE_NOTES_SHOW_IMPORTANT",
-        "createImportantNote": "true",
-        "laserpost0500IncludeComments": "INCLUDE_COMMENTS_NORMAL"
-      }
-    },
-    {
-      "name": "Notes show",
-      "comment": "Notes set to show; verify they are generated and shown.",
-      "setup": "baseline",
-      "cnc": "op-1-defaults",
-      "validators": {
-        "lbrn": {
-          "xpath": [
-            {
-              "query": "/LightBurnProject/Notes[@ShowOnLoad=\"1\"]",
-              "match": "required"
-            }
-          ]
-        },
-        "svg": {
-          "regex": [
-            {
-              "regex": "(Job setup information has been generated)",
-              "require": "Job setup information has been generated"
-            }
-          ]
-        }
-      },
-      "properties": {
-        "laserpost0400IncludeNotes": "INCLUDE_NOTES_SHOW",
-        "laserpost0500IncludeComments": "INCLUDE_COMMENTS_NORMAL"
-      }
-    },
-    {
-      "name": "Trace stock enabled",
-      "comment": "Enable trace stock; verify trace stock layer is generated.",
-      "setup": "all",
-      "cnc": "op-1-defaults",
-      "validators": {
-        "lbrn": {
-          "regex": [
-            {
-              "regex": "(Operation: Stock outline)",
-              "require": "Operation: Stock outline"
-            }
-          ]
-        },
-        "svg": {
-          "regex": [
-            {
-              "regex": "(Operation: Stock outline)",
-              "require": "Operation: Stock outline"
-            }
-          ]
-        }
-      },
-      "properties": {
-        "work0100TraceStock": "true",
-        "laserpost0500IncludeComments": "INCLUDE_COMMENTS_NORMAL"
-      }
-    },
-    {
-      "name": "Trace stock disabled",
-      "comment": "Disable trace stock; verify trace stock layer is not generated.",
-      "setup": "barebones",
-      "cnc": "op-1-defaults",
-      "validators": {
-        "lbrn": {
-          "regex": [
-            {
-              "regex": "Operation: Stock outline",
-              "forbidden": true
-            }
-          ]
-        },
-        "svg": {
-          "regex": [
-            {
-              "regex": "Operation: Stock outline",
-              "forbidden": true
-            }
-          ]
-        }
-      },
-      "properties": {
-        "work0100TraceStock": "false",
-        "laserpost0500IncludeComments": "INCLUDE_COMMENTS_NORMAL"
-      }
-    },
-    {
-      "name": "Work offsets machine upper-right",
-      "comment": "Work offset X=50, Y=75 on upper-right machine; verify offsets.",
-      "setup": "all",
-      "cnc": "op-1-defaults",
-      "validators": {
-        "lbrn": {
-          "xpath": [
-            {
-              "query": "//v[@vx=\"50\"][@vy=\"75\"]",
-              "match": "required"
-            }
-          ]
-        },
-        "svg": {
-          "xpath": [
-            {
-              "query": "/svg:svg[@viewbox=\"0 0 578.268 483.78\"]",
-              "match": "required"
-            }
-          ]
-        }
-      },
-      "properties": {
-        "work0200OffsetX": "50",
-        "work0300OffsetY": "75",
-        "machine0050Orientation": "MACHINE_ORIENTATION_UPPER_RIGHT"
-      }
-    },
-    {
-      "name": "Work offsets machine lower-left",
-      "comment": "Work offset X=50, Y=75 on lower-left machine; verify offsets.",
-      "setup": "all",
-      "cnc": "op-1-defaults",
-      "validators": {
-        "lbrn": {
-          "xpath": [
-            {
-              "query": "//v[@vx=\"50\"][@vy=\"75\"]",
-              "match": "required"
-            }
-          ]
-        },
-        "svg": {
-          "xpath": [
-            {
-              "query": "/svg:svg[@viewbox=\"0 0 578.268 483.78\"]",
-              "match": "required"
-            }
-          ]
-        }
-      },
-      "properties": {
-        "work0200OffsetX": "50",
-        "work0300OffsetY": "75",
-        "machine0050Orientation": "MACHINE_ORIENTATION_LOWER_LEFT"
-      }
-    },
-    {
-      "name": "Power overrides",
-      "comment": "Work offset X=50, Y=75 on lower-left machine; verify offsets.",
-      "setup": "all",
-      "cnc": "op-4-cut-modes",
-      "properties": {
-        "laserPower0100EtchMin": "81",
-        "laserPower0200EtchMax": "91",
-        "laserPower0300VaporizeMin": "82",
-        "laserPower0400VaporizeMax": "92",
-        "laserPower0500ThroughMin": "83",
-        "laserPower0600ThroughMax": "93"
-      }
-    },
-    {
-      "name": "Speed units mm/sec",
-      "comment": "Speed units set to mm/sec; verify units.",
-      "setup": "barebones",
-      "cnc": "op-1-defaults",
-      "validators": {
-        "lbrn": {
-          "regex": [
-            {
-              "regex": "(mm/\\w+) using laser",
-              "require": "mm/sec"
-            }
-          ]
-        },
-        "txt": {
-          "regex": [
-            {
-              "regex": "(mm/\\w+) using laser",
-              "require": "mm/sec"
-            }
-          ]
-        }
-      },
-      "properties": {
-        "machine0100SpeedUnits": "SPEED_UNITS_MMPS"
-      }
-    },
-    {
-      "name": "Speed units mm/min",
-      "comment": "Speed units set to mm/min; verify units.",
-      "setup": "barebones",
-      "cnc": "op-1-defaults",
-      "validators": {
-        "lbrn": {
-          "regex": [
-            {
-              "regex": "(mm/\\w+) using laser",
-              "require": "mm/min"
-            }
-          ]
-        },
-        "txt": {
-          "regex": [
-            {
-              "regex": "(mm/\\w+) using laser",
-              "require": "mm/min"
-            }
-          ]
-        }
-      },
-      "properties": {
-        "machine0100SpeedUnits": "SPEED_UNITS_MMPM"
-      }
-    },
-    {
-      "name": "Shuttle U",
-      "comment": "Set shuttle U on laser 1 to 50 and laser 2 to 100.",
-      "setup": "baseline",
-      "cnc": "op-4-cut-modes",
-      "posts": ["laserpost-lightburn"],
-      "validators": {
-        "lbrn": {
-          "xpath": [
-            {
-              "query": "/LightBurnProject/CutSetting[1]/uOffset[@Value=\"100\"]",
-              "match": "required"
+        {
+            "name": "Org file layer group",
+            "comment": "Organize by layer file, with grouping - with alignment mark testing for each layer file",
+            "setup": "all",
+            "cnc": "op-4-cut-modes",
+            "validators": {
+                "lbrn": {
+                    "regex": [
+                        {
+                            "regex": "Operation: Alignment (mark)",
+                            "require": "mark"
+                        }
+                    ]
+                },
+                "svg": {
+                    "regex": [
+                        {
+                            "regex": "Operation: Alignment (mark)",
+                            "require": "mark"
+                        }
+                    ]
+                }
             },
-            {
-              "query": "/LightBurnProject/CutSetting[2]/uOffset[@Value=\"50\"]",
-              "match": "required"
+            "properties": {
+                "laserpost0100Organization": "ORGANIZATION_BY_LAYER_FILE",
+                "laserpost0300AlignmentMarks": "ALIGNMENT_MARK_UPPER_RIGHT",
+                "laserpost0200GroupShapes": "true",
+                "laserpost0500IncludeComments": "INCLUDE_COMMENTS_NORMAL"
             }
-          ]
-        }
-      },
-      "properties": {
-        "machine0500ShuttleLaser1": "50",
-        "machine0600ShuttleLaser2": "100"
-      }
-    },
-    {
-      "name": "Layer mode inherit",
-      "comment": "Set operation layer mode to inherit, which is cut/line.",
-      "setup": "barebones",
-      "cnc": "op-1-defaults",
-      "validators": {
-        "lbrn": {
-          "xpath": [
-            {
-              "query": "/LightBurnProject/CutSetting[1][@type=\"Cut\"]",
-              "match": "required"
-            }
-          ]
         },
-        "txt": {
-          "regex": [
-            {
-              "regex": "Mode \"(\\w+)\"",
-              "require": "cut"
+        {
+            "name": "Orientation LL-LL",
+            "comment": "Model complex-ll-top, verify not rotated and LBRN not dirty w/ll orientation",
+            "setup": "all",
+            "cnc": "complex-ll-top",
+            "properties": {
+                "machine0050Orientation": "MACHINE_ORIENTATION_LOWER_LEFT"
             }
-          ]
-        }
-      },
-      "properties": {
-        "op0100LayerMode": "LAYER_MODE_INHERIT",
-        "laserpost0500IncludeComments": "INCLUDE_COMMENTS_DEBUG"
-      }
-    },
-    {
-      "name": "Layer mode line",
-      "comment": "Set operation layer mode to cut.",
-      "setup": "barebones",
-      "cnc": "op-1-defaults",
-      "validators": {
-        "lbrn": {
-          "xpath": [
-            {
-              "query": "/LightBurnProject/CutSetting[1][@type=\"Cut\"]",
-              "match": "required"
-            }
-          ]
         },
-        "txt": {
-          "regex": [
-            {
-              "regex": "Mode \"(\\w+)\"",
-              "require": "cut"
+        {
+            "name": "Orientation LL-UL",
+            "comment": "Model complex-ll-top, verify not rotated and LBRN not dirty w/ul orientation",
+            "setup": "all",
+            "cnc": "complex-ll-top",
+            "properties": {
+                "machine0050Orientation": "MACHINE_ORIENTATION_UPPER_LEFT"
             }
-          ]
-        }
-      },
-      "properties": {
-        "op0100LayerMode": "LAYER_MODE_LINE"
-      }
-    },
-    {
-      "name": "Layer mode fill",
-      "comment": "Set operation layer mode to fill.",
-      "setup": "barebones",
-      "cnc": "op-1-defaults",
-      "validators": {
-        "lbrn": {
-          "xpath": [
-            {
-              "query": "/LightBurnProject/CutSetting[1][@type=\"Scan\"]",
-              "match": "required"
-            }
-          ]
         },
-        "txt": {
-          "regex": [
-            {
-              "regex": "Mode \"(\\w+)\"",
-              "require": "fill"
+        {
+            "name": "Orientation LL-LR",
+            "comment": "Model complex-ll-top, verify not rotated and LBRN not dirty w/lr orientation",
+            "setup": "all",
+            "cnc": "complex-ll-top",
+            "properties": {
+                "machine0050Orientation": "MACHINE_ORIENTATION_LOWER_RIGHT"
             }
-          ]
-        }
-      },
-      "properties": {
-        "op0100LayerMode": "LAYER_MODE_FILL"
-      }
-    },
-    {
-      "name": "Layer mode offset fill",
-      "comment": "Set operation layer mode to offset fill.",
-      "setup": "barebones",
-      "cnc": "op-1-defaults",
-      "validators": {
-        "lbrn": {
-          "xpath": [
-            {
-              "query": "/LightBurnProject/CutSetting[1][@type=\"Offset\"]",
-              "match": "required"
-            }
-          ]
         },
-        "txt": {
-          "regex": [
-            {
-              "regex": "Mode \"(.+)\"",
-              "require": "outline fill"
+        {
+            "name": "Orientation LL-UR",
+            "comment": "Model complex-ll-top, verify not rotated and LBRN not dirty w/ur orientation",
+            "setup": "all",
+            "cnc": "complex-ll-top",
+            "properties": {
+                "machine0050Orientation": "MACHINE_ORIENTATION_UPPER_RIGHT"
             }
-          ]
-        }
-      },
-      "properties": {
-        "op0100LayerMode": "LAYER_MODE_OFFSET_FILL"
-      }
-    },
-    {
-      "name": "Air assist gas",
-      "comment": "Set air assist to inherit from assist gas.",
-      "setup": "barebones",
-      "cnc": "op-1-defaults",
-      "validators": {
-        "lbrn": {
-          "xpath": [
-            {
-              "query": "/LightBurnProject/CutSetting[1]/runBlower[@Value=\"1\"]",
-              "match": "required"
-            }
-          ]
         },
-        "txt": {
-          "regex": [
-            {
-              "regex": "air (\\w+)",
-              "require": "on"
+        {
+            "name": "Orientation Right LL-LL",
+            "comment": "Model complex-ll-right, verify not rotated and LBRN not dirty w/ur orientation",
+            "setup": "all",
+            "cnc": "complex-ll-right",
+            "properties": {
+                "machine0050Orientation": "MACHINE_ORIENTATION_UPPER_RIGHT"
             }
-          ]
-        }
-      },
-      "properties": {
-        "op0200UseAir": "USE_AIR_ASSIST_GAS"
-      }
-    },
-    {
-      "name": "Air assist off",
-      "comment": "Set air assist off.",
-      "setup": "barebones",
-      "cnc": "op-1-defaults",
-      "validators": {
-        "lbrn": {
-          "xpath": [
-            {
-              "query": "/LightBurnProject/CutSetting[1]/runBlower[@Value=\"0\"]",
-              "match": "required"
-            }
-          ]
         },
-        "txt": {
-          "regex": [
-            {
-              "regex": "air (\\w+)",
-              "require": "off"
-            }
-          ]
-        }
-      },
-      "properties": {
-        "op0200UseAir": "USE_AIR_OFF"
-      }
-    },
-    {
-      "name": "Air assist on",
-      "comment": "Set air assist on.",
-      "setup": "barebones",
-      "cnc": "op-1-defaults",
-      "validators": {
-        "lbrn": {
-          "xpath": [
-            {
-              "query": "/LightBurnProject/CutSetting[1]/runBlower[@Value=\"1\"]",
-              "match": "required"
-            }
-          ]
-        },
-        "txt": {
-          "regex": [
-            {
-              "regex": "air (\\w+)",
-              "require": "on"
-            }
-          ]
-        }
-      },
-      "properties": {
-        "op0200UseAir": "USE_AIR_ON"
-      }
-    },
-    {
-      "name": "Laser enable tool",
-      "comment": "Set layer to use the default tool-specified laser.",
-      "setup": "barebones",
-      "cnc": "op-1-defaults",
-      "validators": {
-        "lbrn": {
-          "xpath": [
-            {
-              "query": "/LightBurnProject/CutSetting[1]/enableLaser1[@Value=\"1\"]",
-              "match": "required"
+        {
+            "name": "Notes none",
+            "comment": "Notes set to none; verify they are not generated at all.",
+            "setup": "baseline",
+            "cnc": "op-1-defaults",
+            "validators": {
+                "lbrn": {
+                    "xpath": [
+                        {
+                            "query": "/LightBurnProject/Notes",
+                            "match": "forbidden"
+                        }
+                    ]
+                },
+                "svg": {
+                    "regex": [
+                        {
+                            "regex": "(Job setup information has been generated)",
+                            "forbidden": true
+                        }
+                    ]
+                }
             },
-            {
-              "query": "/LightBurnProject/CutSetting[1]/enableLaser2[@Value=\"0\"]",
-              "match": "required"
+            "properties": {
+                "laserpost0400IncludeNotes": "INCLUDE_NOTES_NONE"
             }
-          ]
         },
-        "txt": {
-          "regex": [
-            {
-              "regex": "using laser (\\w+)",
-              "require": "1"
-            }
-          ]
-        }
-      },
-      "properties": {
-        "op0300LaserEnable": "LASER_ENABLE_TOOL"
-      }
-    },
-    {
-      "name": "Laser enable laser 1",
-      "comment": "Set layer to use laser 1.",
-      "setup": "barebones",
-      "cnc": "op-1-defaults",
-      "validators": {
-        "lbrn": {
-          "xpath": [
-            {
-              "query": "/LightBurnProject/CutSetting[1]/enableLaser1[@Value=\"1\"]",
-              "match": "required"
+        {
+            "name": "Notes hidden",
+            "comment": "Notes set to hidden; verify they are generated but not shown.",
+            "setup": "baseline",
+            "cnc": "op-1-defaults",
+            "posts": ["laserpost-lightburn"],
+            "validators": {
+                "lbrn": {
+                    "xpath": [
+                        {
+                            "query": "/LightBurnProject/Notes[@ShowOnLoad=\"0\"]",
+                            "match": "required"
+                        }
+                    ]
+                }
             },
-            {
-              "query": "/LightBurnProject/CutSetting[1]/enableLaser2[@Value=\"0\"]",
-              "match": "required"
+            "properties": {
+                "laserpost0400IncludeNotes": "INCLUDE_NOTES_HIDDEN"
             }
-          ]
         },
-        "txt": {
-          "regex": [
-            {
-              "regex": "using laser (\\w+)",
-              "require": "1"
-            }
-          ]
-        }
-      },
-      "properties": {
-        "op0300LaserEnable": "LASER_ENABLE_1"
-      }
-    },
-    {
-      "name": "Laser enable laser 2",
-      "comment": "Set layer to use laser 2.",
-      "setup": "barebones",
-      "cnc": "op-1-defaults",
-      "validators": {
-        "lbrn": {
-          "xpath": [
-            {
-              "query": "/LightBurnProject/CutSetting[1]/enableLaser1[@Value=\"0\"]",
-              "match": "required"
+        {
+            "name": "Notes show important",
+            "comment": "Notes set to show important; verify they are generated as important.",
+            "setup": "baseline",
+            "cnc": "op-1-defaults",
+            "validators": {
+                "lbrn": {
+                    "xpath": [
+                        {
+                            "query": "/LightBurnProject/Notes[@ShowOnLoad=\"1\"]",
+                            "match": "required"
+                        }
+                    ],
+                    "regex": [
+                        {
+                            "regex": "This is a test, (only a test).",
+                            "require": "only a test"
+                        }
+                    ]
+                },
+                "svg": {
+                    "regex": [
+                        {
+                            "regex": "This is a test, (only a test).",
+                            "require": "only a test"
+                        }
+                    ]
+                }
             },
-            {
-              "query": "/LightBurnProject/CutSetting[1]/enableLaser2[@Value=\"1\"]",
-              "match": "required"
+            "properties": {
+                "laserpost0400IncludeNotes": "INCLUDE_NOTES_SHOW_IMPORTANT",
+                "createImportantNote": "true",
+                "laserpost0500IncludeComments": "INCLUDE_COMMENTS_NORMAL"
             }
-          ]
         },
-        "txt": {
-          "regex": [
-            {
-              "regex": "using laser (\\w+)",
-              "require": "2"
+        {
+            "name": "Notes show",
+            "comment": "Notes set to show; verify they are generated and shown.",
+            "setup": "baseline",
+            "cnc": "op-1-defaults",
+            "validators": {
+                "lbrn": {
+                    "xpath": [
+                        {
+                            "query": "/LightBurnProject/Notes[@ShowOnLoad=\"1\"]",
+                            "match": "required"
+                        }
+                    ]
+                },
+                "svg": {
+                    "regex": [
+                        {
+                            "regex": "(Job setup information has been generated)",
+                            "require": "Job setup information has been generated"
+                        }
+                    ]
+                }
+            },
+            "properties": {
+                "laserpost0400IncludeNotes": "INCLUDE_NOTES_SHOW",
+                "laserpost0500IncludeComments": "INCLUDE_COMMENTS_NORMAL"
             }
-          ]
-        }
-      },
-      "properties": {
-        "op0300LaserEnable": "LASER_ENABLE_2"
-      }
-    },
-    {
-      "name": "Laser enable lasers off",
-      "comment": "Set layer to use no lasers.",
-      "setup": "barebones",
-      "cnc": "op-1-defaults",
-      "validators": {
-        "lbrn": {
-          "xpath": [
-            {
-              "query": "/LightBurnProject/CutSetting[1]/doOutput[@Value=\"0\"]",
-              "match": "required"
-            }
-          ]
         },
-        "txt": {
-          "regex": [
-            {
-              "regex": "Laser turned (\\w+)",
-              "require": "off"
-            }
-          ]
-        }
-      },
-      "properties": {
-        "op0300LaserEnable": "LASER_ENABLE_OFF"
-      }
-    },
-    {
-      "name": "Laser enable laser both",
-      "comment": "Set layer to use both lasers.",
-      "setup": "barebones",
-      "cnc": "op-1-defaults",
-      "validators": {
-        "lbrn": {
-          "xpath": [
-            {
-              "query": "/LightBurnProject/CutSetting[1]/enableLaser1[@Value=\"1\"]",
-              "match": "required"
+        {
+            "name": "Trace stock enabled",
+            "comment": "Enable trace stock; verify trace stock layer is generated.",
+            "setup": "all",
+            "cnc": "op-1-defaults",
+            "validators": {
+                "lbrn": {
+                    "regex": [
+                        {
+                            "regex": "(Operation: Stock outline)",
+                            "require": "Operation: Stock outline"
+                        }
+                    ]
+                },
+                "svg": {
+                    "regex": [
+                        {
+                            "regex": "(Operation: Stock outline)",
+                            "require": "Operation: Stock outline"
+                        }
+                    ]
+                }
             },
-            {
-              "query": "/LightBurnProject/CutSetting[1]/enableLaser2[@Value=\"1\"]",
-              "match": "required"
+            "properties": {
+                "work0100TraceStock": "true",
+                "laserpost0500IncludeComments": "INCLUDE_COMMENTS_NORMAL"
             }
-          ]
         },
-        "txt": {
-          "regex": [
-            {
-              "regex": "using lasers (\\w+) and (\\w+)",
-              "require": ["1", "2"]
+        {
+            "name": "Trace stock disabled",
+            "comment": "Disable trace stock; verify trace stock layer is not generated.",
+            "setup": "barebones",
+            "cnc": "op-1-defaults",
+            "validators": {
+                "lbrn": {
+                    "regex": [
+                        {
+                            "regex": "Operation: Stock outline",
+                            "forbidden": true
+                        }
+                    ]
+                },
+                "svg": {
+                    "regex": [
+                        {
+                            "regex": "Operation: Stock outline",
+                            "forbidden": true
+                        }
+                    ]
+                }
+            },
+            "properties": {
+                "work0100TraceStock": "false",
+                "laserpost0500IncludeComments": "INCLUDE_COMMENTS_NORMAL"
             }
-          ]
-        }
-      },
-      "properties": {
-        "op0300LaserEnable": "LASER_ENABLE_BOTH"
-      }
-    },
-    {
-      "name": "Layer settings",
-      "comment": "Tests for multiple layer settings (power scale=11, z-offset=22, passes=33 and z-step=44).",
-      "setup": "barebones",
-      "cnc": "op-1-defaults",
-      "validators": {
-        "lbrn": {
-          "xpath": [
-            {
-              "query": "/LightBurnProject/CutSetting[1]/zOffset[@Value=\"22\"]",
-              "match": "required"
-            },
-            {
-              "query": "/LightBurnProject/CutSetting[1]/numPasses[@Value=\"33\"]",
-              "match": "required"
-            },
-            {
-              "query": "/LightBurnProject/CutSetting[1]/zPerPass[@Value=\"44\"]",
-              "match": "required"
-            },
-            {
-              "query": "/LightBurnProject/Shape[1]/Children/Shape[@PowerScale=\"11\"]",
-              "match": "required"
-            }
-          ]
         },
-        "txt": {
-          "regex": [
-            {
-              "regex": "\\(scale (\\w+)%\\)",
-              "require": "11"
+        {
+            "name": "Work offsets machine upper-right",
+            "comment": "Work offset X=50, Y=75 on upper-right machine; verify offsets.",
+            "setup": "all",
+            "cnc": "op-1-defaults",
+            "validators": {
+                "lbrn": {
+                    "xpath": [
+                        {
+                            "query": "//v[@vx=\"50\"][@vy=\"75\"]",
+                            "match": "required"
+                        }
+                    ]
+                },
+                "svg": {
+                    "xpath": [
+                        {
+                            "query": "/svg:svg[@viewbox=\"0 0 578.268 483.78\"]",
+                            "match": "required"
+                        }
+                    ]
+                }
             },
-            {
-              "regex": "Z offset (\\w+), passes (\\w+), z-step (\\w+)",
-              "require": ["22", "33", "44"]
+            "properties": {
+                "work0200OffsetX": "50",
+                "work0300OffsetY": "75",
+                "machine0050Orientation": "MACHINE_ORIENTATION_UPPER_RIGHT"
             }
-          ]
-        }
-      },
-      "properties": {
-        "op0400PowerScale": "11",
-        "op0500ZOffset": "22",
-        "op0600Passes": "33",
-        "op0700ZStep": "44"
-      }
-    },
-    {
-      "name": "Group name",
-      "comment": "Set all layers to use same group name, verify they are correctly gathered into a group.",
-      "setup": "barebones",
-      "cnc": "op-4-cut-modes",
-      "validators": {
-        "lbrn": {
-          "xpath": [
-            {
-              "query": "/LightBurnProject/Shape[1][@Type=\"Group\"]/Children/Shape[1][@Type=\"Group\"]",
-              "match": "required"
-            }
-          ]
         },
-        "svg": {
-          "xpath": [
-            {
-              "query": "/svg:svg/svg:g/svg:g",
-              "match": "required"
-            }
-          ]
-        }
-      },
-      "properties": {
-        "op0800GroupName": "GROUP_NAME_TEST",
-        "laserpost0100Organization": "ORGANIZATION_BY_OPERATION"
-      }
-    },
-    {
-      "name": "Custom Cut XML",
-      "comment": "Custom cut setting XML; verify XML is used, and layers are merged with same XML.",
-      "setup": "barebones",
-      "cnc": "op-4-cut-modes",
-      "posts": ["laserpost-lightburn"],
-      "validators": {
-        "lbrn": {
-          "xpath": [
-            {
-              "query": "/LightBurnProject/CutSetting[2]/name[@Value=\"Stock outline\"]",
-              "match": "required"
+        {
+            "name": "Work offsets machine lower-left",
+            "comment": "Work offset X=50, Y=75 on lower-left machine; verify offsets.",
+            "setup": "all",
+            "cnc": "op-1-defaults",
+            "validators": {
+                "lbrn": {
+                    "xpath": [
+                        {
+                            "query": "//v[@vx=\"50\"][@vy=\"75\"]",
+                            "match": "required"
+                        }
+                    ]
+                },
+                "svg": {
+                    "xpath": [
+                        {
+                            "query": "/svg:svg[@viewbox=\"0 0 578.268 483.78\"]",
+                            "match": "required"
+                        }
+                    ]
+                }
             },
-            {
-              "query": "/LightBurnProject/CutSetting[1]/Test",
-              "match": "required"
+            "properties": {
+                "work0200OffsetX": "50",
+                "work0300OffsetY": "75",
+                "machine0050Orientation": "MACHINE_ORIENTATION_LOWER_LEFT"
             }
-          ]
+        },
+        {
+            "name": "Power overrides",
+            "comment": "Work offset X=50, Y=75 on lower-left machine; verify offsets.",
+            "setup": "all",
+            "cnc": "op-4-cut-modes",
+            "properties": {
+                "laserPower0100EtchMin": "81",
+                "laserPower0200EtchMax": "91",
+                "laserPower0300VaporizeMin": "82",
+                "laserPower0400VaporizeMax": "92",
+                "laserPower0500ThroughMin": "83",
+                "laserPower0600ThroughMax": "93"
+            }
+        },
+        {
+            "name": "Speed units mm/sec",
+            "comment": "Speed units set to mm/sec; verify units.",
+            "setup": "barebones",
+            "cnc": "op-1-defaults",
+            "validators": {
+                "lbrn": {
+                    "regex": [
+                        {
+                            "regex": "(mm/\\w+) using laser",
+                            "require": "mm/sec"
+                        }
+                    ]
+                },
+                "txt": {
+                    "regex": [
+                        {
+                            "regex": "(mm/\\w+) using laser",
+                            "require": "mm/sec"
+                        }
+                    ]
+                }
+            },
+            "properties": {
+                "machine0100SpeedUnits": "SPEED_UNITS_MMPS"
+            }
+        },
+        {
+            "name": "Speed units mm/min",
+            "comment": "Speed units set to mm/min; verify units.",
+            "setup": "barebones",
+            "cnc": "op-1-defaults",
+            "validators": {
+                "lbrn": {
+                    "regex": [
+                        {
+                            "regex": "(mm/\\w+) using laser",
+                            "require": "mm/min"
+                        }
+                    ]
+                },
+                "txt": {
+                    "regex": [
+                        {
+                            "regex": "(mm/\\w+) using laser",
+                            "require": "mm/min"
+                        }
+                    ]
+                }
+            },
+            "properties": {
+                "machine0100SpeedUnits": "SPEED_UNITS_MMPM"
+            }
+        },
+        {
+            "name": "Shuttle U",
+            "comment": "Set shuttle U on laser 1 to 50 and laser 2 to 100.",
+            "setup": "baseline",
+            "cnc": "op-4-cut-modes",
+            "posts": ["laserpost-lightburn"],
+            "validators": {
+                "lbrn": {
+                    "xpath": [
+                        {
+                            "query": "/LightBurnProject/CutSetting[1]/uOffset[@Value=\"100\"]",
+                            "match": "required"
+                        },
+                        {
+                            "query": "/LightBurnProject/CutSetting[2]/uOffset[@Value=\"50\"]",
+                            "match": "required"
+                        }
+                    ]
+                }
+            },
+            "properties": {
+                "machine0500ShuttleLaser1": "50",
+                "machine0600ShuttleLaser2": "100"
+            }
+        },
+        {
+            "name": "Layer mode inherit",
+            "comment": "Set operation layer mode to inherit, which is cut/line.",
+            "setup": "barebones",
+            "cnc": "op-1-defaults",
+            "validators": {
+                "lbrn": {
+                    "xpath": [
+                        {
+                            "query": "/LightBurnProject/CutSetting[1][@type=\"Cut\"]",
+                            "match": "required"
+                        }
+                    ]
+                },
+                "txt": {
+                    "regex": [
+                        {
+                            "regex": "Mode \"(\\w+)\"",
+                            "require": "cut"
+                        }
+                    ]
+                }
+            },
+            "properties": {
+                "op0100LayerMode": "LAYER_MODE_INHERIT",
+                "laserpost0500IncludeComments": "INCLUDE_COMMENTS_DEBUG"
+            }
+        },
+        {
+            "name": "Layer mode line",
+            "comment": "Set operation layer mode to cut.",
+            "setup": "barebones",
+            "cnc": "op-1-defaults",
+            "validators": {
+                "lbrn": {
+                    "xpath": [
+                        {
+                            "query": "/LightBurnProject/CutSetting[1][@type=\"Cut\"]",
+                            "match": "required"
+                        }
+                    ]
+                },
+                "txt": {
+                    "regex": [
+                        {
+                            "regex": "Mode \"(\\w+)\"",
+                            "require": "cut"
+                        }
+                    ]
+                }
+            },
+            "properties": {
+                "op0100LayerMode": "LAYER_MODE_LINE"
+            }
+        },
+        {
+            "name": "Layer mode fill",
+            "comment": "Set operation layer mode to fill.",
+            "setup": "barebones",
+            "cnc": "op-1-defaults",
+            "validators": {
+                "lbrn": {
+                    "xpath": [
+                        {
+                            "query": "/LightBurnProject/CutSetting[1][@type=\"Scan\"]",
+                            "match": "required"
+                        }
+                    ]
+                },
+                "txt": {
+                    "regex": [
+                        {
+                            "regex": "Mode \"(\\w+)\"",
+                            "require": "fill"
+                        }
+                    ]
+                }
+            },
+            "properties": {
+                "op0100LayerMode": "LAYER_MODE_FILL"
+            }
+        },
+        {
+            "name": "Layer mode offset fill",
+            "comment": "Set operation layer mode to offset fill.",
+            "setup": "barebones",
+            "cnc": "op-1-defaults",
+            "validators": {
+                "lbrn": {
+                    "xpath": [
+                        {
+                            "query": "/LightBurnProject/CutSetting[1][@type=\"Offset\"]",
+                            "match": "required"
+                        }
+                    ]
+                },
+                "txt": {
+                    "regex": [
+                        {
+                            "regex": "Mode \"(.+)\"",
+                            "require": "outline fill"
+                        }
+                    ]
+                }
+            },
+            "properties": {
+                "op0100LayerMode": "LAYER_MODE_OFFSET_FILL"
+            }
+        },
+        {
+            "name": "Air assist gas",
+            "comment": "Set air assist to inherit from assist gas.",
+            "setup": "barebones",
+            "cnc": "op-1-defaults",
+            "validators": {
+                "lbrn": {
+                    "xpath": [
+                        {
+                            "query": "/LightBurnProject/CutSetting[1]/runBlower[@Value=\"1\"]",
+                            "match": "required"
+                        }
+                    ]
+                },
+                "txt": {
+                    "regex": [
+                        {
+                            "regex": "air (\\w+)",
+                            "require": "on"
+                        }
+                    ]
+                }
+            },
+            "properties": {
+                "op0200UseAir": "USE_AIR_ASSIST_GAS"
+            }
+        },
+        {
+            "name": "Air assist off",
+            "comment": "Set air assist off.",
+            "setup": "barebones",
+            "cnc": "op-1-defaults",
+            "validators": {
+                "lbrn": {
+                    "xpath": [
+                        {
+                            "query": "/LightBurnProject/CutSetting[1]/runBlower[@Value=\"0\"]",
+                            "match": "required"
+                        }
+                    ]
+                },
+                "txt": {
+                    "regex": [
+                        {
+                            "regex": "air (\\w+)",
+                            "require": "off"
+                        }
+                    ]
+                }
+            },
+            "properties": {
+                "op0200UseAir": "USE_AIR_OFF"
+            }
+        },
+        {
+            "name": "Air assist on",
+            "comment": "Set air assist on.",
+            "setup": "barebones",
+            "cnc": "op-1-defaults",
+            "validators": {
+                "lbrn": {
+                    "xpath": [
+                        {
+                            "query": "/LightBurnProject/CutSetting[1]/runBlower[@Value=\"1\"]",
+                            "match": "required"
+                        }
+                    ]
+                },
+                "txt": {
+                    "regex": [
+                        {
+                            "regex": "air (\\w+)",
+                            "require": "on"
+                        }
+                    ]
+                }
+            },
+            "properties": {
+                "op0200UseAir": "USE_AIR_ON"
+            }
+        },
+        {
+            "name": "Laser enable tool",
+            "comment": "Set layer to use the default tool-specified laser.",
+            "setup": "barebones",
+            "cnc": "op-1-defaults",
+            "validators": {
+                "lbrn": {
+                    "xpath": [
+                        {
+                            "query": "/LightBurnProject/CutSetting[1]/enableLaser1[@Value=\"1\"]",
+                            "match": "required"
+                        },
+                        {
+                            "query": "/LightBurnProject/CutSetting[1]/enableLaser2[@Value=\"0\"]",
+                            "match": "required"
+                        }
+                    ]
+                },
+                "txt": {
+                    "regex": [
+                        {
+                            "regex": "using laser (\\w+)",
+                            "require": "1"
+                        }
+                    ]
+                }
+            },
+            "properties": {
+                "op0300LaserEnable": "LASER_ENABLE_TOOL"
+            }
+        },
+        {
+            "name": "Laser enable laser 1",
+            "comment": "Set layer to use laser 1.",
+            "setup": "barebones",
+            "cnc": "op-1-defaults",
+            "validators": {
+                "lbrn": {
+                    "xpath": [
+                        {
+                            "query": "/LightBurnProject/CutSetting[1]/enableLaser1[@Value=\"1\"]",
+                            "match": "required"
+                        },
+                        {
+                            "query": "/LightBurnProject/CutSetting[1]/enableLaser2[@Value=\"0\"]",
+                            "match": "required"
+                        }
+                    ]
+                },
+                "txt": {
+                    "regex": [
+                        {
+                            "regex": "using laser (\\w+)",
+                            "require": "1"
+                        }
+                    ]
+                }
+            },
+            "properties": {
+                "op0300LaserEnable": "LASER_ENABLE_1"
+            }
+        },
+        {
+            "name": "Laser enable laser 2",
+            "comment": "Set layer to use laser 2.",
+            "setup": "barebones",
+            "cnc": "op-1-defaults",
+            "validators": {
+                "lbrn": {
+                    "xpath": [
+                        {
+                            "query": "/LightBurnProject/CutSetting[1]/enableLaser1[@Value=\"0\"]",
+                            "match": "required"
+                        },
+                        {
+                            "query": "/LightBurnProject/CutSetting[1]/enableLaser2[@Value=\"1\"]",
+                            "match": "required"
+                        }
+                    ]
+                },
+                "txt": {
+                    "regex": [
+                        {
+                            "regex": "using laser (\\w+)",
+                            "require": "2"
+                        }
+                    ]
+                }
+            },
+            "properties": {
+                "op0300LaserEnable": "LASER_ENABLE_2"
+            }
+        },
+        {
+            "name": "Laser enable lasers off",
+            "comment": "Set layer to use no lasers.",
+            "setup": "barebones",
+            "cnc": "op-1-defaults",
+            "validators": {
+                "lbrn": {
+                    "xpath": [
+                        {
+                            "query": "/LightBurnProject/CutSetting[1]/doOutput[@Value=\"0\"]",
+                            "match": "required"
+                        }
+                    ]
+                },
+                "txt": {
+                    "regex": [
+                        {
+                            "regex": "Laser turned (\\w+)",
+                            "require": "off"
+                        }
+                    ]
+                }
+            },
+            "properties": {
+                "op0300LaserEnable": "LASER_ENABLE_OFF"
+            }
+        },
+        {
+            "name": "Laser enable laser both",
+            "comment": "Set layer to use both lasers.",
+            "setup": "barebones",
+            "cnc": "op-1-defaults",
+            "validators": {
+                "lbrn": {
+                    "xpath": [
+                        {
+                            "query": "/LightBurnProject/CutSetting[1]/enableLaser1[@Value=\"1\"]",
+                            "match": "required"
+                        },
+                        {
+                            "query": "/LightBurnProject/CutSetting[1]/enableLaser2[@Value=\"1\"]",
+                            "match": "required"
+                        }
+                    ]
+                },
+                "txt": {
+                    "regex": [
+                        {
+                            "regex": "using lasers (\\w+) and (\\w+)",
+                            "require": ["1", "2"]
+                        }
+                    ]
+                }
+            },
+            "properties": {
+                "op0300LaserEnable": "LASER_ENABLE_BOTH"
+            }
+        },
+        {
+            "name": "Layer settings",
+            "comment": "Tests for multiple layer settings (power scale=11, z-offset=22, passes=33 and z-step=44).",
+            "setup": "barebones",
+            "cnc": "op-1-defaults",
+            "validators": {
+                "lbrn": {
+                    "xpath": [
+                        {
+                            "query": "/LightBurnProject/CutSetting[1]/zOffset[@Value=\"22\"]",
+                            "match": "required"
+                        },
+                        {
+                            "query": "/LightBurnProject/CutSetting[1]/numPasses[@Value=\"33\"]",
+                            "match": "required"
+                        },
+                        {
+                            "query": "/LightBurnProject/CutSetting[1]/zPerPass[@Value=\"44\"]",
+                            "match": "required"
+                        },
+                        {
+                            "query": "/LightBurnProject/Shape[1]/Children/Shape[@PowerScale=\"11\"]",
+                            "match": "required"
+                        }
+                    ]
+                },
+                "txt": {
+                    "regex": [
+                        {
+                            "regex": "\\(scale (\\w+)%\\)",
+                            "require": "11"
+                        },
+                        {
+                            "regex": "Z offset (\\w+), passes (\\w+), z-step (\\w+)",
+                            "require": ["22", "33", "44"]
+                        }
+                    ]
+                }
+            },
+            "properties": {
+                "op0400PowerScale": "11",
+                "op0500ZOffset": "22",
+                "op0600Passes": "33",
+                "op0700ZStep": "44"
+            }
+        },
+        {
+            "name": "Group name",
+            "comment": "Set all layers to use same group name, verify they are correctly gathered into a group.",
+            "setup": "barebones",
+            "cnc": "op-4-cut-modes",
+            "validators": {
+                "lbrn": {
+                    "xpath": [
+                        {
+                            "query": "/LightBurnProject/Shape[1][@Type=\"Group\"]/Children/Shape[1][@Type=\"Group\"]",
+                            "match": "required"
+                        }
+                    ]
+                },
+                "svg": {
+                    "xpath": [
+                        {
+                            "query": "/svg:svg/svg:g/svg:g",
+                            "match": "required"
+                        }
+                    ]
+                }
+            },
+            "properties": {
+                "op0800GroupName": "GROUP_NAME_TEST",
+                "laserpost0100Organization": "ORGANIZATION_BY_OPERATION"
+            }
+        },
+        {
+            "name": "Custom Cut XML",
+            "comment": "Custom cut setting XML; verify XML is used, and layers are merged with same XML.",
+            "setup": "barebones",
+            "cnc": "op-4-cut-modes",
+            "posts": ["laserpost-lightburn"],
+            "validators": {
+                "lbrn": {
+                    "xpath": [
+                        {
+                            "query": "/LightBurnProject/CutSetting[2]/name[@Value=\"Stock outline\"]",
+                            "match": "required"
+                        },
+                        {
+                            "query": "/LightBurnProject/CutSetting[1]/Test",
+                            "match": "required"
+                        }
+                    ]
+                }
+            },
+            "properties": {
+                "op0900CustomCutSettingXML": "CUSTOM_CUT_SETTING_XML_TEST"
+            }
+        },
+        {
+            "name": "LB Mat Lib None One Op",
+            "comment": "Lightburn material selection one op",
+            "setup": "all",
+            "cnc": "op-1-defaults",
+            "posts": ["laserpost-lightburn"],
+            "properties": {
+                "op0150LightburnMaterial": "LIBRARY_NONE"
+            },
+            "validators": {
+                "lbrn": {
+                    "xpath": [
+                        {
+                            "query": "/LightBurnProject/CutSetting/LinkPath",
+                            "match": "forbidden"
+                        }
+                    ]
+                }
+            }
+        },
+        {
+            "name": "LB Mat Lib LIBRARY_MATERIAL_TEST One Op",
+            "comment": "Lightburn material selection one op",
+            "setup": "all",
+            "cnc": "op-1-defaults",
+            "posts": ["laserpost-lightburn"],
+            "properties": {
+                "op0150LightburnMaterial": "LIBRARY_MATERIAL_TEST"
+            },
+            "validators": {
+                "lbrn": {
+                    "xpath": [
+                        {
+                            "query": "/LightBurnProject/CutSetting[1]/LinkPath[@Value=\"acrylic/1.5000/cut\"]",
+                            "match": "required"
+                        },
+                        {
+                          "query": "/LightBurnProject/CutSetting[2]/LinkPath",
+                          "match": "forbidden"
+                        }
+                    ]
+                }
+            }
+        },
+        {
+            "name": "LB Mat Lib LIBRARY_MATERIAL_TEST Four Op",
+            "comment": "Lightburn material selection one op",
+            "setup": "all",
+            "cnc": "op-4-cut-modes",
+            "posts": ["laserpost-lightburn"],
+            "properties": {
+                "op0150LightburnMaterial": "LIBRARY_MATERIAL_TEST"
+            },
+            "validators": {
+                "lbrn": {
+                    "xpath": [
+                        {
+                            "query": "/LightBurnProject/CutSetting[1]/LinkPath[@Value=\"acrylic/1.5000/cut\"]",
+                            "match": "required"
+                        },
+                        {
+                            "query": "/LightBurnProject/CutSetting[2]/LinkPath[@Value=\"acrylic/1.5000/cut\"]",
+                            "match": "required"
+                        },
+                        {
+                            "query": "/LightBurnProject/CutSetting[3]/LinkPath[@Value=\"acrylic/1.5000/cut\"]",
+                            "match": "required"
+                        },
+                        {
+                          "query": "/LightBurnProject/CutSetting[4]/LinkPath",
+                          "match": "forbidden"
+                        }
+                  ]
+                }
+            }
         }
-      },
-      "properties": {
-        "op0900CustomCutSettingXML": "CUSTOM_CUT_SETTING_XML_TEST"
-      }
-    }
-  ]
+    ]
 }

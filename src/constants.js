@@ -62,6 +62,7 @@ const LAYER_MODE_DEFAULT = LAYER_MODE_INHERIT;
 // define enum for Lightburn material library selection
 const LIBRARY_NONE = 'none';
 const LIBRARY_DEFAULT = LIBRARY_NONE;
+const LIBRARY_MATERIAL_TEST = 'acrylic/1.5000/cut'
 
 // #endif
 // define enum for speed units
