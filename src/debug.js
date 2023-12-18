@@ -316,12 +316,12 @@ function dumpProject() {
  */
 function dumpToolTable() {
   // add comments for tool information
-  var tools = getToolTable();
+  let tools = getToolTable();
   if (tools.getNumberOfTools() > 0) {
     debugLog('', {});
     debugLog(localize('Tools'));
-    for (var toolIndex = 0; toolIndex < tools.getNumberOfTools(); ++toolIndex) {
-      var tool = tools.getTool(toolIndex);
+    for (let toolIndex = 0; toolIndex < tools.getNumberOfTools(); ++toolIndex) {
+      let tool = tools.getTool(toolIndex);
       const useAir =
         tool.assistGas.toLowerCase() != localize('none') &&
         tool.assistGas.toLowerCase() != localize('off') &&

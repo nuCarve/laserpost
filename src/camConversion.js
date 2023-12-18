@@ -113,6 +113,7 @@ function createLayers() {
         zStep: groupOperation.zStep,
         kerf: groupOperation.kerf,
         // #if LBRN
+        linkPath: groupOperation.linkPath,
         shuttleLaser1: groupOperation.shuttleLaser1,
         shuttleLaser2: groupOperation.shuttleLaser2,
         // #endif
@@ -1100,6 +1101,9 @@ function getCutSetting(cutSettingSpecs) {
     else {
       // standard properties - see if we match
       matchFound =
+        // #if LBRN
+        cutSetting.linkPath == cutSettingSpecs.linkPath &&
+        // #endif
         cutSetting.minPower == cutSettingSpecs.minPower &&
         cutSetting.maxPower == cutSettingSpecs.maxPower &&
         cutSetting.speed == cutSettingSpecs.speed &&

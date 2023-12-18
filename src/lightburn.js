@@ -6,11 +6,119 @@
  *
  *************************************************************************************/
 
+// #if LBRN
+/**
+ * Global code that executes upon post load.  Triggers the loading of the lightburn material
+ * library into the properties (for the UI).
+ */
+loadLightburnLibrary();
+
+/**
+ * Loads the lightburn material library, if one is being used.  Uses state (the XML file in the post
+ * directory) to get the lightburn path because it isn't available otherwise during load, which is
+ * the only time we can adjust properties in the UI.  This means when the library path changes, the
+ * post must be run once, discarded, and then settings can be adjusted using the material library.
+ */
+function loadLightburnLibrary() {
+  // load the state file so we can access properties
+  stateLoad();
+
+  // do we have a lightburn library path?
+  let enumValues = properties['op0150LightburnMaterial'].values;
+  if (activeState.lightburnLibraryPath != '') {
+    // load the library 
+    const library = loadXMLFile(activeState.lightburnLibraryPath);
+    if (library) {
+      if (library.LightBurnLibrary) {
+        // normalize the Material to an array
+        if (!library.LightBurnLibrary.Material)
+          library.LightBurnLibrary.Material = [];
+        if (!Array.isArray(library.LightBurnLibrary.Material))
+          library.LightBurnLibrary.Material = [library.LightBurnLibrary.Material];
+
+          // loop through all items in Material, processing each Entry
+        for (let materialIndex = 0; materialIndex < library.LightBurnLibrary.Material.length; ++materialIndex) {
+          const material = library.LightBurnLibrary.Material[materialIndex];
+
+          // normalize the Entry to an array
+          if (!material.Entry)
+            material.Entry = [];
+          if (!Array.isArray(material.Entry))
+            material.Entry = [material.Entry];
+
+          // sort the material.Entry by material.Entry.Thickness
+          material.Entry.sort(function (a, b) {
+            const thicknessA = a.Thickness ? a.Thickness : 0;
+            const thicknessB = b.Thickness ? b.Thickness : 0;
+            return thicknessA - thicknessB;
+          });
+          
+          // loop through all entries in the material's Entry, adding them to the enum
+          for (let entryIndex = 0; entryIndex < material.Entry.length; ++entryIndex) {
+            const entry = material.Entry[entryIndex];
+            let title = material.name + ': ' + entry.Desc;
+            if (entry.Thickness < 0)
+              title += ' (' + localize('no thickness') + ')'
+            else {
+              let thickness = unit == MM ? parseFloat(entry.Thickness) : (parseFloat(entry.Thickness) / 25.4);
+              thickness = parseFloat(Number(thickness).toFixed(2));
+              title += ' (' + thickness + 'mm)'
+            }
+
+            // make sure all expected properties exist
+            if (!entry.CutSetting || !entry.CutSetting.LinkPath || !entry.CutSetting.LinkPath.Value)
+              continue;
+
+            // set the ID to the link path
+            const id = material.name + '/' + entry.Thickness + '/' + entry.Desc;
+
+            // add to the property dropdown enum
+            enumValues.push({ title: title, id: id})
+          }
+        }
+      }
+    }
+  }
+}
+
+/**
+ * Checks if the lightburn library path is valid, and if it has recently changed, to help provide warnings
+ * to the user to get it working.
+ */
+function checkLightburnLibrary() {
+  if (activeState.lightburnLibraryPath != getProperty('machine0070LightburnLibrary', ''))
+    showWarning(
+      localize('WARNING: Lightburn library path has changed.  You must run the post again for it to take affect.'),
+      {});
+  else if (activeState.lightburnLibraryPath != '' && !FileSystem.isFile(activeState.lightburnLibraryPath)) {
+      showWarning(
+          localize('WARNING: Library file "{path}" does not exist.  Check path and and ensure it has the library filename with extension.'),
+          { path: activeState.lightburnLibraryPath}
+      );
+  }
+}
+
+/**
+ * Saves the lightburn material library path into the state file.  This allows us to access the path on
+ * future runs (see loadLightburnLibrary) during the early load phase so we can adjust the UI.
+ */
+function onProjectComplete() {
+  activeState.lightburnLibraryPath = getProperty(
+    'machine0070LightburnLibrary',
+    ''
+  );
+}
+
+// #endif
 /**
  * Adjust the coordinate translation to match the users preferences for LightBurn
  * machine origin
  */
 function onTranslateSetup() {
+
+  // help by providing warnings about the lightburn library path, if it changed or doesn't exist
+  checkLightburnLibrary();
+
   let orientation = getProperty(
     'machine0050Orientation',
     MACHINE_ORIENTATION_DEFAULT
@@ -39,7 +147,7 @@ function onTranslateSetup() {
 
   // this is a rotate 180 degrees
   // project.translate.x = !project.translate.x;
-  // project.translate.y = !project.translate.y;
+  // project.translate.y = !project.translate.y;    
 }
 
 /**
@@ -294,10 +402,10 @@ function writeCommentLine(template, parameters) {
 }
 
 /**
- * Adds the <CutSetting> tags for all LightBurn layers as well as update notes to describe
- * the
+ * Generates notes to describe the cut settings for the layer(s)
  *
  * @param layer Layer (cutSetting) being generated (-1 for all layers)
+ * @returns Array of strings containing the notes
  */
 function generateLayerNotes(layer) {
   const result = [];
@@ -349,14 +457,20 @@ function generateLayerNotes(layer) {
           break;
       }
 
+      // get the linkPath to the material library, if any
+      let linkPath = '';
+      if (cutSetting.linkPath && cutSetting.linkPath != 'none')
+        linkPath = format(localize(' using material "{path}"'), { path: cutSetting.linkPath });
+
       if (cutSetting.laserEnable !== LASER_ENABLE_OFF) {
         result.push(
           format(
             '    ' +
               localize(
-                'Fill "{mode}" at power {min}-{max}% (scale {scale}%) and {speed} using {lasers} (air {air}, Z offset {zOffset}, passes {passes}, z-step {zStep})'
+                'Fill "{mode}"{linkPath} at power {min}-{max}% (scale {scale}%) and {speed} using {lasers} (air {air}, Z offset {zOffset}, passes {passes}, z-step {zStep})'
               ),
             {
+              linkPath: linkPath,
               min: cutSetting.minPower,
               max: cutSetting.maxPower,
               speed: speedToUnits(cutSetting.speed),
@@ -380,8 +494,7 @@ function generateLayerNotes(layer) {
 }
 
 /**
- * Adds the <CutSetting> tags for all LightBurn layers as well as update notes to describe
- * the layers
+ * Adds the <CutSetting> tags for all LightBurn layers 
  *
  * @param layer Layer (cutSetting) being generated (-1 for all layers)
  */
@@ -419,6 +532,10 @@ function writeCutSettings(layer) {
       writeXML('zOffset', { Value: cutSetting.zOffset });
       writeXML('numPasses', { Value: cutSetting.passes });
       writeXML('zPerPass', { Value: cutSetting.zStep });
+
+      // use the lightburn material library if selected
+      if (cutSetting.linkPath && cutSetting.linkPath != 'none')
+        writeXML('LinkPath', { Value: cutSetting.linkPath });
 
       // write the settings for select select and output enable/disable
       switch (cutSetting.laserEnable) {

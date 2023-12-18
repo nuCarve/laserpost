@@ -245,6 +245,15 @@ properties = {
     value: MACHINE_ORIENTATION_DEFAULT,
     scope: 'machine',
   },
+  machine0070LightburnLibrary: {
+    title: localize('Lightburn library'),
+    description: localize(
+      'Optional: Path to a Lightburn material library to use for material selection, including the library file name.'
+    ),
+    type: 'string',
+    value: '',
+    scope: 'machine',
+  },
   // #endif
   machine0100SpeedUnits: {
     title: localize('Speed units'),
@@ -329,6 +338,21 @@ properties = {
     scope: 'operation',
     enabled: 'cutting',
   },
+  // #if LBRN
+  op0150LightburnMaterial: {
+    title: localize('Lightburn library material'),
+    description: localize(
+        'Optional: Material name from the Lightburn library to use for this layer.  If specified, the material settings will be used from the library if it exists '+
+        'when the file is imported into Lightburn.  If it does not exist, the tool settings will be used.'),
+    type: 'enum',
+    values: [
+        { title: localize('None'), id: LIBRARY_NONE },
+    ], // this is populated in lightburn.js upon loading the library
+    value: LIBRARY_DEFAULT,
+    scope: 'operation',
+    enabled: 'cutting',
+  },
+  // #endif
   op0200UseAir: {
     title: localize('Air assist'),
     description: localize(
@@ -445,3 +469,4 @@ properties = {
     visible: false,
   }
 };
+

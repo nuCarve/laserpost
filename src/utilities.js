@@ -70,7 +70,7 @@ function debugLog(template, parameters, level) {
 
   if (text == '\n' || text == '') writeCommentLine('');
   else {
-    var commentPrefix = '';
+    let commentPrefix = '';
     if (level == COMMENT_DEBUG) commentPrefix = 'DEBUG: ';
     else if (level == COMMENT_INSANE) commentPrefix = 'INSANE: ';
     writeCommentLine(commentPrefix + text);

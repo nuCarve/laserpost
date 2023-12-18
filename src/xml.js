@@ -90,10 +90,10 @@ function writeXMLClose() {
 }
 
 /**
-      Write a single line to the file with multiple arguments.
-    
-      @param arguments Variable number of arguments to write to the file on a single line
-    */
+  Write a single line to the file with multiple arguments.
+
+  @param arguments Variable number of arguments to write to the file on a single line
+*/
 function writeBlock() {
   const spaces = '                                        ';
   write(spaces.slice(0, xmlStack.length * 2));
@@ -125,6 +125,36 @@ function encodeXML(string) {
 }
 
 /**
+ * Loads an XML file, decodes it, and returns the resulting object.  If the file does not exist, 
+ * undefined is returned.
+ * 
+ * @param string filename (with path) to load
+ * @returns object with decoded XML, or undefined if no file (or parsing problem)
+ */
+function loadXMLFile(filename) {
+    let xmlFile;
+    // set up path to the state file, and see if it exists
+    try {
+      xmlFile = new TextFile(filename, false, 'ansi');
+    } catch (ex) {
+      return undefined;
+    }
+  
+    // bring in all lines from the file
+    let xmlString = '';
+    try {
+      // load all lines.  The readln method throws error at EOF, so we just read until we get an error
+      while (true) {
+        xmlString += xmlFile.readln();
+      }
+    } catch (ex) {}
+    xmlFile.close();
+  
+    return parseXML(xmlString);
+  }
+  
+
+/**
  * Helper method to decode a string encoded for XML
  *
  * @param string String to decode
@@ -145,7 +175,8 @@ function decodeXML(string) {
  * Simple XML parser
  *
  * This limited parser handles nested xml tags with attributes.  It has support
- * only for non-duplicate tag names with attributes and content within a tag.
+ * only for tag names with attributes and content within a tag.  If a tag name
+ * is used multiple times at the same object level, it is converted to an array.
  * There is no handling of special character codes for xml.  Very limited
  * detection of malformed XML.  Results in a nested object where the name of the
  * tag is the name of the member of the object, and the value of the member is
@@ -193,7 +224,17 @@ function parseXML(xml) {
 
     // create a new object for this tag
     let currentTagObject = {};
-    objStack[objStack.length - 1][tagName] = currentTagObject;
+    // check if tagName is already a member of objStack
+    if (objStack[objStack.length - 1][tagName] !== undefined) {
+        // if it is, make it an array if it isn't already
+        if (!Array.isArray(objStack[objStack.length - 1][tagName])) {
+            objStack[objStack.length - 1][tagName] = [objStack[objStack.length - 1][tagName]];
+        }
+        // and push the new object onto the array
+        objStack[objStack.length - 1][tagName].push(currentTagObject);
+    } else
+        // otherwise, just add it as a member
+        objStack[objStack.length - 1][tagName] = currentTagObject;
     objStack.push(currentTagObject);
 
     // parse the attributes
@@ -215,7 +256,7 @@ function parseXML(xml) {
     else {
       let nextTagPos = xml.indexOf('<', endTagPos + 1);
       if (nextTagPos > endTagPos + 1) {
-        var content = xml.substring(endTagPos + 1, nextTagPos).trim();
+        let content = xml.substring(endTagPos + 1, nextTagPos).trim();
         if (content.length) currentTagObject['content'] = decodeXML(content);
       }
     }

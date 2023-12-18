@@ -110,8 +110,8 @@ function generateProjectNotes(layerIndex) {
   }
 
   // dump machine configuration
-  var vendor = machineConfiguration.getVendor();
-  var model = machineConfiguration.getModel();
+  let vendor = machineConfiguration.getVendor();
+  let model = machineConfiguration.getModel();
 
   appendProjectNote(localize('Machine'));
   if (vendor) {
@@ -122,6 +122,28 @@ function generateProjectNotes(layerIndex) {
   }
 
   appendProjectNote('');
+
+  // #if LBRN
+  // if a Lightburn library is in use, include the path info
+  let lightburnLibraryPath = getProperty(
+    'machine0070LightburnLibrary',
+    ''
+  );
+  if (lightburnLibraryPath) {
+    appendProjectNote(localize('LightBurn library'));
+    appendProjectNote('  Path: ' + localize('Path: {path}'), {
+      path: lightburnLibraryPath,
+    });
+    if (!FileSystem.isFile(lightburnLibraryPath)) {
+        appendProjectNote(
+            '  ' + localize('WARNING: Library file does not exist.  Check path and and ensure it has the library filename with extension.'),
+            undefined,
+            true
+        );
+    }
+    appendProjectNote('');
+  }
+  // #endif
 
   // if the user did any laser overrides, include those in the comments
   let laserPowerEtchMin = getProperty(
@@ -181,8 +203,8 @@ function generateProjectNotes(layerIndex) {
       );
   }
 
-  // if the user is using a mirror shuttle, output that to comments
   // #if LBRN
+  // if the user is using a mirror shuttle, output that to comments
   let shuttleLaser1 = getProperty(
     'machine0500ShuttleLaser1',
     SHUTTLE_LASER_1_DEFAULT
@@ -220,7 +242,7 @@ function onSection() {
   dumpOperationProperties();
 
   // add a comment that contains the operation name
-  var operationName = getParameter('operation-comment');
+  let operationName = getParameter('operation-comment');
   if (!operationName)
     // it appears this can never happen, but it is a safety valve just in case...
     operationName = 'unknown';
@@ -237,8 +259,8 @@ function onSection() {
   // laser power is defined on the tool (cut power is max power, pierce power is min power), but
   // can also be overridden in post properties.  Determine the min/max power and the source of
   // that power selection (for logging purposes).
-  var minPower = 0;
-  var maxPower = 0;
+  let minPower = 0;
+  let maxPower = 0;
   let powerSource;
 
   switch (currentSection.getJetMode()) {
@@ -285,8 +307,8 @@ function onSection() {
       return;
   }
 
-  // get values for the "U" when using a mirror shuttle
   // #if LBRN
+  // get values for the "U" when using a mirror shuttle
   let shuttleLaser1 = getProperty(
     'machine0500ShuttleLaser1',
     SHUTTLE_LASER_1_DEFAULT
@@ -302,6 +324,9 @@ function onSection() {
     shuttleLaser1Value = shuttleLaser1 == '' ? '0' : shuttleLaser1;
     shuttleLaser2Value = shuttleLaser2 == '' ? '0' : shuttleLaser2;
   }
+
+  // get lightburn material link path
+  let linkPath = getProperty('op0150LightburnMaterial', '');
   // #endif
 
   // if the user did not specify an override on max power, use the tools cut (max) and/or pierce (min) power
@@ -441,6 +466,7 @@ function onSection() {
       zStep: zStep,
       kerf: unit == MM ? tool.getKerfWidth() : tool.getKerfWidth() * 25.4,
       // #if LBRN
+      linkPath: linkPath,
       shuttleLaser1: shuttleLaser1Value,
       shuttleLaser2: shuttleLaser2Value,
       // #endif

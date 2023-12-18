@@ -58,6 +58,12 @@ const LAYER_MODE_FILL = 'fill';
 const LAYER_MODE_OFFSET_FILL = 'offsetFill';
 const LAYER_MODE_DEFAULT = LAYER_MODE_INHERIT;
 
+// #if LBRN
+// define enum for Lightburn material library selection
+const LIBRARY_NONE = 'none';
+const LIBRARY_DEFAULT = LIBRARY_NONE;
+
+// #endif
 // define enum for speed units
 const SPEED_UNITS_MMPS = 'mmps';
 const SPEED_UNITS_MMPM = 'mmpm';

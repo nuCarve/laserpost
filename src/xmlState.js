@@ -17,30 +17,13 @@
  * with <memberName>value</memberName>
  */
 function stateLoad() {
-  let xmlFile;
-  // set up path to the state file, and see if it exists
-  try {
-    xmlFile = new TextFile(getStatePath(), false, 'ansi');
-  } catch (ex) {
-    // no file, so set an empty state
-    origState = {};
-    activeState = {};
-    return;
-  }
+  // load the XML file
+  const xmlObject = loadXMLFile(getStatePath());
 
-  // bring in all lines from the file
-  let xmlString = '';
-  try {
-    // load all lines.  The readln method throws error at EOF, so we just read until we get an error
-    while (true) {
-      xmlString += xmlFile.readln();
-    }
-  } catch (ex) {}
-  xmlFile.close();
-
-  const xmlObject = parseXML(xmlString);
+  // did we load it, and does it have the required 'laserpost' section?
   if (!xmlObject || !xmlObject.laserpost) origState = {};
   else {
+    // duplicate the state so we can compare it later
     origState = xmlObject.laserpost;
     for (key in origState)
       if (origState[key].content) origState[key] = origState[key].content;
