@@ -233,7 +233,9 @@ properties = {
   machine0050Orientation: {
     title: localize('Machine orientation'),
     description: localize(
-      'Orientation of the home position on the physical laser machine.  Must match the LightBurn machine orientation.'
+      'Orientation of the home position on the physical laser machine.' + 
+      '<br><br>' +
+      '<i>IMPORTANT</i>: Must match the Lightburn machine orientation (in Lightburn, Edit / Device Settings / Origin radio buttons).'
     ),
     type: 'enum',
     values: [
@@ -246,12 +248,31 @@ properties = {
     scope: 'machine',
   },
   machine0070LightburnLibrary: {
-    title: localize('Lightburn library'),
+    title: localize('Lightburn library (run post to apply)'),
     description: localize(
-      'Optional: Path to a Lightburn material library to use for material selection, including the library file name.'
+      'Optional: Path to a Lightburn material library to use for material selection, including the library file name.' +
+      '<br><br>' +
+      '<i>IMPORTANT</i>: When changed, you must run the post once to allow the processor to apply the changes.  This is because ' +
+      'the post is cached and the code to change the properties can only run when a post is loaded.'
     ),
     type: 'string',
     value: '',
+    scope: 'machine',
+  },
+  machine0080LightburnLibraryUnits: {
+    title: localize('Lightburn library units (run post to apply)'),
+    description: localize(
+      'When using a Lightburn material library, specifies the units thickness should be displayed in.  Does not affect generated files.' +
+      '<br><br>' +
+      '<i>IMPORTANT</i>: When changed, you must run the post once to allow the processor to apply the changes.  This is because ' +
+      'the post is cached and the code to change the properties can only run when a post is loaded.'
+    ),
+    type: 'enum',
+    values: [
+        { title: localize('mm'), id: LIGHTBURN_LIBRARY_UNITS_MM },
+        { title: localize('in'), id: LIGHTBURN_LIBRARY_UNITS_INCH },
+    ],
+    value: LIGHTBURN_LIBRARY_UNITS_DEFAULT,
     scope: 'machine',
   },
   // #endif
@@ -325,7 +346,7 @@ properties = {
   op0100LayerMode: {
     title: localize('Layer mode'),
     description: localize(
-      'Selects the layer mode for the layer (Use cutting mode, Line, Fill or Offset Fill).  Use cutting mode will set to Line for Through, and Fill for etch.'
+      'Selects the layer mode for the layer ("Use cutting mode", "Line", "Fill" or "Offset Fill").  "Use cutting mode" will set to "Line" for through, and "Fill" for etch.'
     ),
     type: 'enum',
     values: [
@@ -342,8 +363,9 @@ properties = {
   op0150LightburnMaterial: {
     title: localize('Lightburn library material'),
     description: localize(
-        'Optional: Material name from the Lightburn library to use for this layer.  If specified, the material settings will be used from the library if it exists '+
-        'when the file is imported into Lightburn.  If it does not exist, the tool settings will be used.'),
+        'Material setting from a Lightburn material library to use for this layer.' + 
+        '<br><br>' +
+        'Settings to adjust the library path and units are found in the Machine\'s post properties.'),
     type: 'enum',
     values: [
         { title: localize('None'), id: LIBRARY_NONE },
@@ -356,8 +378,12 @@ properties = {
   op0200UseAir: {
     title: localize('Air assist'),
     description: localize(
-      'Sets if the layer uses air.  "Off" / "On" always set the air to the specified state, "Tool Assist Gas" will set the air off when ' +
-        'the tools "Cutting Data" (section "Process inputs") property "Assist gas" is "None" (or "off" or blank) and turn the air on for any other value.'
+      'Sets if the layer uses air.' +
+      '<br><br>' +
+      '"Off" / "On" always set the air to the specified state.  "Tool Assist Gas" will set the air based on the selected tool:' +
+      '<ul><li>Air off: Assist gas "None", "off", or blank)</li>' +
+      '<li>Air on: Assist gas "Air", "on", or any non-off value</li>' +
+      '<ul>'
     ),
     type: 'enum',
     values: [
@@ -372,7 +398,7 @@ properties = {
   op0300LaserEnable: {
     title: localize('Laser selection'),
     description: localize(
-      'Controls if the layer should be enabled and using which laser(s) (for dual laser machines).'
+      'For machines with dual laser heads, controls which laser(s) to use for the operation.'
     ),
     type: 'enum',
     values: [
@@ -400,7 +426,7 @@ properties = {
   op0500ZOffset: {
     title: localize('Z-offset (mm)'),
     description: localize(
-      'Amount to offset Z into the material (or out of it) at the start of cutting.  Useful for deep cutting or defocusing.'
+      'Amount to offset Z into the material (or out of it) at the start of cutting.'
     ),
     type: 'number',
     value: Z_OFFSET_DEFAULT,
@@ -439,8 +465,8 @@ properties = {
   op0900CustomCutSettingXML: {
     title: localize('Custom CutSetting (XML)'),
     description: localize(
-      'For complex LightBurn cut settings (such as using sub-layers or advanced options) you can paste the <CutSettings> section of the XML from a template ' +
-        'LightBurn file (it does not matter if it is from lbrn or lbrn2).  Include everything from <CutSettings> through </CutSettings> (including those tags).'
+      'For complex LightBurn cut settings (such as using sub-layers or advanced options) you can paste the \<CutSettings> section of the XML from a template ' +
+        'LightBurn file.  Include everything from \<CutSettings> through \</CutSettings> (including those tags).'
     ),
     type: 'string',
     value: CUSTOM_CUT_SETTING_XML_DEFAULT,

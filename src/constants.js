@@ -64,6 +64,11 @@ const LIBRARY_NONE = 'none';
 const LIBRARY_DEFAULT = LIBRARY_NONE;
 const LIBRARY_MATERIAL_TEST = 'acrylic/1.5000/cut'
 
+// define enum for Lightburn material library units
+const LIGHTBURN_LIBRARY_UNITS_MM = 'mm';
+const LIGHTBURN_LIBRARY_UNITS_INCH = 'in';
+const LIGHTBURN_LIBRARY_UNITS_DEFAULT = LIGHTBURN_LIBRARY_UNITS_MM;
+
 // #endif
 // define enum for speed units
 const SPEED_UNITS_MMPS = 'mmps';

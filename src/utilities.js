@@ -130,3 +130,38 @@ function getSectionProperty(propertyName, defaultValue) {
   if (currentSection.getProperty(propertyName)) return currentSection.getProperty(propertyName);
   return defaultValue;
 }
+
+/**
+ * Autodesk caches the post code and does not reload it when the user changes settings or runs the post
+ * again. This presents a problem for the load-time operations to make changes at runtime
+ * (properties are only available during post execution and not during UI operation).  However, if the
+ * source file is touched (time stamp changes), the post will be reloaded.  
+ * 
+ * This function will read the source file and write it back again, thereby causing the post to be 
+ * reloaded automatically.
+ */
+function requestPostReload() {
+  try {
+    // load the source into an array of lines
+    const lines = [];
+    const readFile = new TextFile(getConfigurationPath(), false, 'ansi');
+    try {
+      // no end of file detection, so we read until we get an exception
+      while (true)
+        lines.push(readFile.readln());
+    } catch (ex) {}
+    readFile.close();
+  
+    // write the source back to the file
+    try {
+      const writeFile = new TextFile(getConfigurationPath(), true, 'ansi');
+      for (let i = 0; i < lines.length; i++) 
+        writeFile.write(lines[i] + '\n');
+    } finally {
+      writeFile.close();
+    }
+  } catch (ex) {
+    showWarning(localize('Unable to reload post-processor; please exit and restart the application (e.g. Fusion 360).  (error {error}'),
+      { error: ex.message });
+  }
+}

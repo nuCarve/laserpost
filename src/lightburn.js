@@ -30,6 +30,9 @@ function loadLightburnLibrary() {
     const library = loadXMLFile(activeState.lightburnLibraryPath);
     if (library) {
       if (library.LightBurnLibrary) {
+        // get units for the Lightburn library
+        const libraryUnits = activeState.lightburnLibraryUnits ? activeState.lightburnLibraryUnits : LIGHTBURN_LIBRARY_UNITS_DEFAULT;
+
         // normalize the Material to an array
         if (!library.LightBurnLibrary.Material)
           library.LightBurnLibrary.Material = [];
@@ -60,9 +63,9 @@ function loadLightburnLibrary() {
             if (entry.Thickness < 0)
               title += ' (' + localize('no thickness') + ')'
             else {
-              let thickness = unit == MM ? parseFloat(entry.Thickness) : (parseFloat(entry.Thickness) / 25.4);
+              let thickness = libraryUnits == 'mm' ? parseFloat(entry.Thickness) : (parseFloat(entry.Thickness) / 25.4);
               thickness = parseFloat(Number(thickness).toFixed(2));
-              title += ' (' + thickness + 'mm)'
+              title += ' (' + thickness + (libraryUnits == 'mm' ? localize('mm') : localize('in')) + ')';
             }
 
             // make sure all expected properties exist
@@ -82,16 +85,23 @@ function loadLightburnLibrary() {
 }
 
 /**
- * Checks if the lightburn library path is valid, and if it has recently changed, to help provide warnings
- * to the user to get it working.
+ * Checks the lightburn settings and provides warnings if they have changed or if lightburn library
+ * is missing.  Also "touches" the post source file to force a reload of the post, which will refresh
+ * the properties.
  */
 function checkLightburnLibrary() {
   // skip if doing automated testing
   if (getProperty('automatedTesting', false) == false) {
-    if (activeState.lightburnLibraryPath != getProperty('machine0070LightburnLibrary', ''))
+    if (activeState.lightburnLibraryPath != getProperty('machine0070LightburnLibrary', '') ||
+    activeState.lightburnLibraryUnits != getProperty('machine0080LightburnLibraryUnits', LIGHTBURN_LIBRARY_UNITS_DEFAULT)) {
+      // settings have changed, which means we need to cause this post to be reloaded so the
+      // properties can be refreshed.      
       showWarning(
-        localize('WARNING: Lightburn library path has changed.  You must run the post again for it to take affect.'),
-        {});
+        localize('WARNING: Lightburn material library setting(s) have changed.  If changes do not appear in post properties, it means ' +
+        'the post was not automatically reloaded.  If this occurs, exit and restart the application (e.g. Fusion 360).'));
+      ensureSecurityRights();
+      requestPostReload();
+    }
     else if (activeState.lightburnLibraryPath != '' && !FileSystem.isFile(activeState.lightburnLibraryPath)) {
         showWarning(
             localize('WARNING: Library file "{path}" does not exist.  Check path and and ensure it has the library filename with extension.'),
@@ -102,14 +112,29 @@ function checkLightburnLibrary() {
 }
 
 /**
- * Saves the lightburn material library path into the state file.  This allows us to access the path on
- * future runs (see loadLightburnLibrary) during the early load phase so we can adjust the UI.
+ * Process at the end of the post.  Does the following:
+ * 
+ * 1) Checks the lightburn material settings have changed, and causes the post to be reloaded so
+ *    that user interface changes can be applied.
+ * 2) Saves the lightburn material library settings into the state file.  This allows us to access them
+ *    on future runs (see loadLightburnLibrary) during the UI phase (when properties are not avaiable) so
+ *    we can adjust the options.
  */
 function onProjectComplete() {
-  activeState.lightburnLibraryPath = getProperty(
-    'machine0070LightburnLibrary',
-    ''
-  );
+  // help by providing warnings about the lightburn library path, if it changed or doesn't exist
+  checkLightburnLibrary();
+
+  // save property changes
+  if (activeState.lightburnLibraryPath != getProperty('machine0070LightburnLibrary', ''))
+    activeState.lightburnLibraryPath = getProperty(
+      'machine0070LightburnLibrary',
+      ''
+    );
+  if (activeState.lightburnLibraryUnits != getProperty('machine0080LightburnLibraryUnits', LIGHTBURN_LIBRARY_UNITS_DEFAULT))
+    activeState.lightburnLibraryUnits = getProperty(
+      'machine0080LightburnLibraryUnits',
+      LIGHTBURN_LIBRARY_UNITS_DEFAULT
+    );
 }
 
 // #endif
@@ -118,10 +143,6 @@ function onProjectComplete() {
  * machine origin
  */
 function onTranslateSetup() {
-
-  // help by providing warnings about the lightburn library path, if it changed or doesn't exist
-  checkLightburnLibrary();
-
   let orientation = getProperty(
     'machine0050Orientation',
     MACHINE_ORIENTATION_DEFAULT
