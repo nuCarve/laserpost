@@ -335,26 +335,27 @@ function generateLayerNotes(layer, showFilename) {
       }
 
       if (cutSetting.laserEnable !== LASER_ENABLE_OFF) {
-        result.push(
-          format(
-            '    ' +
-              (showFilename ? '  ' : '') +
-              localize(
-                'Mode "{mode}" at power {min}-{max}% (scale {scale}%) and {speed} using {lasers} (air {air}, Z offset {zOffset}, passes {passes}, z-step {zStep})'
-              ),
-            {
-              min: cutSetting.minPower,
-              max: cutSetting.maxPower,
-              speed: speedToUnits(cutSetting.speed),
-              lasers: laserNames[cutSetting.laserEnable],
-              air: cutSetting.useAir ? localize('on') : localize('off'),
-              zOffset: cutSetting.zOffset,
-              passes: cutSetting.passes,
-              zStep: cutSetting.zStep,
-              scale: cutSetting.powerScale,
-              mode: layerMode,
-            }
-          )
+        if (advancedFeature())
+            result.push(
+              format(
+                '    ' +
+                (showFilename ? '  ' : '') +
+                localize(
+                    'Laser "{mode}" at power {min}-{max}% (scale {scale}%) and {speed} using {lasers} (air {air}, Z offset {zOffset}, passes {passes}, z-step {zStep})'
+                ),
+                {
+                min: cutSetting.minPower,
+                max: cutSetting.maxPower,
+                speed: speedToUnits(cutSetting.speed),
+                lasers: laserNames[cutSetting.laserEnable],
+                air: cutSetting.useAir ? localize('on') : localize('off'),
+                zOffset: cutSetting.zOffset,
+                passes: cutSetting.passes,
+                zStep: cutSetting.zStep,
+                scale: cutSetting.powerScale,
+                mode: layerMode,
+                }
+            )
         );
       } else {
         // laser is off

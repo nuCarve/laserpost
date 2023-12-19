@@ -89,7 +89,7 @@ function generateProjectNotes(layerIndex) {
       file: project.layers[0].filename,
     });
 
-  // include timestamp (unless disabled)
+  // include timestamp (unless automated testing, to avoid snapshot compare errors)
   if (getProperty('automatedTesting', false) == false)
     appendProjectNote(localize('Generated at: {date}'), {
       date: new Date().toString(),
@@ -146,81 +146,86 @@ function generateProjectNotes(layerIndex) {
   // #endif
 
   // if the user did any laser overrides, include those in the comments
-  let laserPowerEtchMin = getProperty(
-    'laserPower0100EtchMin',
-    LASER_POWER_ETCH_MIN_DEFAULT
-  );
-  let laserPowerEtchMax = getProperty(
-    'laserPower0200EtchMax',
-    LASER_POWER_ETCH_MAX_DEFAULT
-  );
-  let laserPowerVaporizeMin = getProperty(
-    'laserPower0300VaporizeMin',
-    LASER_POWER_VAPORIZE_MIN_DEFAULT
-  );
-  let laserPowerVaporizeMax = getProperty(
-    'laserPower0400VaporizeMax',
-    LASER_POWER_VAPORIZE_MAX_DEFAULT
-  );
-  let laserPowerThroughMin = getProperty(
-    'laserPower0500ThroughMin',
-    LASER_POWER_THROUGH_MIN_DEFAULT
-  );
-  let laserPowerThroughMax = getProperty(
-    'laserPower0600ThroughMax',
-    LASER_POWER_THROUGH_MAX_DEFAULT
-  );
+  if (advancedFeature()) {
+    let laserPowerEtchMin = getProperty(
+      'laserPower0100EtchMin',
+      LASER_POWER_ETCH_MIN_DEFAULT
+    );
+    let laserPowerEtchMax = getProperty(
+      'laserPower0200EtchMax',
+      LASER_POWER_ETCH_MAX_DEFAULT
+    );
+    let laserPowerVaporizeMin = getProperty(
+      'laserPower0300VaporizeMin',
+      LASER_POWER_VAPORIZE_MIN_DEFAULT
+    );
+    let laserPowerVaporizeMax = getProperty(
+      'laserPower0400VaporizeMax',
+      LASER_POWER_VAPORIZE_MAX_DEFAULT
+    );
+    let laserPowerThroughMin = getProperty(
+      'laserPower0500ThroughMin',
+      LASER_POWER_THROUGH_MIN_DEFAULT
+    );
+    let laserPowerThroughMax = getProperty(
+      'laserPower0600ThroughMax',
+      LASER_POWER_THROUGH_MAX_DEFAULT
+    );
 
-  if (
-    laserPowerEtchMax != 0 ||
-    laserPowerThroughMax != 0 ||
-    laserPowerVaporizeMax != 0
-  ) {
-    appendProjectNote('Laser power overrides');
-    if (laserPowerEtchMax != 0)
-      appendProjectNote(
-        '  ' + localize('Etch power: {min}% (min) - {max}% (max)'),
-        {
-          min: laserPowerEtchMin,
-          max: laserPowerEtchMax,
-        }
-      );
-    if (laserPowerVaporizeMax != 0)
-      appendProjectNote(
-        '  ' + localize('Vaporize power: {min}% (min) - {max}% (max)'),
-        {
-          min: laserPowerVaporizeMin,
-          max: laserPowerVaporizeMax,
-        }
-      );
-    if (laserPowerThroughMax != 0)
-      appendProjectNote(
-        '  ' + localize('Through power: {min}% (min) - {max}% (max)'),
-        {
-          min: laserPowerThroughMin,
-          max: laserPowerThroughMax,
-        }
-      );
+    if (
+      laserPowerEtchMax != 0 ||
+      laserPowerThroughMax != 0 ||
+      laserPowerVaporizeMax != 0
+    ) {
+      appendProjectNote('Laser power overrides');
+      if (laserPowerEtchMax != 0)
+        appendProjectNote(
+          '  ' + localize('Etch power: {min}% (min) - {max}% (max)'),
+          {
+            min: laserPowerEtchMin,
+            max: laserPowerEtchMax,
+          }
+        );
+      if (laserPowerVaporizeMax != 0)
+        appendProjectNote(
+          '  ' + localize('Vaporize power: {min}% (min) - {max}% (max)'),
+          {
+            min: laserPowerVaporizeMin,
+            max: laserPowerVaporizeMax,
+          }
+        );
+      if (laserPowerThroughMax != 0)
+        appendProjectNote(
+          '  ' + localize('Through power: {min}% (min) - {max}% (max)'),
+          {
+            min: laserPowerThroughMin,
+            max: laserPowerThroughMax,
+          }
+        );
+    }
   }
 
   // #if LBRN
   // if the user is using a mirror shuttle, output that to comments
-  let shuttleLaser1 = getProperty(
-    'machine0500ShuttleLaser1',
-    SHUTTLE_LASER_1_DEFAULT
-  );
-  let shuttleLaser2 = getProperty(
-    'machine0600ShuttleLaser2',
-    SHUTTLE_LASER_2_DEFAULT
-  );
+  if (advancedFeature()) {
+    let shuttleLaser1 = getProperty(
+      'machine0500ShuttleLaser1',
+      SHUTTLE_LASER_1_DEFAULT
+    );
+    let shuttleLaser2 = getProperty(
+      'machine0600ShuttleLaser2',
+      SHUTTLE_LASER_2_DEFAULT
+    );
 
-  if (shuttleLaser1 != '' || shuttleLaser2 != '') {
-    appendProjectNote('  ' + localize('Shuttle "U" for laser 1: {value}'), {
-      value: shuttleLaser1 == '' ? '0' : shuttleLaser1,
-    });
-    appendProjectNote('  ' + localize('Shuttle "U" for laser 2: {value}'), {
-      value: shuttleLaser2 == '' ? '0' : shuttleLaser2,
-    });
+    if (shuttleLaser1 != '' || shuttleLaser2 != '') {
+      appendProjectNote('Laser shuttle settings:');
+      appendProjectNote('  ' + localize('Shuttle "U" for laser 1: {value}'), {
+        value: shuttleLaser1 == '' ? '0' : shuttleLaser1,
+      });
+      appendProjectNote('  ' + localize('Shuttle "U" for laser 2: {value}'), {
+        value: shuttleLaser2 == '' ? '0' : shuttleLaser2,
+      });
+    }
   }
   // #endif
 }
@@ -491,7 +496,26 @@ function onSection() {
       { xml: customCutSettingXML },
       COMMENT_DEBUG
     );
-  else
+  else {
+    // #if LBRN
+    debugLog(
+      'Settings: material "{material}", {min}-{max}% ({source}), layer mode: {mode}, laser enable: {enable}, power scale: {scale}, air: {air}, z-offset: {zOffset}, passes: {passes}, z-step: {zStep}',
+      {
+        material: linkPath ? linkPath : localize('none'),
+        min: minPower,
+        max: maxPower,
+        source: powerSource,
+        mode: opLayerMode,
+        enable: laserEnable,
+        scale: powerScale,
+        air: useAir ? localize('on') : localize('off'),
+        zOffset: zOffset,
+        passes: passes,
+        zStep: zStep,
+      },
+      COMMENT_DEBUG
+    );
+    // #else
     debugLog(
       'Settings: {min}-{max}% ({source}), layer mode: {mode}, laser enable: {enable}, power scale: {scale}, air: {air}, z-offset: {zOffset}, passes: {passes}, z-step: {zStep}',
       {
@@ -508,6 +532,8 @@ function onSection() {
       },
       COMMENT_DEBUG
     );
+    // #endif
+  }
 }
 
 /**
@@ -725,6 +751,12 @@ function onClose() {
     generateProjectNotes(-1);
     onProjectComplete(redirect);
   }
+
+  // save the laserpost features (standard/advanced) setting
+  activeState.laserpostFeatures = getProperty(
+    'machine0025LaserpostFeatures',
+    LASERPOST_FEATURES_DEFAULT
+  );
 
   // save our state to the persistent state file (if changed)
   stateSave();

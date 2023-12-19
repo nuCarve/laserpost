@@ -70,6 +70,11 @@ const LIGHTBURN_LIBRARY_UNITS_INCH = 'in';
 const LIGHTBURN_LIBRARY_UNITS_DEFAULT = LIGHTBURN_LIBRARY_UNITS_MM;
 
 // #endif
+// define enum for Laserpost features
+const LASERPOST_FEATURES_STANDARD = 'standard';
+const LASERPOST_FEATURES_ADVANCED = 'advanced';
+const LASERPOST_FEATURES_DEFAULT = LASERPOST_FEATURES_STANDARD;
+
 // define enum for speed units
 const SPEED_UNITS_MMPS = 'mmps';
 const SPEED_UNITS_MMPM = 'mmpm';

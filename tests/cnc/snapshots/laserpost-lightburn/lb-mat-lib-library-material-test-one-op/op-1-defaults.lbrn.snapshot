@@ -11,6 +11,7 @@
 *****   op0150LightburnMaterial: LIBRARY_MATERIAL_TEST
 *****   laserpost0500IncludeComments: INCLUDE_COMMENTS_NONE
 *****   automatedTesting: true
+*****   machine0025LaserpostFeatures: LASERPOST_FEATURES_ADVANCED
 ***** 
 ***** Options:
 *****   quiet: "--quiet"
@@ -29,6 +30,9 @@
 *****   XPath validator:
 *****     Query: "/LightBurnProject/CutSetting[1]/LinkPath[@Value="acrylic/1.5000/cut"]"
 *****     Match: required
+*****   XPath validator:
+*****     Query: "/LightBurnProject/CutSetting[2]/LinkPath"
+*****     Match: forbidden
 ***** 
 <CutSetting type="Cut">
     <index Value="0"/>

@@ -17,8 +17,12 @@
  * with <memberName>value</memberName>
  */
 function stateLoad() {
-  // load the XML file
-  const xmlObject = loadXMLFile(getStatePath());
+  let xmlObject;
+  // only load the XML file if we are not in automated testing
+  if (getProperty('automatedTesting', false) == false) {
+    // load the XML file
+    xmlObject = loadXMLFile(getStatePath());
+  }
 
   // did we load it, and does it have the required 'laserpost' section?
   if (!xmlObject || !xmlObject.laserpost) origState = {};
@@ -49,6 +53,10 @@ function stateIsDirty() {
  * was last loaded)
  */
 function stateSave() {
+  // don't save if in automated testing
+  if (getProperty('automatedTesting', false) == true)
+    return;
+
   // make sure something has changed....
   if (stateIsDirty()) {
     // make sure to tell the user why we need security rights if we don't have them
@@ -86,6 +94,10 @@ function stateSave() {
         } catch (ex) {}
       }
     }
+
+    // since state has changed, make sure to reload the post code to ensure the next run has
+    // accurate state information
+    requestPostReload();
   }
 }
 

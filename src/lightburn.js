@@ -20,9 +20,6 @@ loadLightburnLibrary();
  * post must be run once, discarded, and then settings can be adjusted using the material library.
  */
 function loadLightburnLibrary() {
-  // load the state file so we can access properties
-  stateLoad();
-
   // do we have a lightburn library path?
   let enumValues = properties['op0150LightburnMaterial'].values;
   if (activeState.lightburnLibraryPath != '') {
@@ -59,6 +56,16 @@ function loadLightburnLibrary() {
           // loop through all entries in the material's Entry, adding them to the enum
           for (let entryIndex = 0; entryIndex < material.Entry.length; ++entryIndex) {
             const entry = material.Entry[entryIndex];
+
+            // check if the prior entry matches this one, if so skip it (LightBurn library has
+            // duplicates)
+            if (entryIndex > 0) {
+              const priorEntry = material.Entry[entryIndex - 1];
+              if (priorEntry.Thickness == entry.Thickness && priorEntry.Desc == entry.Desc)
+                continue;
+            }
+
+            // build the title for the enum
             let title = material.name + ': ' + entry.Desc;
             if (entry.Thickness < 0)
               title += ' (' + localize('no thickness') + ')'
@@ -93,14 +100,13 @@ function checkLightburnLibrary() {
   // skip if doing automated testing
   if (getProperty('automatedTesting', false) == false) {
     if (activeState.lightburnLibraryPath != getProperty('machine0070LightburnLibrary', '') ||
-    activeState.lightburnLibraryUnits != getProperty('machine0080LightburnLibraryUnits', LIGHTBURN_LIBRARY_UNITS_DEFAULT)) {
+    activeState.lightburnLibraryUnits != getProperty('machine0075LightburnLibraryUnits', LIGHTBURN_LIBRARY_UNITS_DEFAULT)) {
       // settings have changed, which means we need to cause this post to be reloaded so the
       // properties can be refreshed.      
       showWarning(
         localize('WARNING: Lightburn material library setting(s) have changed.  If changes do not appear in post properties, it means ' +
         'the post was not automatically reloaded.  If this occurs, exit and restart the application (e.g. Fusion 360).'));
       ensureSecurityRights();
-      requestPostReload();
     }
     else if (activeState.lightburnLibraryPath != '' && !FileSystem.isFile(activeState.lightburnLibraryPath)) {
         showWarning(
@@ -125,16 +131,14 @@ function onProjectComplete() {
   checkLightburnLibrary();
 
   // save property changes
-  if (activeState.lightburnLibraryPath != getProperty('machine0070LightburnLibrary', ''))
-    activeState.lightburnLibraryPath = getProperty(
-      'machine0070LightburnLibrary',
-      ''
-    );
-  if (activeState.lightburnLibraryUnits != getProperty('machine0080LightburnLibraryUnits', LIGHTBURN_LIBRARY_UNITS_DEFAULT))
-    activeState.lightburnLibraryUnits = getProperty(
-      'machine0080LightburnLibraryUnits',
-      LIGHTBURN_LIBRARY_UNITS_DEFAULT
-    );
+  activeState.lightburnLibraryPath = getProperty(
+    'machine0070LightburnLibrary',
+    ''
+  );
+  activeState.lightburnLibraryUnits = getProperty(
+    'machine0075LightburnLibraryUnits',
+    LIGHTBURN_LIBRARY_UNITS_DEFAULT
+  );
 }
 
 // #endif
@@ -481,33 +485,41 @@ function generateLayerNotes(layer) {
           break;
       }
 
-      // get the linkPath to the material library, if any
-      let linkPath = '';
-      if (cutSetting.linkPath && cutSetting.linkPath != 'none')
-        linkPath = format(localize(' using material "{path}"'), { path: cutSetting.linkPath });
 
+      // get the linkPath to the material library, if any
       if (cutSetting.laserEnable !== LASER_ENABLE_OFF) {
-        result.push(
-          format(
-            '    ' +
-              localize(
-                'Fill "{mode}"{linkPath} at power {min}-{max}% (scale {scale}%) and {speed} using {lasers} (air {air}, Z offset {zOffset}, passes {passes}, z-step {zStep})'
-              ),
-            {
-              linkPath: linkPath,
-              min: cutSetting.minPower,
-              max: cutSetting.maxPower,
-              speed: speedToUnits(cutSetting.speed),
-              lasers: laserNames[cutSetting.laserEnable],
-              air: cutSetting.useAir ? localize('on') : localize('off'),
-              zOffset: cutSetting.zOffset,
-              passes: cutSetting.passes,
-              zStep: cutSetting.zStep,
-              scale: cutSetting.powerScale,
-              mode: layerMode,
-            }
-          )
-        );
+        if (advancedFeature()) {
+          let linkPath = '';
+          if (cutSetting.linkPath && cutSetting.linkPath != 'none')
+            linkPath = format(localize(' using material "{path}"'), { path: cutSetting.linkPath });
+      
+          result.push(
+            format(
+              '    ' +
+                localize(
+                  'Fill "{mode}"{linkPath} at power {min}-{max}% (scale {scale}%) and {speed} using {lasers} (air {air}, Z offset {zOffset}, passes {passes}, z-step {zStep})'
+                ),
+              {
+                linkPath: linkPath,
+                min: cutSetting.minPower,
+                max: cutSetting.maxPower,
+                speed: speedToUnits(cutSetting.speed),
+                lasers: laserNames[cutSetting.laserEnable],
+                air: cutSetting.useAir ? localize('on') : localize('off'),
+                zOffset: cutSetting.zOffset,
+                passes: cutSetting.passes,
+                zStep: cutSetting.zStep,
+                scale: cutSetting.powerScale,
+                mode: layerMode,
+              }
+            )
+          );
+        } else {
+          if (cutSetting.linkPath && cutSetting.linkPath != 'none') 
+            result.push('    ' + format(localize('Using material "{path}"'), { path: cutSetting.linkPath }));
+          else
+            result.push('    ' + localize('Using default material'));
+        } 
       } else {
         // laser is off
         result.push(format('    ' + localize('Output turned off')));

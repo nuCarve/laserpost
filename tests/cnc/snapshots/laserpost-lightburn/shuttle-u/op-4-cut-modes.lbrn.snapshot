@@ -12,6 +12,7 @@
 *****   machine0600ShuttleLaser2: 100
 *****   laserpost0500IncludeComments: INCLUDE_COMMENTS_NONE
 *****   automatedTesting: true
+*****   machine0025LaserpostFeatures: LASERPOST_FEATURES_ADVANCED
 ***** 
 ***** Options:
 *****   quiet: "--quiet"

@@ -11,6 +11,7 @@
 *****   work0100TraceStock: true
 *****   laserpost0500IncludeComments: INCLUDE_COMMENTS_NORMAL
 *****   automatedTesting: true
+*****   machine0025LaserpostFeatures: LASERPOST_FEATURES_ADVANCED
 ***** 
 ***** Options:
 *****   quiet: "--quiet"

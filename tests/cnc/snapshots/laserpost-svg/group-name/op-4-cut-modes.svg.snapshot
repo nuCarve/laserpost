@@ -9,8 +9,10 @@
 ***** 
 ***** Properties:
 *****   op0800GroupName: GROUP_NAME_TEST
+*****   laserpost0100Organization: ORGANIZATION_BY_OPERATION
 *****   laserpost0500IncludeComments: INCLUDE_COMMENTS_NONE
 *****   automatedTesting: true
+*****   machine0025LaserpostFeatures: LASERPOST_FEATURES_ADVANCED
 ***** 
 ***** Options:
 *****   quiet: "--quiet"

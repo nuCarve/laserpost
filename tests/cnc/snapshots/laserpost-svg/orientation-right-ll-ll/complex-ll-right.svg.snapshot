@@ -11,6 +11,7 @@
 *****   machine0050Orientation: MACHINE_ORIENTATION_UPPER_RIGHT
 *****   laserpost0500IncludeComments: INCLUDE_COMMENTS_NONE
 *****   automatedTesting: true
+*****   machine0025LaserpostFeatures: LASERPOST_FEATURES_ADVANCED
 ***** 
 ***** Options:
 *****   quiet: "--quiet"

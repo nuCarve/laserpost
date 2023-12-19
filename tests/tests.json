@@ -32,7 +32,8 @@
             },
             "properties": {
                 "laserpost0500IncludeComments": "INCLUDE_COMMENTS_NONE",
-                "automatedTesting": "true"
+                "automatedTesting": "true",
+                "machine0025LaserpostFeatures": "LASERPOST_FEATURES_ADVANCED"
             }
         },
         "barebones": {
@@ -626,7 +627,7 @@
                 "txt": {
                     "regex": [
                         {
-                            "regex": "Mode \"(\\w+)\"",
+                            "regex": "Laser \"(\\w+)\"",
                             "require": "cut"
                         }
                     ]
@@ -654,7 +655,7 @@
                 "txt": {
                     "regex": [
                         {
-                            "regex": "Mode \"(\\w+)\"",
+                            "regex": "Laser \"(\\w+)\"",
                             "require": "cut"
                         }
                     ]
@@ -681,7 +682,7 @@
                 "txt": {
                     "regex": [
                         {
-                            "regex": "Mode \"(\\w+)\"",
+                            "regex": "Laser \"(\\w+)\"",
                             "require": "fill"
                         }
                     ]
@@ -708,7 +709,7 @@
                 "txt": {
                     "regex": [
                         {
-                            "regex": "Mode \"(.+)\"",
+                            "regex": "Laser \"(.+)\"",
                             "require": "outline fill"
                         }
                     ]
@@ -1085,8 +1086,8 @@
                             "match": "required"
                         },
                         {
-                          "query": "/LightBurnProject/CutSetting[2]/LinkPath",
-                          "match": "forbidden"
+                            "query": "/LightBurnProject/CutSetting[2]/LinkPath",
+                            "match": "forbidden"
                         }
                     ]
                 }
@@ -1094,7 +1095,7 @@
         },
         {
             "name": "LB Mat Lib LIBRARY_MATERIAL_TEST Four Op",
-            "comment": "Lightburn material selection one op",
+            "comment": "Lightburn material selection four op",
             "setup": "all",
             "cnc": "op-4-cut-modes",
             "posts": ["laserpost-lightburn"],
@@ -1117,11 +1118,33 @@
                             "match": "required"
                         },
                         {
-                          "query": "/LightBurnProject/CutSetting[4]/LinkPath",
-                          "match": "forbidden"
+                            "query": "/LightBurnProject/CutSetting[4]/LinkPath",
+                            "match": "forbidden"
                         }
-                  ]
+                    ]
                 }
+            }
+        },
+        {
+            "name": "Features Standard",
+            "comment": "Test of standard mode, no materials",
+            "setup": "all",
+            "cnc": "op-4-cut-modes",
+            "properties": {
+                "machine0025LaserpostFeatures": "LASERPOST_FEATURES_STANDARD",
+                "laserpost0500IncludeComments": "INCLUDE_COMMENTS_NORMAL"
+            }
+        },
+        {
+            "name": "Features Standard with materials",
+            "comment": "Test of standard mode, with materials",
+            "setup": "all",
+            "cnc": "op-4-cut-modes",
+            "posts": ["laserpost-lightburn"],
+            "properties": {
+                "machine0025LaserpostFeatures": "LASERPOST_FEATURES_STANDARD",
+                "op0150LightburnMaterial": "LIBRARY_MATERIAL_TEST",
+                "laserpost0500IncludeComments": "INCLUDE_COMMENTS_NORMAL"
             }
         }
     ]

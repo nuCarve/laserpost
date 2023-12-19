@@ -7,7 +7,28 @@
  *************************************************************************************/
 
 /**
- * Define the groups used for properties when displayed during CAM configuraiton in the CAM UI
+ * Global code that executes upon post load.  Loads the XML state file so we can set
+ * feature visibility.
+ */
+stateLoad();
+
+/**
+ * Helper method used on "visibility" properties for advanced features.  If advanced features
+ * are enabled, returns `true` to enable the feature, otherwise `false`.
+ * 
+ * @returns {boolean} true if the user has selected the advanced features
+ */
+function advancedFeature() {
+  // if automated test, use the property value
+  if (getProperty('automatedTesting', false) == true) 
+    return getProperty('machine0025LaserpostFeatures', LASERPOST_FEATURES_DEFAULT) === LASERPOST_FEATURES_ADVANCED;
+
+  // return if advanced based on the state
+  return activeState.laserpostFeatures ? activeState.laserpostFeatures === LASERPOST_FEATURES_ADVANCED : false;
+}
+
+/**
+ * Define the groups used for properties when displayed during CAM configuration in the CAM UI
  */
 groupDefinitions = {
   groupLaserPost: {
@@ -146,6 +167,7 @@ properties = {
     type: 'number',
     value: OFFSET_X_AXIS_DEFAULT,
     scope: 'post',
+    visible: advancedFeature()
   },
   work0300OffsetY: {
     title: localize('Offset Y axis'),
@@ -156,6 +178,7 @@ properties = {
     type: 'number',
     value: OFFSET_Y_AXIS_DEFAULT,
     scope: 'post',
+    visible: advancedFeature()
   },
   //
   // Group: groupLaserPower
@@ -170,6 +193,7 @@ properties = {
     value: LASER_POWER_ETCH_MIN_DEFAULT,
     range: [0, 100],
     scope: 'post',
+    visible: advancedFeature()
   },
   laserPower0200EtchMax: {
     title: localize('Etch power (max, %)'),
@@ -181,6 +205,7 @@ properties = {
     value: LASER_POWER_ETCH_MAX_DEFAULT,
     range: [0, 100],
     scope: 'post',
+    visible: advancedFeature()
   },
   laserPower0300VaporizeMin: {
     title: localize('Vaporize power (min, %)'),
@@ -192,6 +217,7 @@ properties = {
     value: LASER_POWER_VAPORIZE_MIN_DEFAULT,
     range: [0, 100],
     scope: 'post',
+    visible: advancedFeature()
   },
   laserPower0400VaporizeMax: {
     title: localize('Vaporize power (max, %)'),
@@ -203,6 +229,7 @@ properties = {
     value: LASER_POWER_VAPORIZE_MAX_DEFAULT,
     range: [0, 100],
     scope: 'post',
+    visible: advancedFeature()
   },
   laserPower0500ThroughMin: {
     title: localize('Through power (min, %)'),
@@ -214,6 +241,7 @@ properties = {
     value: LASER_POWER_THROUGH_MIN_DEFAULT,
     range: [0, 100],
     scope: 'post',
+    visible: advancedFeature()
   },
   laserPower0600ThroughMax: {
     title: localize('Through power (max, %)'),
@@ -225,10 +253,31 @@ properties = {
     value: LASER_POWER_THROUGH_MAX_DEFAULT,
     range: [0, 100],
     scope: 'post',
+    visible: advancedFeature()
   },
   //
   // machine: common machine settings
   //
+  machine0025LaserpostFeatures: {
+    title: localize('Laserpost Features (run post to apply)'),
+    description: localize(
+      'Laserpost generates laser-ready files from CAM operations in all modes.  Advanced mode extends the capabilties ' +
+      'to allow for advanced laser settings, using the tool library to define materials and setups, and providing for ' +
+      'operation specific exceptions on those settings.  For most use, standard is sufficient.  Advanced is useful if you ' +
+      'want to capture all laser settings in the CAM operations instead or (or in addition to) having those settings in ' +
+      'your laser program.' +
+      '<br><br>' +
+      '<i>IMPORTANT</i>: When changed, you must run the post once to allow the processor to apply the changes.  This is because ' +
+      'the post is cached and the code to change the properties can only run when a post is loaded.'
+    ),
+    type: 'enum',
+    values: [
+        { title: localize('Standard'), id: LASERPOST_FEATURES_STANDARD },
+        { title: localize('Advanced with Tool Library and laser settings'), id: LASERPOST_FEATURES_ADVANCED },
+    ],
+    value: LASERPOST_FEATURES_DEFAULT,
+    scope: 'machine',
+  },
   // #if LBRN
   machine0050Orientation: {
     title: localize('Machine orientation'),
@@ -259,7 +308,7 @@ properties = {
     value: '',
     scope: 'machine',
   },
-  machine0080LightburnLibraryUnits: {
+  machine0075LightburnLibraryUnits: {
     title: localize('Lightburn library units (run post to apply)'),
     description: localize(
       'When using a Lightburn material library, specifies the units thickness should be displayed in.  Does not affect generated files.' +
@@ -326,6 +375,7 @@ properties = {
     type: 'string',
     value: SHUTTLE_LASER_1_DEFAULT,
     scope: 'machine',
+    visible: advancedFeature()
   },
   machine0600ShuttleLaser2: {
     title: localize('Mirror shuttle laser 2'),
@@ -337,6 +387,7 @@ properties = {
     type: 'string',
     value: SHUTTLE_LASER_2_DEFAULT,
     scope: 'machine',
+    visible: advancedFeature()
   },
   // #endif
   machine0700LaunchOnPost: {
@@ -385,6 +436,7 @@ properties = {
     value: LAYER_MODE_DEFAULT,
     scope: 'operation',
     enabled: 'cutting',
+    visible: advancedFeature()
   },
   // #if LBRN
   op0150LightburnMaterial: {
@@ -421,6 +473,7 @@ properties = {
     value: USE_AIR_DEFAULT,
     scope: 'operation',
     enabled: 'cutting',
+    visible: advancedFeature()
   },
   op0300LaserEnable: {
     title: localize('Laser selection'),
@@ -438,6 +491,7 @@ properties = {
     value: LASER_ENABLE_DEFAULT,
     scope: 'operation',
     enabled: 'cutting',
+    visible: advancedFeature()
   },
   op0400PowerScale: {
     title: localize('Power scale (%)'),
@@ -449,6 +503,7 @@ properties = {
     range: [0, 100],
     scope: 'operation',
     enabled: 'cutting',
+    visible: advancedFeature()
   },
   op0500ZOffset: {
     title: localize('Z-offset (mm)'),
@@ -459,6 +514,7 @@ properties = {
     value: Z_OFFSET_DEFAULT,
     scope: 'operation',
     enabled: 'cutting',
+    visible: advancedFeature()
   },
   op0600Passes: {
     title: localize('Pass count'),
@@ -467,6 +523,7 @@ properties = {
     value: PASS_COUNT_DEFAULT,
     scope: 'operation',
     enabled: 'cutting',
+    visible: advancedFeature()
   },
   op0700ZStep: {
     title: localize('Z-step per pass (mm)'),
@@ -475,6 +532,7 @@ properties = {
     value: Z_STEP_PER_PASS_DEFAULT,
     scope: 'operation',
     enabled: 'cutting',
+    visible: advancedFeature()
   },
   op0800GroupName: {
     title: localize('Grouping name'),
@@ -499,6 +557,7 @@ properties = {
     value: CUSTOM_CUT_SETTING_XML_DEFAULT,
     scope: 'operation',
     enabled: 'cutting',
+    visible: advancedFeature()
   },
   // #endif
 

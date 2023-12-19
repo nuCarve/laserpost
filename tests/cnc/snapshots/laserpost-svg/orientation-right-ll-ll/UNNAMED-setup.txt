@@ -11,6 +11,6 @@ Machine
 
 Layers:
   Layer 0 (Black): Etch top and left
-    Mode "fill" at power 80-80% (scale 100%) and 30 mm/sec using laser 1 (air on, Z offset 0, passes 1, z-step 0)
+    Laser "fill" at power 80-80% (scale 100%) and 30 mm/sec using laser 1 (air on, Z offset 0, passes 1, z-step 0)
   Layer 1 (Green): Cut spline, Cut outline
-    Mode "cut" at power 80-80% (scale 100%) and 30 mm/sec using laser 1 (air on, Z offset 0, passes 1, z-step 0)
+    Laser "cut" at power 80-80% (scale 100%) and 30 mm/sec using laser 1 (air on, Z offset 0, passes 1, z-step 0)

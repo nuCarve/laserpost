@@ -9,8 +9,10 @@
 ***** 
 ***** Properties:
 *****   op0800GroupName: GROUP_NAME_TEST
+*****   laserpost0100Organization: ORGANIZATION_BY_OPERATION
 *****   laserpost0500IncludeComments: INCLUDE_COMMENTS_NONE
 *****   automatedTesting: true
+*****   machine0025LaserpostFeatures: LASERPOST_FEATURES_ADVANCED
 ***** 
 ***** Options:
 *****   quiet: "--quiet"
@@ -35,8 +37,8 @@ Machine
 
 Layers:
   Layer 0 (Black): Outer through, Center through
-    Mode "cut" at power 80-80% (scale 100%) and 30 mm/sec using laser 2 (air on, Z offset 0, passes 1, z-step 0)
+    Laser "cut" at power 80-80% (scale 100%) and 30 mm/sec using laser 2 (air on, Z offset 0, passes 1, z-step 0)
   Layer 1 (Green): Top hex etch
-    Mode "fill" at power 80-80% (scale 100%) and 30 mm/sec using laser 1 (air on, Z offset 0, passes 1, z-step 0)
+    Laser "fill" at power 80-80% (scale 100%) and 30 mm/sec using laser 1 (air on, Z offset 0, passes 1, z-step 0)
   Layer 2 (Blue): Bottom rounded vaporize
-    Mode "cut" at power 80-80% (scale 100%) and 30 mm/sec using laser 1 (air on, Z offset 0, passes 1, z-step 0)
+    Laser "cut" at power 80-80% (scale 100%) and 30 mm/sec using laser 1 (air on, Z offset 0, passes 1, z-step 0)

@@ -12,10 +12,10 @@ Machine
 Files:
   File UNNAMED.svg:
     Layer 0 (Black): Outer through, Center through
-      Mode "cut" at power 80-80% (scale 100%) and 30 mm/sec using laser 2 (air on, Z offset 0, passes 1, z-step 0)
+      Laser "cut" at power 80-80% (scale 100%) and 30 mm/sec using laser 2 (air on, Z offset 0, passes 1, z-step 0)
   File UNNAMED-1.svg:
     Layer 0 (Black): Top hex etch
-      Mode "fill" at power 80-80% (scale 100%) and 30 mm/sec using laser 1 (air on, Z offset 0, passes 1, z-step 0)
+      Laser "fill" at power 80-80% (scale 100%) and 30 mm/sec using laser 1 (air on, Z offset 0, passes 1, z-step 0)
   File UNNAMED-2.svg:
     Layer 0 (Black): Bottom rounded vaporize
-      Mode "cut" at power 80-80% (scale 100%) and 30 mm/sec using laser 1 (air on, Z offset 0, passes 1, z-step 0)
+      Laser "cut" at power 80-80% (scale 100%) and 30 mm/sec using laser 1 (air on, Z offset 0, passes 1, z-step 0)

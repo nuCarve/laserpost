@@ -146,9 +146,10 @@ function dumpProject() {
       );
     else
       debugLog(
-        '    #{id}: "{name}" {minPower}-{maxPower}% power at {speed} mm/min, index={index}, priority={priority}, layerMode={layerMode}, laserEnable={laserEnable}',
+        '    #{id}: "{name}" material "{linkPath}", {minPower}-{maxPower}% power at {speed} mm/min, index={index}, priority={priority}, layerMode={layerMode}, laserEnable={laserEnable}',
         {
           id: cutSettingsIndex,
+          linkPath: cutSetting.linkPath ? cutSetting.linkPath : 'none',
           name: cutSetting.name,
           index: cutSetting.index,
           priority: cutSetting.priority,

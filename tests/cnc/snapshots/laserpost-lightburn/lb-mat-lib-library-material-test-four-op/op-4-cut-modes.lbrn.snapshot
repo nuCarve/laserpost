@@ -11,6 +11,7 @@
 *****   op0150LightburnMaterial: LIBRARY_MATERIAL_TEST
 *****   laserpost0500IncludeComments: INCLUDE_COMMENTS_NONE
 *****   automatedTesting: true
+*****   machine0025LaserpostFeatures: LASERPOST_FEATURES_ADVANCED
 ***** 
 ***** Options:
 *****   quiet: "--quiet"

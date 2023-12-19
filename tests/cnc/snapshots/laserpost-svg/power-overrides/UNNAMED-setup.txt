@@ -15,8 +15,8 @@ Laser power overrides
   Through power: 83% (min) - 93% (max)
 Layers:
   Layer 0 (Black): Outer through, Center through
-    Mode "cut" at power 83-93% (scale 100%) and 30 mm/sec using laser 2 (air on, Z offset 0, passes 1, z-step 0)
+    Laser "cut" at power 83-93% (scale 100%) and 30 mm/sec using laser 2 (air on, Z offset 0, passes 1, z-step 0)
   Layer 1 (Green): Top hex etch
-    Mode "fill" at power 81-91% (scale 100%) and 30 mm/sec using laser 1 (air on, Z offset 0, passes 1, z-step 0)
+    Laser "fill" at power 81-91% (scale 100%) and 30 mm/sec using laser 1 (air on, Z offset 0, passes 1, z-step 0)
   Layer 2 (Blue): Bottom rounded vaporize
-    Mode "cut" at power 82-92% (scale 100%) and 30 mm/sec using laser 1 (air on, Z offset 0, passes 1, z-step 0)
+    Laser "cut" at power 82-92% (scale 100%) and 30 mm/sec using laser 1 (air on, Z offset 0, passes 1, z-step 0)

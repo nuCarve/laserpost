@@ -12,6 +12,7 @@
 *****   createImportantNote: true
 *****   laserpost0500IncludeComments: INCLUDE_COMMENTS_NORMAL
 *****   automatedTesting: true
+*****   machine0025LaserpostFeatures: LASERPOST_FEATURES_ADVANCED
 ***** 
 ***** Options:
 *****   quiet: "--quiet"
@@ -37,4 +38,4 @@ Machine
 This is a test, only a test.
 Layers:
   Layer 0 (Black): 2D Profile1
-    Mode "cut" at power 80-80% (scale 100%) and 30 mm/sec using laser 1 (air on, Z offset 0, passes 1, z-step 0)
+    Laser "cut" at power 80-80% (scale 100%) and 30 mm/sec using laser 1 (air on, Z offset 0, passes 1, z-step 0)
