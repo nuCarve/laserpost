@@ -728,7 +728,19 @@ function onClose() {
 
   // save our state to the persistent state file (if changed)
   stateSave();
+
+  // if requested, launch an app for this post
+  if (getProperty('machine0700LaunchOnPost', LAUNCH_ON_POST_PATH_DEFAULT) != '')
+    executeNoWait(getProperty('machine0700LaunchOnPost', LAUNCH_ON_POST_PATH_DEFAULT),
+      format(getProperty('machine0800LaunchOnPostArguments', LAUNCH_ON_POST_ARGUMENTS_DEFAULT), {
+        path: getOutputPath(),
+        dir: FileSystem.getFolderPath(getOutputPath()),
+        basename: programName,
+        ext: extension
+      }), true, FileSystem.getFolderPath(getOutputPath()));
 }
+
+
 
 /**
  * onClose is called by CAM when the last section has been completed.

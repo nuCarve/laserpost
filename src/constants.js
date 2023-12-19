@@ -165,6 +165,8 @@ const GROUP_NAME_DEFAULT = '';
 const GROUP_NAME_TEST = 'Test-group-name';
 const CUSTOM_CUT_SETTING_XML_DEFAULT = '';
 const CUSTOM_CUT_SETTING_XML_TEST = '<CutSetting><Test /></CutSetting>';
+const LAUNCH_ON_POST_PATH_DEFAULT = '';
+const LAUNCH_ON_POST_ARGUMENTS_DEFAULT = '"{path}"';
 
 // CAM APIs offer a redirection feature to create multiple output fles (such as used in
 // file-by-layer).  When JavaScript errors occur during redirection the logging information is

@@ -339,6 +339,33 @@ properties = {
     scope: 'machine',
   },
   // #endif
+  machine0700LaunchOnPost: {
+    title: localize('Launch on post'),
+    description: localize(
+      'Optional: Command to launch after the post successfully completes.  If the application is not in the path, specify the ' +
+      'full path to the application.  For example, on Windows with LightBurn you might use "C:\\Program Files\\LightBurn\\SendUDP", '+
+      'along with specifying "{path}" on the launch arguments, will send the file to an already open instance ' +
+      'of LightBurn (or start it if it is not running)'
+    ),
+    type: 'string',
+    value: LAUNCH_ON_POST_PATH_DEFAULT,
+    scope: 'machine',
+  },
+  machine0800LaunchOnPostArguments: {
+    title: localize('Launch arguments'),
+    description: localize(
+      'Arguments to pass to the "Launch on post" application (if specified).  Parameters can be added using "{parameter-name}" such as "{path}":' +
+      '<ul>' +
+      '<li>{path}: Full path to the file including extension.</li>' +
+      '<li>{basename}: Name of the generated file, without the path or extension</li>' +
+      '<li>{ext}: Extension of the generated file (not including any "." character)' +
+      '<li>{dir}: Directory of the generated file, without the filename and without a trailing slash' +
+      '</ul>'
+    ),
+    type: 'string',
+    value: LAUNCH_ON_POST_ARGUMENTS_DEFAULT,
+    scope: 'machine',
+  },
 
   //
   // operation: cutting
