@@ -4,7 +4,7 @@
   "description": "LaserPost post-processors",
   "type": "module",
   "scripts": {
-    "test": "node tests/test.js",
+    "test": "copy /y tests\\states\\*.xml release\\dist && node tests/test.js",
     "postinstall": "cd tests && npm install && cd ../release && npm install",
     "start": "node release/release.js",
     "build": "node release/release.js",

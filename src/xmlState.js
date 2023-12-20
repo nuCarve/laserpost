@@ -17,12 +17,8 @@
  * with <memberName>value</memberName>
  */
 function stateLoad() {
-  let xmlObject;
-  // only load the XML file if we are not in automated testing
-  if (getProperty('automatedTesting', false) == false) {
-    // load the XML file
-    xmlObject = loadXMLFile(getStatePath());
-  }
+  // load the XML file
+  const xmlObject = loadXMLFile(getStatePath());
 
   // did we load it, and does it have the required 'laserpost' section?
   if (!xmlObject || !xmlObject.laserpost) origState = {};

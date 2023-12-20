@@ -19,9 +19,12 @@ stateLoad();
  * @returns {boolean} true if the user has selected the advanced features
  */
 function advancedFeature() {
-  // if automated test, use the property value
-  if (getProperty('automatedTesting', false) == true) 
-    return getProperty('machine0025LaserpostFeatures', LASERPOST_FEATURES_DEFAULT) === LASERPOST_FEATURES_ADVANCED;
+  // if automated test, use the property value if available, else fall back on state
+  if (getProperty('automatedTesting', false) || activeState.automatedTesting) {
+    const features = getProperty('machine0025LaserpostFeatures', undefined);
+    if (features) return features === LASERPOST_FEATURES_ADVANCED;
+    return true;
+  }
 
   // return if advanced based on the state
   return activeState.laserpostFeatures ? activeState.laserpostFeatures === LASERPOST_FEATURES_ADVANCED : false;
@@ -362,7 +365,7 @@ properties = {
     ),
     type: 'boolean',
     value: UPDATE_ALLOW_BETA_DEFAULT,
-    scope: 'machine',
+    scope: 'machine'
   },
   // #if LBRN
   machine0500ShuttleLaser1: {
@@ -375,7 +378,7 @@ properties = {
     type: 'string',
     value: SHUTTLE_LASER_1_DEFAULT,
     scope: 'machine',
-    visible: advancedFeature()
+    // visible: advancedFeature()  // 'machine' scope doesn't support visible, so see below for removal
   },
   machine0600ShuttleLaser2: {
     title: localize('Mirror shuttle laser 2'),
@@ -387,7 +390,7 @@ properties = {
     type: 'string',
     value: SHUTTLE_LASER_2_DEFAULT,
     scope: 'machine',
-    visible: advancedFeature()
+    // visible: advancedFeature()  // 'machine' scope doesn't support visible, so see below for removal
   },
   // #endif
   machine0700LaunchOnPost: {
@@ -582,3 +585,10 @@ properties = {
   }
 };
 
+// machine scope doesn't support the visible attribute, so if advanced we need to delete the
+// unwanted machine scope properties.  This has the unfortunate side effect that the property values
+// are deleted as well.  
+if (!advancedFeature()) {
+  delete properties.machine0500ShuttleLaser1;
+  delete properties.machine0600ShuttleLaser2;
+}
