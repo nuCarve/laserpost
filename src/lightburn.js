@@ -105,8 +105,8 @@ function checkLightburnLibrary() {
   const libraryPath = getProperty('machine0070LightburnLibrary', '');
   const libraryUnits = getProperty('machine0075LightburnLibraryUnits', LIGHTBURN_LIBRARY_UNITS_DEFAULT);
 
-  // skip if doing automated testing or we have an empty library path
-  if (getProperty('automatedTesting', false) == false || libraryPath == '') {
+  // make sure we are not doing automated testing (props not available), and that we have a library path
+  if (getProperty('automatedTesting', false) == false && libraryPath !== '') {
     if (!FileSystem.isFile(libraryPath) && !FileSystem.isFile(libraryPath + '.clb')) {
       // helper check - do we appear to have a path?
       if (libraryPath.indexOf('/') == -1 && libraryPath.indexOf('\\') == -1)
