@@ -22,9 +22,14 @@ loadLightburnLibrary();
 function loadLightburnLibrary() {
   // do we have a lightburn library path?
   let enumValues = properties['op0150LightburnMaterial'].values;
-  if (activeState.lightburnLibraryPath != '') {
+  let libraryPath = activeState.lightburnLibraryPath;
+  if (libraryPath != '') {
+    // default the extension if needed
+    if (!FileSystem.isFile(libraryPath) && FileSystem.isFile(libraryPath + '.clb'))
+      libraryPath += '.clb';
+
     // load the library 
-    const library = loadXMLFile(activeState.lightburnLibraryPath);
+    const library = loadXMLFile(libraryPath);
     if (library) {
       if (library.LightBurnLibrary) {
         // get units for the Lightburn library
@@ -97,48 +102,44 @@ function loadLightburnLibrary() {
  * the properties.
  */
 function checkLightburnLibrary() {
-  // skip if doing automated testing
-  if (getProperty('automatedTesting', false) == false) {
-    if (activeState.lightburnLibraryPath != getProperty('machine0070LightburnLibrary', '') ||
-    activeState.lightburnLibraryUnits != getProperty('machine0075LightburnLibraryUnits', LIGHTBURN_LIBRARY_UNITS_DEFAULT)) {
+  const libraryPath = getProperty('machine0070LightburnLibrary', '');
+  const libraryUnits = getProperty('machine0075LightburnLibraryUnits', LIGHTBURN_LIBRARY_UNITS_DEFAULT);
+
+  // skip if doing automated testing or we have an empty library path
+  if (getProperty('automatedTesting', false) == false || libraryPath == '') {
+    if (!FileSystem.isFile(libraryPath) && !FileSystem.isFile(libraryPath + '.clb')) {
+      // helper check - do we appear to have a path?
+      if (libraryPath.indexOf('/') == -1 && libraryPath.indexOf('\\') == -1)
+        showWarning(
+          localize('WARNING: Library file not loaded, "{path}" must include the full path to the library file.'), 
+          { path: libraryPath}
+        );
+      else
+        showWarning(
+            localize('WARNING: Library file not loaded, "{path}" does not exist.'),
+            { path: libraryPath}
+        );
+    }
+    else if (activeState.lightburnLibraryPath != libraryPath ||
+      activeState.lightburnLibraryUnits != libraryUnits) {
       // settings have changed, which means we need to cause this post to be reloaded so the
       // properties can be refreshed.      
       showWarning(
-        localize('WARNING: Lightburn material library setting(s) have changed.  If changes do not appear in post properties, it means ' +
-        'the post was not automatically reloaded.  If this occurs, exit and restart the application (e.g. Fusion 360).'));
+        localize('Adjusted Lightburn material library setting(s) have now been applied.'));
       ensureSecurityRights();
     }
-    else if (activeState.lightburnLibraryPath != '' && !FileSystem.isFile(activeState.lightburnLibraryPath)) {
-        showWarning(
-            localize('WARNING: Library file "{path}" does not exist.  Check path and and ensure it has the library filename with extension.'),
-            { path: activeState.lightburnLibraryPath}
-        );
-    }
   }
+
+  // save property changes
+  activeState.lightburnLibraryPath = libraryPath;
+  activeState.lightburnLibraryUnits = libraryUnits;
 }
 
 /**
- * Process at the end of the post.  Does the following:
- * 
- * 1) Checks the lightburn material settings have changed, and causes the post to be reloaded so
- *    that user interface changes can be applied.
- * 2) Saves the lightburn material library settings into the state file.  This allows us to access them
- *    on future runs (see loadLightburnLibrary) during the UI phase (when properties are not avaiable) so
- *    we can adjust the options.
+ * Process at the end of the post. 
  */
 function onProjectComplete() {
-  // help by providing warnings about the lightburn library path, if it changed or doesn't exist
   checkLightburnLibrary();
-
-  // save property changes
-  activeState.lightburnLibraryPath = getProperty(
-    'machine0070LightburnLibrary',
-    ''
-  );
-  activeState.lightburnLibraryUnits = getProperty(
-    'machine0075LightburnLibraryUnits',
-    LIGHTBURN_LIBRARY_UNITS_DEFAULT
-  );
 }
 
 // #endif

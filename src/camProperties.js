@@ -308,6 +308,9 @@ properties = {
       'the post is cached and the code to change the properties can only run when a post is loaded.'
     ),
     type: 'string',
+    length: 50,
+    width: 50,
+    siez: 50,
     value: '',
     scope: 'machine',
   },

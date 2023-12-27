@@ -134,7 +134,7 @@ function generateProjectNotes(layerIndex) {
     appendProjectNote('  Path: ' + localize('Path: {path}'), {
       path: lightburnLibraryPath,
     });
-    if (!FileSystem.isFile(lightburnLibraryPath)) {
+    if (!FileSystem.isFile(lightburnLibraryPath) && !FileSystem.isFolder(lightburnLibraryPath + '.clb')) {
         appendProjectNote(
             '  ' + localize('WARNING: Library file does not exist.  Check path and and ensure it has the library filename with extension.'),
             undefined,
