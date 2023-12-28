@@ -117,14 +117,24 @@ properties = {
   },
   laserpost0400IncludeNotes: {
     title: localize('Notes'),
-    description: localize('Detail level of generated setup notes.'),
+    // #if LBRN
+    description: localize('Detail level of generated LightBurn setup notes, which may appear when LightBurn opens the project. ' +
+      '"Disable" will not generate any notes, "Hidden" will generate them but not shown them automatically (in LightBurn, use ' +
+      'File / Show Notes to see them), "Show when important" will normally hide them but will show when there is something important '+
+      ' to share, and "Always show" will always show the notes when LightBurn loads the project.'
+    ),
+    // #else
+    description: localize('Detail level of generated setup notes, which are placed in a text file along side the generated SVG ' +
+      'file.  "Disable" will not generate any notes, "Hidden" will generate them but not the popup saying they are available, ' +
+      '"Show when important" will normally not show the popup, but will when there is something important to share, and ' +
+      '"Always show" will always generate the notes and display a popup when they are generated.'
+    ),
+    // #endif
     group: 'groupLaserPost',
     type: 'enum',
     values: [
       { title: localize('Disable'), id: INCLUDE_NOTES_NONE },
-      // #if LBRN
       { title: localize('Hidden'), id: INCLUDE_NOTES_HIDDEN },
-      // #endif
       {
         title: localize('Show when important'),
         id: INCLUDE_NOTES_SHOW_IMPORTANT,
