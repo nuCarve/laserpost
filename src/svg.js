@@ -51,8 +51,8 @@ function onWriteHeader(layer) {
       version: '1.1',
       xmlns: 'http://www.w3.org/2000/svg',
       xmlns_xlink: 'http://www.w3.org/1999/xlink',
-      width: mmFormat(maxX + 1),
-      height: mmFormat(maxY + 1),
+      width: mmFormatWithUnits(maxX + 1),
+      height: mmFormatWithUnits(maxY + 1),
       viewbox: format('{minX} {minY} {maxX} {maxY}', {
         minX: 0,
         minY: 0,
@@ -539,17 +539,54 @@ function cutIndexToColorName(cutIndex) {
 }
 
 /**
- * Formats a mm value for output to the SVG file.
+ * Formats a mm value for output to the SVG file, without any units.
  *
- * This will take a mm value, convert it to pixels, and format it to reduce the number of digits.
- * We use pixels instead of "mm" units directly in SVG because some products (I'm looking
- * at you, LightBurn) fail to load svg files that use "mm" units.
+ * This will take a mm value, convert it to the unit required by the SVG file, and format it to reduce the number 
+ * of digits. It will specify the units used, unless pixels in which case no units are rendered.  We
+ * do this because some laser programs fail to work with units (older LightBurn versions) but others use the
+ * incorrect scale factor for pixels (XTool XCS).
  *
  * @param mm Number in millimeters
- * @returns String with formatted value
+ * @returns String with formatted value in pixels, without any units specified
  */
 function mmFormat(mm) {
-  return formatPosition.format(mm * 3.779527559);
+  switch (getProperty('machine0090SVGFileUnits', SVG_FILE_UNITS_DEFAULT)) {
+    case SVG_FILE_UNITS_INCH:
+      // 25.4 mm to an inch
+      return formatPosition.format(mm / 25.4);
+    case SVG_FILE_UNITS_MM:
+      // 1 mm to a mm
+      return formatPosition.format(mm);
+    case SVG_FILE_UNITS_POINT:
+      // a point is 1/72 per inch (but we are in mm's so we convert with 25.4mm/inch)
+      return formatPosition.format(mm * 1/25.4*72);
+    default:
+      // default pixels, or 1/96 per inch (but we are in mm's so we convert with 25.4mm/inch)
+      return formatPosition.format(mm * 1/25.4*96);
+    }
+}
+
+/**
+ * Formats a mm value for output to the SVG file, with units
+ *
+ * Similar to mmFormat, except also includes the units (in, px, etc).  
+ *
+ * @param mm Number in millimeters
+ * @returns String with formatted value according to machine property machine0090SVGFileUnits
+ */
+function mmFormatWithUnits(mm) {
+  switch (getProperty('machine0090SVGFileUnits', SVG_FILE_UNITS_DEFAULT)) {
+    case SVG_FILE_UNITS_INCH:
+      return mmFormat(mm) + 'in';
+    case SVG_FILE_UNITS_MM:
+      return mmFormat(mm) + 'mm';
+    case SVG_FILE_UNITS_POINT:
+      return mmFormat(mm) + 'pt';
+    default:
+      // since pixels are default, we return pixels without any units specifier as some programs
+      // don't import files with units
+      return mmFormat(mm);
+    }
 }
 
 /**

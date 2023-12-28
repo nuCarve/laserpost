@@ -1146,6 +1146,47 @@
                 "op0150LightburnMaterial": "LIBRARY_MATERIAL_TEST",
                 "laserpost0500IncludeComments": "INCLUDE_COMMENTS_NORMAL"
             }
+        },
+        {
+            "name": "SVG units in mm",
+            "comment": "Test SVG file generation using mm units",
+            "setup": "all",
+            "cnc": "op-1-defaults",
+            "posts": ["laserpost-svg"],
+            "properties": {
+                "machine0090SVGFileUnits": "SVG_FILE_UNITS_MM"
+            }
+        },
+        {
+            "name": "SVG units in inch",
+            "comment": "Test SVG file generation using inch units",
+            "setup": "all",
+            "cnc": "op-1-defaults",
+            "posts": ["laserpost-svg"],
+            "properties": {
+                "machine0090SVGFileUnits": "SVG_FILE_UNITS_INCH"
+            }
+        },
+        {
+            "name": "SVG units in point",
+            "comment": "Test SVG file generation using point units",
+            "setup": "all",
+            "cnc": "op-1-defaults",
+            "posts": ["laserpost-svg"],
+            "properties": {
+                "machine0090SVGFileUnits": "SVG_FILE_UNITS_POINT"
+            }
+        },
+        {
+            "name": "SVG units in pixel",
+            "comment": "Test SVG file generation using pixel units",
+            "setup": "all",
+            "cnc": "op-1-defaults",
+            "posts": ["laserpost-svg"],
+            "properties": {
+                "machine0090SVGFileUnits": "SVG_FILE_UNITS_PIXEL"
+            }
         }
+
     ]
 }

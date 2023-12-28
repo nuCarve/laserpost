@@ -753,7 +753,19 @@ function onClose() {
   }
 
   // save the laserpost features (standard/advanced) setting
-  activeState.laserpostFeatures = getProperty(
+  if (activeState.laserpostFeatures != getProperty(
+    'machine0025LaserpostFeatures',
+    LASERPOST_FEATURES_DEFAULT
+  )) {
+    if (getProperty('machine0025LaserpostFeatures', LASERPOST_FEATURES_DEFAULT) == LASERPOST_FEATURES_ADVANCED)
+      showWarning(
+        localize('LaserPost Advanced mode has been enabled.'));
+      else
+      showWarning(
+        localize('LaserPost Standard mode has been enabled.'));
+  }
+  
+    activeState.laserpostFeatures = getProperty(
     'machine0025LaserpostFeatures',
     LASERPOST_FEATURES_DEFAULT
   );

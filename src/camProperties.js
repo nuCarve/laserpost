@@ -347,6 +347,27 @@ properties = {
     scope: 'machine',
   },
   // #endif
+  // #if SVG
+  machine0090SVGFileUnits: {
+    title: localize('SVG file units'),
+    description: localize(
+      'Specifies the units to use in the SVG file.  The default SVG unit is pixels, which are normally 96 per inch.  Some laser programs ' +
+      'are unable to work with units, so this is the default used by LaserPost.  However, other programs use a different scale for pixels, ' +
+      'resulting in the vectors being the wrong size when imported.  This option controls the units that LaserPost will generate in the SVG ' +
+      'file.  For example, if you find your SVG files are 33% too large (where the pixels are being interpreted as 72 per inch, such as ' +
+      'with XTool XCS), then change this to "mm" to force a unit that can be understood by your laser program.'
+    ),
+    type: 'enum',
+    values: [
+      { title: localize('pixel'), id: SVG_FILE_UNITS_PIXEL },
+      { title: localize('mm'), id: SVG_FILE_UNITS_MM },
+      { title: localize('inch'), id: SVG_FILE_UNITS_INCH },
+      { title: localize('point'), id: SVG_FILE_UNITS_POINT },
+    ],
+    value: SVG_FILE_UNITS_DEFAULT,
+    scope: 'machine',
+  },
+  // #endif
   machine0100SpeedUnits: {
     title: localize('Speed units'),
     description: localize(

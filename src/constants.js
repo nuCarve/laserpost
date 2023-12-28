@@ -75,6 +75,15 @@ const LASERPOST_FEATURES_STANDARD = 'standard';
 const LASERPOST_FEATURES_ADVANCED = 'advanced';
 const LASERPOST_FEATURES_DEFAULT = LASERPOST_FEATURES_STANDARD;
 
+// #if SVG
+// define enum for SVG units
+const SVG_FILE_UNITS_PIXEL = 'pixel';
+const SVG_FILE_UNITS_MM = 'mm';
+const SVG_FILE_UNITS_INCH = 'inch';
+const SVG_FILE_UNITS_POINT = 'point';
+const SVG_FILE_UNITS_DEFAULT = SVG_FILE_UNITS_PIXEL;
+
+// #endif
 // define enum for speed units
 const SPEED_UNITS_MMPS = 'mmps';
 const SPEED_UNITS_MMPM = 'mmpm';
