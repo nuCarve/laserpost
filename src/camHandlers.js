@@ -243,6 +243,12 @@ function onComment(message) {
  * onSection is called by CAM on the start of each operation.
  */
 function onSection() {
+  // make sure stock was defined 
+  if (!isWorkpieceDefined()) {
+    showWarning(localize('Stock is not defined; unable to post.'));
+    error(localize('Stock is not defined or has no thickness; unable to post.'));
+  }
+  
   // add operation properties to the debug log
   dumpOperationProperties();
 
