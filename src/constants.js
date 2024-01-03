@@ -81,7 +81,7 @@ const SVG_FILE_UNITS_PIXEL = 'pixel';
 const SVG_FILE_UNITS_MM = 'mm';
 const SVG_FILE_UNITS_INCH = 'inch';
 const SVG_FILE_UNITS_POINT = 'point';
-const SVG_FILE_UNITS_DEFAULT = SVG_FILE_UNITS_PIXEL;
+const SVG_FILE_UNITS_DEFAULT = SVG_FILE_UNITS_MM;
 
 // #endif
 // define enum for speed units
