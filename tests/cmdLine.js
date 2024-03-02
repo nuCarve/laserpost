@@ -1,5 +1,5 @@
 /**
- * Copyright (C) 2023 nuCarve
+ * Copyright (C) 2024 nuCarve
  * All rights reserved.
  *
  * Automated test manager for LaserPost
@@ -65,7 +65,7 @@ export function parseArgs() {
             console.log(
               chalk.greenBright(`LaserPost automated testing framework`)
             );
-            console.log(chalk.greenBright(`Copyright (c) 2023 nuCarve`));
+            console.log(chalk.greenBright(`Copyright (c) 2024 nuCarve`));
             console.log(``);
             console.log(
               `Command syntax: ${chalk.yellow(

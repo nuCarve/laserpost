@@ -1,10 +1,10 @@
 /**
 // #if LBRN
- * LaserPost for LightBurn: Copyright (C) 2023 nuCarve
+ * LaserPost for LightBurn: Copyright (C) 2024 nuCarve
  *
  * A CAM post processor for creating LightBurn project(s) for laser (jet) operations.
 // #else
- * LaserPost for SVG: Copyright (C) 2023 nuCarve
+ * LaserPost for SVG: Copyright (C) 2024 nuCarve
  *
  * A CAM post processor for creating SVG file(s) for laser (jet) operations.
 // #endif
