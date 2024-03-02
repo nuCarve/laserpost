@@ -638,11 +638,25 @@ function onCircular(clockwise, cx, cy, cz, x, y, z, feed) {
   // get quick reference to current operation
   const operation = currentGroup.operations[currentGroup.operations.length - 1];
 
+  // The HSM isFullCircle() method occasionally will say a curve is a semicircle when it is actually
+  // a full circle.  Since Bezier paths can't realistically create a fully circle, this causes the
+  // generation to fail.  Here we do our own full circle test to handle the circle vs.
+  // semicircle correctly.
+
+  let isCircle = isFullCircle();
+  // safety check - just make sure we have a prior point (though we always should)
+  if (operation.paths.length > 0 && !isCircle) {
+	// is the start position same as end?  If so, we have a full circle
+	if (operation.paths[operation.paths.length - 1].x == x && operation.paths[operation.paths.length - 1].y == y)
+		isCircle = true;
+  }  
+
+
   debugLog(
     'onCircular: {clockwise} {fullSemi} [{ex}, {ey}] center [{cx}, {cy}], feed={feed} mm/min',
     {
       clockwise: clockwise ? 'CW' : 'CCW',
-      fullSemi: isFullCircle() ? 'circle' : 'semicircle',
+      fullSemi: isCircle ? 'circle' : 'semicircle',
       cx: formatPosition.format(cx),
       cy: formatPosition.format(cy),
       ex: formatPosition.format(x),
@@ -651,10 +665,10 @@ function onCircular(clockwise, cx, cy, cz, x, y, z, feed) {
     },
     COMMENT_INSANE
   );
-
+  
   // add this path segment
   operation.paths.push({
-    type: isFullCircle() ? PATH_TYPE_CIRCLE : PATH_TYPE_SEMICIRCLE,
+    type: isCircle ? PATH_TYPE_CIRCLE : PATH_TYPE_SEMICIRCLE,
     centerX: cx,
     centerY: cy,
     x: x,

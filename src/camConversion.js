@@ -910,27 +910,31 @@ function generatePathShape(
         }
         break;
     }
-
     // update our position
     position = { x: path.x, y: path.y };
   }
+
   // if this is a closed segment, add a primitive to connect the last to the first, and update
   // the starting vector to have the entry bezier control point if we have one.  If an open
   // segment, add the final vector and primitive to connect them.
   if (segmentClosed) {
-    // closed - so connect primitive to start vector as our ending point
-    debugLog(
-      'CLOSE Primitive push: {start}-{end}',
-      { start: formatPosition.format(shape.vectors.length - 1), end: 0 },
-      COMMENT_INSANE
-    );
-    shape.primitives.push({
-      type: c1 ? PRIMITIVE_TYPE_BEZIER : PRIMITIVE_TYPE_LINE,
-      start: shape.vectors.length - 1,
-      end: 0,
-    });
-    shape.vectors[0].c1x = c1 !== undefined ? c1.x : undefined;
-    shape.vectors[0].c1y = c1 !== undefined ? c1.y : undefined;
+    // closed - connect primitive to start vector as our ending point (if we have points)
+	// also check if we have vectors - we always should, but if not we crash
+	if (shape.vectors.length > 0) {
+		debugLog(
+		'CLOSE Primitive push: {start}-{end}',
+		{ start: formatPosition.format(shape.vectors.length - 1), end: 0 },
+		COMMENT_INSANE
+		);
+		shape.primitives.push({
+		type: c1 ? PRIMITIVE_TYPE_BEZIER : PRIMITIVE_TYPE_LINE,
+		start: shape.vectors.length - 1,
+		end: 0,
+		});
+		shape.vectors[0].c1x = c1 !== undefined ? c1.x : undefined;
+		shape.vectors[0].c1y = c1 !== undefined ? c1.y : undefined;
+	} else
+		debugLog('WARNING: Found shape with no vectors - shapes may be missing in output', {}, COMMENT_NORMAL);
   } else {
     // open - so add the final vector and connect them
     shape.vectors.push({
