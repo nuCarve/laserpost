@@ -29,4 +29,4 @@
 *****     Query: "/svg:svg/svg:path"
 *****     Match: optional
 ***** 
-<path id="laserpost_bottom_rounded_vaporize_1" d=" M 570.52,535.367 L 570.52,533.48 L 570.52,533.102 L 230.551,533.102 C 209.796,533.102 192.945,549.953 192.945,570.709 L 192.945,646.11 L 532.913,646.11 C 553.683,646.11 570.52,629.273 570.52,608.504 L 570.52,535.367" stroke="#000000" stroke-width="0.378" fill="none" xmlns="http://www.w3.org/2000/svg"/>
+<path id="laserpost_bottom_rounded_vaporize_1" d=" M 150.95,141.649 L 150.95,141.15 L 150.95,141.05 L 61,141.05 C 55.508,141.05 51.05,145.508 51.05,151 L 51.05,170.95 L 141,170.95 C 146.495,170.95 150.95,166.495 150.95,161 L 150.95,141.649" stroke="#000000" stroke-width="0.1" fill="none" xmlns="http://www.w3.org/2000/svg"/>

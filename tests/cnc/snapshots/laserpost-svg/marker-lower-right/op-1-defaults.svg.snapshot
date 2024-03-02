@@ -28,5 +28,5 @@
 ***** 
 <g id="laserpost_alignment_mark" xmlns="http://www.w3.org/2000/svg">
     <desc>Operation: Alignment mark</desc>
-    <path id="laserpost_alignment_mark_1" d="M 385.512,177.638 A 18.898,18.898 0 0 1 423.307,177.638 A 18.898,18.898 0 0 1 385.512,177.638 M 404.409,196.535 L 404.409,158.74 M 385.512,177.638 L 423.307,177.638" stroke="#178837" stroke-width="0.378" fill="none"/>
+    <path id="laserpost_alignment_mark_1" d="M 102,47 A 5,5 0 0 1 112,47 A 5,5 0 0 1 102,47 M 107,52 L 107,42 M 102,47 L 112,47" stroke="#178837" stroke-width="0.1" fill="none"/>
   </g>

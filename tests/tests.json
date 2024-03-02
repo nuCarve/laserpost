@@ -476,7 +476,7 @@
                 "svg": {
                     "xpath": [
                         {
-                            "query": "/svg:svg[@viewbox=\"0 0 578.268 483.78\"]",
+                            "query": "/svg:svg[@viewbox=\"0 0 153 128\"]",
                             "match": "required"
                         }
                     ]
@@ -505,7 +505,7 @@
                 "svg": {
                     "xpath": [
                         {
-                            "query": "/svg:svg[@viewbox=\"0 0 578.268 483.78\"]",
+                            "query": "/svg:svg[@viewbox=\"0 0 153 128\"]",
                             "match": "required"
                         }
                     ]
