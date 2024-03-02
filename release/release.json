@@ -2,7 +2,7 @@
   "macros": [
     {
       "name": "VERSION_NUMBER",
-      "value": "1.2-beta.4"
+      "value": "1.2-rc.1"
     }
   ],
   "targets": {
