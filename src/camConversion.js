@@ -15,28 +15,26 @@
  * in the `project` array.
  */
 function groupsToProject() {
-  // set up the project.translate and project.box to reflect the CAM settings
-  project.box = {
+	// define a box that surrounds the part and stock 
+	project.box = {
     minX:
-      getGlobalParameter('stock-lower-x') +
-      getProperty('work0200OffsetX', OFFSET_X_AXIS_DEFAULT),
+      Math.min(getGlobalParameter('stock-lower-x'), hasParameter('part-lower-x') ? getParameter('part-lower-x') : 0),
     minY:
-      getGlobalParameter('stock-lower-y') +
-      getProperty('work0300OffsetY', OFFSET_Y_AXIS_DEFAULT),
+      Math.min(getGlobalParameter('stock-lower-y'), hasParameter('part-lower-y') ? getParameter('part-lower-y') : 0),
     maxX:
-      getGlobalParameter('stock-upper-x') +
-      getProperty('work0200OffsetX', OFFSET_X_AXIS_DEFAULT),
+      Math.max(getGlobalParameter('stock-upper-x'), hasParameter('part-upper-x') ? getParameter('part-upper-x') : 0),
     maxY:
-      getGlobalParameter('stock-upper-y') +
-      getProperty('work0300OffsetY', OFFSET_Y_AXIS_DEFAULT),
+      Math.max(getGlobalParameter('stock-upper-y'), hasParameter('part-upper-y') ? getParameter('part-upper-y') : 0)
   };
+
+	// default the translation to none
   project.translate = {
     x: false,
     y: false,
     reflect: false,
   };
 
-  // let the writer modify these values as needed
+	// let the writer modify these values as needed
   if (typeof onTranslateSetup == 'function') onTranslateSetup();
 
   // process all groups and build out the unique layers that are used
@@ -565,40 +563,46 @@ function translateCoordinateSpace() {
 }
 
 /**
- * Perform translation of coordinates to match the desired coordinate space.  Uses the project.translate
- * and project.box properties to define the transformation, as well as applies the offsets from the
- * workspace post properties.
+ * Perform translation of coordinates to match the desired coordinate space.  Starts with
+ * project.box that is a union of the stock and part space, and uses that to establish a 0,0
+ * reference point.  If the coordinate space needs translation (flip X and/or Y) it uses
+ * the project.box dimensions to perform the translation.  Then it applies any workspace
+ * offsets the user may have requsted, and finally performs any needed reflection of the
+ * coordinate space (flipping X and Y).
  *
  * project.translate properties:
  * - x: boolean; when true transforms X based on project.box
  * - y: boolean; when true transforms Y based on project.box
  * - reflect: boolean, flips X and Y coordinates
  *
- * project.box properties:
- * - minX: minimum X coordinate (often 0)
- * - minY: minimum Y coordinate  (often 0)
- * - maxX: maximum X coordinate (where maxX - minX => width)
- * - maxY: maximum Y coordinate (where maxY - minY => height)
+ * project.box properties are a union of stock and part
+ * - minX: minimum X coordinate 
+ * - minY: minimum Y coordinate
+ * - maxX: maximum X coordinate 
+ * - maxY: maximum Y coordinate
  *
  * @param xy Object with `x` and `y` properties to translate.  Values `undefined` and returned likewise.
  * @returns Object with same properties, but translated according to project.box
  */
 function translate(xy) {
-  workspaceOffsets = {
-    x: getProperty('work0200OffsetX', OFFSET_X_AXIS_DEFAULT),
-    y: getProperty('work0300OffsetY', OFFSET_Y_AXIS_DEFAULT),
-  };
-
-  if (xy.x !== undefined)
+	// translate into our box space to establish a 0,0 coordinate root, and then optionally
+	// reverse the coordinate space
+	if (xy.x !== undefined) {
+		xy.x -= project.box.minX;
     if (project.translate.x)
-      xy.x = project.box.maxX - project.box.minX - xy.x + project.box.minX;
-    else xy.x += workspaceOffsets.x;
-
-  if (xy.y !== undefined)
+			xy.x = project.box.maxX - project.box.minX - xy.x + project.box.minX;
+	}
+	if (xy.y !== undefined) {
+		xy.y -= project.box.minY;
     if (project.translate.y)
-      xy.y = project.box.maxY - project.box.minY - xy.y + project.box.minY;
-    else xy.y += workspaceOffsets.y;
+			xy.y = project.box.maxY - project.box.minY - xy.y + project.box.minY;
+	}
 
+	// adjust for workspace offsets
+	if (xy.x !== undefined) xy.x += getProperty('work0200OffsetX', OFFSET_X_AXIS_DEFAULT);
+	if (xy.y !== undefined) xy.y += getProperty('work0300OffsetY', OFFSET_Y_AXIS_DEFAULT);
+
+	// if we need to reflect the coordinate space, do so
   if (project.translate.reflect) {
     const originalX = xy.x;
     xy.x = xy.y;

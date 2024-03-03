@@ -177,6 +177,35 @@ function onTranslateSetup() {
   // this is a rotate 180 degrees
   // project.translate.x = !project.translate.x;
   // project.translate.y = !project.translate.y;    
+
+	// include the translations
+	debugLog('');
+  // include the stock and part boxes
+  debugLog(
+	'Stock: [{lx}, {ly}] to [{ux}, {uy}]', { 
+		lx: getGlobalParameter('stock-lower-x'),
+		ly: getGlobalParameter('stock-lower-y'),
+		ux: getGlobalParameter('stock-upper-x'),
+		uy: getGlobalParameter('stock-upper-y') 
+	}, COMMENT_DEBUG);
+	if (hasParameter('part-lower-x'))
+		debugLog('Part: [{lx}, {ly}] to [{ux}, {uy}]', {
+			lx: getParameter('part-lower-x'),
+			ly: getParameter('part-lower-y'),
+			ux: getParameter('part-upper-x'),
+			uy: getParameter('part-upper-y')
+		}, COMMENT_DEBUG);
+	debugLog('Project box: [{minx}, {miny}] to [{maxx}, {maxy}]', { 
+		minx: project.box.minX, 
+		miny: project.box.minY,
+		maxx: project.box.maxX,
+		maxy: project.box.maxY }, COMMENT_DEBUG);
+	debugLog('Project translation: x={x}, y={y}, reflect={reflect}', {
+		x: project.translate.x,
+		y: project.translate.y,
+		reflect: project.translate.reflect,
+		}, COMMENT_DEBUG);
+	debugLog('');
 }
 
 /**

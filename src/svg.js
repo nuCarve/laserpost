@@ -32,8 +32,8 @@ function onFileCreate(layer) {
  * @param layer Layer (cutSetting) being generated (-1 for all layers)
  */
 function onWriteHeader(layer) {
-  let maxX = project.box.maxX;
-  let maxY = project.box.maxY;
+  let maxX = project.box.maxX + getProperty('work0200OffsetX', OFFSET_X_AXIS_DEFAULT);
+  let maxY = project.box.maxY + getProperty('work0300OffsetY', OFFSET_X_AXIS_DEFAULT);
 
   // output notes, including layer notes, to the header
   const headerNotes = projectNotes.concat(
