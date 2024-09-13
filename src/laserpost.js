@@ -55,7 +55,7 @@ longDescription = localize('LaserPost for LightBurn (VERSION_NUMBER) generates .
 // #endif
 vendor = 'nuCarve';
 vendorUrl = 'https://nucarve.com/laserpost';
-legal = 'Copyright (C) 2023 by nuCarve';
+legal = 'Copyright (C) 2024 by nuCarve';
 // #if LBRN
 extension = 'lbrn';
 // #else
