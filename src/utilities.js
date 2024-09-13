@@ -153,12 +153,15 @@ function requestPostReload() {
     readFile.close();
   
     // write the source back to the file
+    let writeFile;
     try {
-      const writeFile = new TextFile(getConfigurationPath(), true, 'ansi');
+      writeFile = new TextFile(getConfigurationPath(), true, 'ansi');
       for (let i = 0; i < lines.length; i++) 
         writeFile.write(lines[i] + '\n');
     } finally {
-      writeFile.close();
+      if (writeFile) {
+        writeFile.close();
+      }
     }
   } catch (ex) {
     showWarning(localize('Unable to reload post-processor; please exit and restart the application (e.g. Fusion 360).  (error {error}'),
